@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-21T05:16:27.412Z",
+  "generatedAt": "2026-08-21T05:44:00.969Z",
   "collections": [
     {
       "name": "users",
@@ -37,12 +37,696 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "role",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["user", "admin"]
+        },
+        {
+          "name": "phone",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "emergency_passcode",
+          "type": "text",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": [
         "CREATE UNIQUE INDEX `idx_tokenKey__pb_users_auth_` ON `users` (`tokenKey`)",
         "CREATE UNIQUE INDEX `idx_email__pb_users_auth_` ON `users` (`email`) WHERE `email` != ''"
       ]
+    },
+    {
+      "name": "destinations",
+      "type": "base",
+      "apiRules": {
+        "list": "",
+        "view": "",
+        "create": "@request.auth.id != '' && @request.auth.role = 'admin'",
+        "update": "@request.auth.id != '' && @request.auth.role = 'admin'",
+        "delete": "@request.auth.id != '' && @request.auth.role = 'admin'"
+      },
+      "fields": [
+        {
+          "name": "country",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "city",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "country_code",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "police_number",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "medical_emergency_number",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "general_emergency_number",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "consulate_embassy_name",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "consulate_address",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "consulate_phone",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "consulate_email",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "consulate_emergency_24h",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "safe_havens",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "travel_tips",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX idx_destinations_country_city ON destinations (country, city)"
+      ]
+    },
+    {
+      "name": "trips",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
+        "view": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
+        "delete": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')"
+      },
+      "fields": [
+        {
+          "name": "user_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "users"
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "destination_country",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "destination_city",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "departure_date",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "return_date",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "trip_reason",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "accommodation_type",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "accommodation_address",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "who_is_paying",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "traveling_with",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "host_responsible_person",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "destination_contact",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "quick_notes",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "checkin_frequency",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "checkin_preferred_time",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "checkin_active",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE INDEX idx_trips_user_created ON trips (user_id, created DESC)"]
+    },
+    {
+      "name": "assessments",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
+        "view": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
+        "delete": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')"
+      },
+      "fields": [
+        {
+          "name": "user_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "users"
+        },
+        {
+          "name": "trip_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "trips"
+        },
+        {
+          "name": "overall_score",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "tier",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "summary_text",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "answers",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "breakdown",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "dependence_factors",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "recommendations",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_assessments_user_created ON assessments (user_id, created DESC)"
+      ]
+    },
+    {
+      "name": "guardians",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
+        "view": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
+        "delete": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')"
+      },
+      "fields": [
+        {
+          "name": "user_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "users"
+        },
+        {
+          "name": "trip_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "trips"
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "relationship",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "phone",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "email",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "country",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "access_type",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "notify_on_checkin",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "receive_missed_alert",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "receive_full_itinerary",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "notes",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE INDEX idx_guardians_user_created ON guardians (user_id, created DESC)"]
+    },
+    {
+      "name": "checkins",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
+        "view": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
+        "delete": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')"
+      },
+      "fields": [
+        {
+          "name": "user_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "users"
+        },
+        {
+          "name": "trip_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "trips"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "note",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "location_approx",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "escalation_stage",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "timestamp",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE INDEX idx_checkins_user_created ON checkins (user_id, created DESC)"]
+    },
+    {
+      "name": "safety_plans",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
+        "view": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
+        "delete": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')"
+      },
+      "fields": [
+        {
+          "name": "user_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "users"
+        },
+        {
+          "name": "trip_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "trips"
+        },
+        {
+          "name": "item_key",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "category",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "completed",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "why_it_matters",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "action_tip",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "is_required_for_high_autonomy",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE INDEX idx_safety_plans_user_trip ON safety_plans (user_id, trip_id)"]
+    },
+    {
+      "name": "security_library",
+      "type": "base",
+      "apiRules": {
+        "list": "",
+        "view": "",
+        "create": "@request.auth.id != '' && @request.auth.role = 'admin'",
+        "update": "@request.auth.id != '' && @request.auth.role = 'admin'",
+        "delete": "@request.auth.id != '' && @request.auth.role = 'admin'"
+      },
+      "fields": [
+        {
+          "name": "slug",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "icon_name",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "urgency_level",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "short_summary",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "immediate_steps",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "what_not_to_do",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "rights_and_resources",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE UNIQUE INDEX idx_security_library_slug ON security_library (slug)"]
     }
   ]
 }

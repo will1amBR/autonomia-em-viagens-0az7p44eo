@@ -123,6 +123,10 @@ export const CreateTripPage: React.FC = () => {
                   <option value="França">França</option>
                   <option value="Portugal">Portugal</option>
                   <option value="Estados Unidos">Estados Unidos</option>
+                  <option value="Espanha">Espanha</option>
+                  <option value="Reino Unido">Reino Unido</option>
+                  <option value="Argentina">Argentina</option>
+                  <option value="Japão">Japão</option>
                   <option value="Outro">Outro País Internacional</option>
                 </select>
               </div>

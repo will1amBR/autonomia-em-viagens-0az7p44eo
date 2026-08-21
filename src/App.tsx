@@ -1,11 +1,20 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Toaster } from '@/components/ui/toaster'
 import { Toaster as Sonner } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import Layout from './components/Layout'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider } from './context/AuthContext'
 import { TripProvider } from './context/TripContext'
+import { Layout } from './components/Layout'
+import { ProtectedRoute } from './components/ProtectedRoute'
 
+// Pages
 import { LandingPage } from './pages/LandingPage'
+import { EntryGatewayPage } from './pages/EntryGatewayPage'
+import { ClientLoginPage } from './pages/ClientLoginPage'
+import { RegisterPage } from './pages/RegisterPage'
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
+import { AdminLoginPage } from './pages/AdminLoginPage'
+import { AdminDashboardPage } from './pages/AdminDashboardPage'
 import { OnboardingPage } from './pages/OnboardingPage'
 import { CreateTripPage } from './pages/CreateTripPage'
 import { AssessmentPage } from './pages/AssessmentPage'
@@ -22,27 +31,87 @@ import NotFound from './pages/NotFound'
 const App = () => (
   <BrowserRouter>
     <TooltipProvider>
-      <TripProvider>
-        <Toaster />
-        <Sonner />
-        <Routes>
-          <Route element={<Layout />}>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/onboarding" element={<OnboardingPage />} />
-            <Route path="/create-trip" element={<CreateTripPage />} />
-            <Route path="/assessment" element={<AssessmentPage />} />
-            <Route path="/score-result" element={<ScoreResultPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/checklist" element={<ChecklistPage />} />
-            <Route path="/guardians" element={<GuardiansPage />} />
-            <Route path="/checkin" element={<CheckinPage />} />
-            <Route path="/emergency" element={<EmergencyPage />} />
-            <Route path="/library" element={<SecurityLibraryPage />} />
-            <Route path="/plan-spec" element={<PlanSpecExplorerPage />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </TripProvider>
+      <AuthProvider>
+        <TripProvider>
+          <Toaster />
+          <Sonner />
+          <Layout>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/entrar" element={<EntryGatewayPage />} />
+              <Route path="/entrar/cliente" element={<ClientLoginPage />} />
+              <Route path="/login" element={<Navigate to="/entrar/cliente" replace />} />
+              <Route path="/cadastro" element={<RegisterPage />} />
+              <Route path="/recuperar-senha" element={<ForgotPasswordPage />} />
+              <Route path="/admin/login" element={<AdminLoginPage />} />
+
+              {/* Admin protected routes */}
+              <Route
+                path="/admin/dashboard"
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <AdminDashboardPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+
+              {/* Public exploratory flow */}
+              <Route path="/onboarding" element={<OnboardingPage />} />
+              <Route path="/create-trip" element={<CreateTripPage />} />
+              <Route path="/assessment" element={<AssessmentPage />} />
+              <Route path="/score-result" element={<ScoreResultPage />} />
+              <Route path="/security-library" element={<SecurityLibraryPage />} />
+              <Route path="/emergency" element={<EmergencyPage />} />
+              <Route path="/plan-spec" element={<PlanSpecExplorerPage />} />
+
+              {/* Authenticated traveler protected routes */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <DashboardPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/checklist"
+                element={
+                  <ProtectedRoute>
+                    <ChecklistPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/guardians"
+                element={
+                  <ProtectedRoute>
+                    <GuardiansPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/checkin"
+                element={
+                  <ProtectedRoute>
+                    <CheckinPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Helper aliases */}
+              <Route path="/quiz" element={<Navigate to="/assessment" replace />} />
+              <Route path="/score" element={<Navigate to="/score-result" replace />} />
+              <Route path="/safety" element={<Navigate to="/security-library" replace />} />
+              <Route path="/ajuda" element={<Navigate to="/security-library" replace />} />
+
+              {/* Catch-all 404 */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Layout>
+        </TripProvider>
+      </AuthProvider>
     </TooltipProvider>
   </BrowserRouter>
 )

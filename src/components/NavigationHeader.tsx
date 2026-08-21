@@ -1,122 +1,189 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   Shield,
-  Compass,
+  LifeBuoy,
+  BookOpen,
   CheckSquare,
   Users,
-  BellRing,
+  Compass,
+  FileCheck,
   AlertTriangle,
-  BookOpen,
-  FileText,
-  Eye,
+  Menu,
+  X,
+  Lock,
+  EyeOff,
   LogOut,
   ExternalLink,
+  ShieldAlert,
+  User,
+  Search,
+  RotateCcw,
 } from 'lucide-react'
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
 import { useTrip } from '../context/TripContext'
+import { useAuth } from '../context/AuthContext'
+
+export const QuickExitOverlay: React.FC = () => {
+  const { isQuickExitActive, restoreFromQuickExit } = useTrip()
+
+  if (!isQuickExitActive) return null
+
+  return (
+    <div className="fixed inset-0 z-50 bg-white text-slate-800 flex flex-col p-6 overflow-y-auto">
+      <div className="max-w-3xl mx-auto w-full space-y-6">
+        {/* Fake Search Engine Look */}
+        <div className="flex items-center justify-between border-b pb-4">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl font-bold tracking-tight text-blue-600">G</span>
+            <span className="text-2xl font-bold tracking-tight text-red-500">o</span>
+            <span className="text-2xl font-bold tracking-tight text-amber-500">o</span>
+            <span className="text-2xl font-bold tracking-tight text-blue-600">g</span>
+            <span className="text-2xl font-bold tracking-tight text-green-600">l</span>
+            <span className="text-2xl font-bold tracking-tight text-red-500">e</span>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={restoreFromQuickExit}
+            className="text-[11px] text-slate-400 hover:text-slate-700"
+          >
+            <RotateCcw className="w-3.5 h-3.5 mr-1" />
+            <span>Restaurar app</span>
+          </Button>
+        </div>
+
+        <div className="relative">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+          <input
+            type="text"
+            defaultValue="receitas de culinária simples para o almoço"
+            className="w-full pl-10 pr-4 py-2 text-sm border border-slate-200 rounded-full shadow-sm outline-none"
+            readOnly
+          />
+        </div>
+
+        <div className="space-y-4 text-xs text-slate-600">
+          <div className="space-y-1">
+            <span className="text-blue-700 text-sm font-medium hover:underline cursor-pointer block">
+              15 Receitas Rápidas de Almoço para o Dia a Dia - TudoGostoso
+            </span>
+            <p className="text-slate-500">
+              Confira receitas práticas e fáceis prontas em menos de 20 minutos com ingredientes que
+              você já tem em casa...
+            </p>
+          </div>
+
+          <div className="space-y-1">
+            <span className="text-blue-700 text-sm font-medium hover:underline cursor-pointer block">
+              Almoço de Domingo: 20 ideias de pratos saborosos e fáceis
+            </span>
+            <p className="text-slate-500">
+              Dicas de massas, assados e saladas completas para reunir a família com praticidade...
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export const NavigationHeader: React.FC = () => {
   const location = useLocation()
   const navigate = useNavigate()
-  const { currentTrip, triggerQuickExit, isQuickExitActive } = useTrip()
+  const { triggerQuickExit, isQuickExitActive } = useTrip()
+  const { user, isAuthenticated, isAdmin, logout } = useAuth()
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   if (isQuickExitActive) {
     return null
   }
 
-  const isEmergencyPage = location.pathname === '/emergency'
-
-  const navLinks = [
-    { to: '/dashboard', label: 'Dashboard', icon: Compass },
-    { to: '/assessment', label: 'Avaliação & Score', icon: Shield },
-    { to: '/checklist', label: 'Plano de Segurança', icon: CheckSquare },
-    { to: '/guardians', label: 'Guardians', icon: Users },
-    { to: '/checkin', label: 'Check-in', icon: BellRing },
-    { to: '/library', label: 'Biblioteca', icon: BookOpen },
-    { to: '/plan-spec', label: 'PLAN Mode (A-Q)', icon: FileText, highlight: true },
+  const navItems = [
+    { label: 'Visão Geral', path: '/dashboard', icon: Compass },
+    { label: 'Autonomia (Quiz)', path: '/assessment', icon: FileCheck },
+    { label: 'Guardians', path: '/guardians', icon: Users },
+    { label: 'Check-in', path: '/checkin', icon: LifeBuoy },
+    { label: 'Checklist', path: '/checklist', icon: CheckSquare },
+    { label: 'Biblioteca', path: '/security-library', icon: BookOpen },
   ]
+
+  const isEmergencyPage = location.pathname === '/emergency'
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      {/* Top Banner with philosophy & Quick Exit */}
-      <div className="bg-slate-900 text-slate-100 text-xs px-4 py-1.5 flex items-center justify-between">
-        <div className="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap">
-          <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span className="font-semibold text-emerald-300">Autonomia não é desconfiança:</span>
-          <span className="hidden sm:inline text-slate-300">
-            Você pode confiar em alguém e ainda garantir seus próprios recursos e saída
-            independente.
+      {/* Quick Exit Bar Top (Discreet Safety Feature) */}
+      <div className="bg-slate-900 text-slate-300 px-4 py-1.5 text-xs flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="text-[11px] font-medium text-slate-300">
+            Ambiente Seguro • Dados Privados
           </span>
         </div>
-
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Quick Exit Disguise Button */}
+        <div className="flex items-center gap-3">
           <Button
-            variant="destructive"
+            variant="ghost"
             size="sm"
             onClick={triggerQuickExit}
-            className="h-6 px-2 text-[11px] bg-amber-600 hover:bg-amber-700 text-white font-medium flex items-center gap-1 shadow-sm transition-all"
-            title="Disfarça instantaneamente a tela como previsão do tempo e notícias de viagem neutras"
+            className="h-6 px-2 text-[11px] text-amber-300 hover:text-amber-200 hover:bg-slate-800 flex items-center gap-1 font-semibold"
+            title="Disfarce rápido da tela imediatamente"
           >
-            <Eye className="w-3 h-3" />
-            <span className="hidden xs:inline">Saída Rápida</span> (Disfarce)
+            <EyeOff className="w-3.5 h-3.5" />
+            <span>Saída Rápida (Quick Exit)</span>
           </Button>
         </div>
       </div>
 
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        {/* Brand */}
         <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-sky-500/20 group-hover:scale-105 transition-transform">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center text-white shadow-sm shadow-sky-500/20 group-hover:scale-105 transition-transform">
             <Shield className="w-5 h-5" />
           </div>
-          <div>
+          <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
-              <span className="font-bold text-base sm:text-lg tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-                Autonomia
+              <span className="font-extrabold text-base tracking-tight text-foreground">
+                SafeTrip
               </span>
               <Badge
-                variant="outline"
-                className="text-[10px] px-1.5 py-0 h-4 border-sky-300 bg-sky-50 text-sky-800 font-semibold"
+                variant="secondary"
+                className="text-[10px] px-1.5 py-0 font-semibold bg-sky-100 text-sky-800"
               >
-                SafeTrip
+                Autonomia
               </Badge>
             </div>
-            <p className="text-[11px] text-muted-foreground hidden sm:block leading-none">
-              Segurança e Autonomia em Viagens
-            </p>
+            <span className="text-[10px] text-muted-foreground -mt-0.5 hidden sm:inline">
+              Autonomia Não É Desconfiança
+            </span>
           </div>
         </Link>
 
-        {/* Desktop Nav */}
+        {/* Desktop Navigation Links */}
         <nav className="hidden lg:flex items-center gap-1">
-          {navLinks.map((item) => {
+          {navItems.map((item) => {
             const Icon = item.icon
-            const isActive = location.pathname === item.to
+            const isActive = location.pathname === item.path
             return (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  isActive
-                    ? 'bg-slate-900 text-white shadow-sm'
-                    : item.highlight
-                      ? 'text-indigo-700 hover:bg-indigo-50 border border-indigo-200'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                }`}
-              >
-                <Icon
-                  className={`w-3.5 h-3.5 ${isActive ? 'text-white' : item.highlight ? 'text-indigo-600' : 'text-slate-500'}`}
-                />
-                {item.label}
+              <Link key={item.path} to={item.path}>
+                <Button
+                  variant={isActive ? 'secondary' : 'ghost'}
+                  size="sm"
+                  className={`h-9 text-xs font-medium gap-1.5 ${
+                    isActive ? 'font-semibold text-primary' : 'text-muted-foreground'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{item.label}</span>
+                </Button>
               </Link>
             )
           })}
         </nav>
 
-        {/* Emergency Action */}
+        {/* Right side actions */}
         <div className="flex items-center gap-2">
+          {/* Emergency Button */}
           <Link to="/emergency">
             <Button
               variant={isEmergencyPage ? 'default' : 'destructive'}
@@ -128,129 +195,131 @@ export const NavigationHeader: React.FC = () => {
               }`}
             >
               <AlertTriangle className="w-4 h-4" />
-              <span>SOS Emergência</span>
+              <span className="hidden sm:inline">Modo Emergência</span>
+              <span className="sm:hidden">Emergência</span>
             </Button>
           </Link>
-        </div>
-      </div>
 
-      {/* Mobile Sub-Navigation Bar */}
-      <div className="lg:hidden border-t border-slate-200/80 bg-slate-50/90 px-2 py-1 flex items-center justify-between overflow-x-auto text-xs scrollbar-none">
-        {navLinks.map((item) => {
-          const Icon = item.icon
-          const isActive = location.pathname === item.to
-          return (
-            <Link
-              key={item.to}
-              to={item.to}
-              className={`flex flex-col items-center gap-0.5 px-2.5 py-1 rounded text-[11px] whitespace-nowrap font-medium ${
-                isActive
-                  ? 'text-sky-700 font-bold bg-sky-100/70'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              <span>{item.label}</span>
+          {/* User Auth Info / Login */}
+          {isAuthenticated ? (
+            <div className="flex items-center gap-1.5 pl-1.5 border-l border-slate-200">
+              {isAdmin && (
+                <Link to="/admin/dashboard" title="Painel Admin">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-9 px-2.5 text-xs font-bold text-amber-800 bg-amber-50 border-amber-300 hover:bg-amber-100 gap-1"
+                  >
+                    <ShieldAlert className="w-3.5 h-3.5 text-amber-600" />
+                    <span className="hidden xl:inline">Admin</span>
+                  </Button>
+                </Link>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  logout()
+                  navigate('/entrar')
+                }}
+                className="h-9 px-2 text-xs text-slate-500 hover:text-red-600 gap-1"
+                title="Sair"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span className="hidden md:inline">Sair</span>
+              </Button>
+            </div>
+          ) : (
+            <Link to="/entrar" className="pl-1">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 px-3 text-xs font-bold text-sky-700 border-sky-300 hover:bg-sky-50"
+              >
+                Entrar
+              </Button>
             </Link>
-          )
-        })}
-      </div>
-    </header>
-  )
-}
+          )}
 
-export const QuickExitOverlay: React.FC = () => {
-  const { isQuickExitActive, restoreFromQuickExit } = useTrip()
-
-  if (!isQuickExitActive) return null
-
-  return (
-    <div className="fixed inset-0 z-50 bg-slate-100 text-slate-800 flex flex-col font-sans overflow-y-auto">
-      {/* Neutral disguised weather & travel blog banner */}
-      <div className="border-b bg-white px-6 py-3 flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="w-7 h-7 bg-amber-400 rounded-full flex items-center justify-center text-white font-bold text-xs">
-            ☀️
-          </div>
-          <span className="font-semibold text-sm text-slate-700">
-            Mundo Clima & Dicas de Turismo Internacional
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
+          {/* Mobile menu trigger */}
           <Button
-            variant="outline"
-            size="sm"
-            onClick={restoreFromQuickExit}
-            className="text-xs text-slate-500 hover:text-slate-800 border-slate-300"
+            variant="ghost"
+            size="icon"
+            className="lg:hidden h-9 w-9"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Abrir menu de navegação"
           >
-            Retomar visualização do app
+            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </Button>
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto p-6 space-y-6">
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-slate-800">
-                Previsão do Tempo na Europa e América do Norte
-              </h2>
-              <p className="text-xs text-slate-500">
-                Atualizado há 12 minutos via estações meteorológicas globais
-              </p>
-            </div>
-            <div className="text-right">
-              <span className="text-3xl font-light text-slate-700">21°C</span>
-              <p className="text-xs text-slate-500">Céu limpo em Roma / Paris</p>
-            </div>
-          </div>
+      {/* Mobile Menu Dropdown */}
+      {mobileOpen && (
+        <div className="lg:hidden border-b border-border/80 bg-background/98 px-4 py-3 space-y-1">
+          {navItems.map((item) => {
+            const Icon = item.icon
+            const isActive = location.pathname === item.path
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={() => setMobileOpen(false)}
+                className="block"
+              >
+                <div
+                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium ${
+                    isActive
+                      ? 'bg-primary/10 text-primary font-semibold'
+                      : 'text-muted-foreground hover:bg-muted'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{item.label}</span>
+                </div>
+              </Link>
+            )
+          })}
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t text-center">
-            <div className="p-3 bg-slate-50 rounded-lg">
-              <span className="block text-xs font-semibold text-slate-600">Segunda</span>
-              <span className="text-base font-bold text-slate-800">22°C / 14°C</span>
-              <span className="text-[11px] text-slate-500">Ensolarado</span>
-            </div>
-            <div className="p-3 bg-slate-50 rounded-lg">
-              <span className="block text-xs font-semibold text-slate-600">Terça</span>
-              <span className="text-base font-bold text-slate-800">20°C / 13°C</span>
-              <span className="text-[11px] text-slate-500">Parcialmente nublado</span>
-            </div>
-            <div className="p-3 bg-slate-50 rounded-lg">
-              <span className="block text-xs font-semibold text-slate-600">Quarta</span>
-              <span className="text-base font-bold text-slate-800">19°C / 12°C</span>
-              <span className="text-[11px] text-slate-500">Poucas nuvens</span>
-            </div>
-            <div className="p-3 bg-slate-50 rounded-lg">
-              <span className="block text-xs font-semibold text-slate-600">Quinta</span>
-              <span className="text-base font-bold text-slate-800">23°C / 15°C</span>
-              <span className="text-[11px] text-slate-500">Tempo aberto</span>
-            </div>
+          <div className="pt-2 border-t border-slate-100 flex flex-col gap-2">
+            {isAuthenticated ? (
+              <>
+                {isAdmin && (
+                  <Link
+                    to="/admin/dashboard"
+                    onClick={() => setMobileOpen(false)}
+                    className="block"
+                  >
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold text-amber-800 bg-amber-50 border border-amber-300">
+                      <ShieldAlert className="w-4 h-4 text-amber-600" />
+                      <span>Painel de Administração</span>
+                    </div>
+                  </Link>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    logout()
+                    setMobileOpen(false)
+                    navigate('/entrar')
+                  }}
+                  className="w-full text-xs text-red-600 border-red-200"
+                >
+                  <LogOut className="w-3.5 h-3.5 mr-1.5" />
+                  <span>Encerrar Sessão ({user?.email})</span>
+                </Button>
+              </>
+            ) : (
+              <Link to="/entrar" onClick={() => setMobileOpen(false)} className="block">
+                <Button className="w-full bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold">
+                  Entrar no SafeTrip
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
-
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-3">
-          <h3 className="font-semibold text-slate-800 text-sm">
-            Artigo: 10 Museus e Parques Gratuitos em Capitais Europeias
-          </h3>
-          <p className="text-xs text-slate-600 leading-relaxed">
-            Planejar uma caminhada por centros históricos permite explorar arquitetura, gastronomia
-            típica e praças monumentais sem gastar com transportes caros. Confira nosso guia de
-            roteiros a pé e horários de visitação de catedrais e jardins públicos.
-          </p>
-          <div className="pt-2 flex justify-between items-center text-xs text-slate-400">
-            <span>Categoria: Guias Culturais</span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={restoreFromQuickExit}
-              className="text-xs text-sky-600 hover:text-sky-800"
-            >
-              Voltar ao SafeTrip
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
+      )}
+    </header>
   )
 }

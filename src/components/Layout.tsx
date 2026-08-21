@@ -2,14 +2,12 @@ import React from 'react'
 import { Outlet } from 'react-router-dom'
 import { NavigationHeader, QuickExitOverlay } from './NavigationHeader'
 
-const Layout: React.FC = () => {
+export const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans antialiased selection:bg-sky-100 selection:text-sky-900">
       <QuickExitOverlay />
       <NavigationHeader />
-      <main className="flex-1">
-        <Outlet />
-      </main>
+      <main className="flex-1">{children || <Outlet />}</main>
       <footer className="border-t border-slate-200 bg-slate-50 py-8 text-center text-xs text-slate-500">
         <div className="container mx-auto px-4 max-w-4xl space-y-2">
           <p className="font-semibold text-slate-700">

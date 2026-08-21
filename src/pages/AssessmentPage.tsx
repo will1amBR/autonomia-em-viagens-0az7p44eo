@@ -15,6 +15,9 @@ import {
   Sparkles,
   Lock,
   RotateCcw,
+  Building,
+  HeartHandshake,
+  Loader2,
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
@@ -24,13 +27,16 @@ import { Progress } from '../components/ui/progress'
 import { Badge } from '../components/ui/badge'
 import { useTrip } from '../context/TripContext'
 import { TripAssessmentAnswers } from '../types/trip'
+import { useToast } from '../hooks/use-toast'
 
 export const AssessmentPage: React.FC = () => {
   const navigate = useNavigate()
   const { currentTrip, updateTripAssessment } = useTrip()
+  const { toast } = useToast()
 
   const [answers, setAnswers] = useState<TripAssessmentAnswers>(currentTrip.assessment)
   const [currentStep, setCurrentStep] = useState<number>(1)
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
   const totalSteps = 4
 
@@ -44,9 +50,21 @@ export const AssessmentPage: React.FC = () => {
     }))
   }
 
-  const handleFinish = () => {
-    updateTripAssessment(answers)
-    navigate('/score-result')
+  const handleFinish = async () => {
+    setIsSubmitting(true)
+    try {
+      await updateTripAssessment(answers)
+      toast({
+        title: 'Avaliação concluída com sucesso!',
+        description: 'Seu Índice de Autonomia foi calculado e salvo com segurança.',
+      })
+      navigate('/score-result')
+    } catch (e) {
+      console.warn('Error submitting assessment', e)
+      navigate('/score-result')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -58,10 +76,10 @@ export const AssessmentPage: React.FC = () => {
             variant="outline"
             className="text-xs px-2.5 py-0.5 border-sky-300 bg-sky-50 text-sky-800 font-semibold"
           >
-            Etapa {currentStep} de {totalSteps}
+            Pilar {currentStep} de {totalSteps}
           </Badge>
           <span className="text-xs text-slate-500 font-medium">
-            Progresso da Avaliação: {Math.round((currentStep / totalSteps) * 100)}%
+            Progresso do Quiz: {Math.round((currentStep / totalSteps) * 100)}%
           </span>
         </div>
         <Progress value={(currentStep / totalSteps) * 100} className="h-2" />
@@ -87,10 +105,10 @@ export const AssessmentPage: React.FC = () => {
           <Card className="border-2 border-indigo-500/80 bg-gradient-to-br from-indigo-50/70 via-white to-sky-50/50 shadow-md">
             <CardHeader className="p-5 pb-3">
               <span className="text-xs font-bold text-indigo-700 uppercase tracking-wider block">
-                Pergunta Central de Autonomia
+                1. A Pergunta Central de Autonomia
               </span>
               <CardTitle className="text-lg sm:text-xl font-extrabold text-slate-900 leading-tight">
-                "Se você quiser voltar para o Brasil amanhã, você consegue?"
+                "Se você quiser voltar para o Brasil amanhã, você consegue sozinho(a)?"
               </CardTitle>
               <CardDescription className="text-xs text-slate-600">
                 Considere se você tem acesso a passagens, fundos e transporte para o aeroporto sem
@@ -173,7 +191,7 @@ export const AssessmentPage: React.FC = () => {
                     htmlFor="ret-unsure"
                     className="text-xs sm:text-sm font-semibold text-slate-800 cursor-pointer"
                   >
-                    Não sei ao certo.
+                    Não sei ao certo / Preciso verificar.
                   </Label>
                 </div>
               </RadioGroup>
@@ -184,7 +202,8 @@ export const AssessmentPage: React.FC = () => {
           <Card className="border-slate-200 shadow-sm">
             <CardHeader className="p-5 pb-3">
               <CardTitle className="text-base flex items-center gap-2">
-                <FileCheck className="w-4 h-4 text-sky-600" /> Documentação Pessoal & Posse Física
+                <FileCheck className="w-4 h-4 text-sky-600" /> 2. Documentação Pessoal & Posse
+                Física
               </CardTitle>
               <CardDescription className="text-xs">
                 Garantir que seus documentos estejam válidos e sob seu controle contínuo.
@@ -278,7 +297,8 @@ export const AssessmentPage: React.FC = () => {
           <Card className="border-slate-200 shadow-sm">
             <CardHeader className="p-5 pb-3">
               <CardTitle className="text-base flex items-center gap-2">
-                <CreditCard className="w-4 h-4 text-emerald-600" /> Autonomia Financeira & Passagens
+                <CreditCard className="w-4 h-4 text-emerald-600" /> 3. Autonomia Financeira &
+                Passagens
               </CardTitle>
               <CardDescription className="text-xs">
                 A capacidade de comprar refeições, transporte e passagens sem pedir autorização.
@@ -401,7 +421,7 @@ export const AssessmentPage: React.FC = () => {
           <Card className="border-slate-200 shadow-sm">
             <CardHeader className="p-5 pb-3">
               <CardTitle className="text-base flex items-center gap-2">
-                <Smartphone className="w-4 h-4 text-indigo-600" /> Comunicação & Mobilidade no
+                <Smartphone className="w-4 h-4 text-indigo-600" /> 4. Comunicação & Mobilidade no
                 Destino
               </CardTitle>
               <CardDescription className="text-xs">
@@ -505,7 +525,7 @@ export const AssessmentPage: React.FC = () => {
           <Card className="border-slate-200 shadow-sm">
             <CardHeader className="p-5 pb-3">
               <CardTitle className="text-base flex items-center gap-2">
-                <Users className="w-4 h-4 text-sky-700" /> Dinâmica do Relacionamento & Limites
+                <Users className="w-4 h-4 text-sky-700" /> 5. Dinâmica do Relacionamento & Limites
                 Pessoais
               </CardTitle>
               <CardDescription className="text-xs">
@@ -707,10 +727,20 @@ export const AssessmentPage: React.FC = () => {
           <Button
             type="button"
             onClick={handleFinish}
+            disabled={isSubmitting}
             className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 text-sm h-11 rounded-xl flex items-center gap-2 shadow-md shadow-emerald-600/20"
           >
-            <Sparkles className="w-4 h-4" />
-            <span>Calcular meu Índice de Autonomia</span>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Salvando e Calculando...</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4" />
+                <span>Calcular meu Índice de Autonomia</span>
+              </>
+            )}
           </Button>
         )}
       </div>

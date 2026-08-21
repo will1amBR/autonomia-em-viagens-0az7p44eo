@@ -57,34 +57,33 @@ export const LandingPage: React.FC = () => {
 
           {/* Primary CTAs */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2">
-            <Link to="/onboarding" className="w-full sm:w-auto">
+            <Link to="/assessment" className="w-full sm:w-auto">
               <Button
                 size="lg"
                 className="w-full sm:w-auto text-sm sm:text-base font-bold bg-sky-600 hover:bg-sky-700 text-white shadow-lg shadow-sky-600/25 px-8 h-12 rounded-xl flex items-center justify-center gap-2"
               >
-                <span>Preparar minha viagem</span>
+                <span>Fazer Quiz de Autonomia</span>
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
 
-            <Link to="/assessment" className="w-full sm:w-auto">
+            <Link to="/entrar" className="w-full sm:w-auto">
               <Button
                 variant="outline"
                 size="lg"
-                className="w-full sm:w-auto text-sm sm:text-base border-slate-300 text-slate-700 hover:bg-slate-50 h-12 rounded-xl"
+                className="w-full sm:w-auto text-sm sm:text-base border-sky-300 bg-sky-50 text-sky-900 hover:bg-sky-100 font-bold h-12 rounded-xl"
               >
-                Avaliar meu Score de Autonomia
+                Entrar / Login
               </Button>
             </Link>
 
-            <Link to="/plan-spec" className="w-full sm:w-auto">
+            <Link to="/onboarding" className="w-full sm:w-auto">
               <Button
                 variant="ghost"
                 size="lg"
-                className="w-full sm:w-auto text-xs text-indigo-700 bg-indigo-50/70 hover:bg-indigo-100 border border-indigo-200 h-12 rounded-xl flex items-center gap-1.5"
+                className="w-full sm:w-auto text-xs text-slate-700 hover:bg-slate-100 border border-slate-200 h-12 rounded-xl flex items-center gap-1.5"
               >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Ver Especificação PLAN (A-Q)</span>
+                <span>Preparar Viagem (Passo a Passo)</span>
               </Button>
             </Link>
           </div>
