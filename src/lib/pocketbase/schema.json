@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-21T05:44:00.969Z",
+  "generatedAt": "2026-08-21T21:41:29.909Z",
   "collections": [
     {
       "name": "users",
@@ -298,6 +298,36 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "notify_guardians_on_absence",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "checkin_start_time",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "last_checkin_at",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "current_absence_stage",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "absence_stage_updated_at",
+          "type": "text",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": ["CREATE INDEX idx_trips_user_created ON trips (user_id, created DESC)"]
@@ -727,6 +757,99 @@
         }
       ],
       "indexes": ["CREATE UNIQUE INDEX idx_security_library_slug ON security_library (slug)"]
+    },
+    {
+      "name": "absence_notifications",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
+        "view": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != '' && @request.auth.role = 'admin'",
+        "delete": "@request.auth.id != '' && @request.auth.role = 'admin'"
+      },
+      "fields": [
+        {
+          "name": "user_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "users"
+        },
+        {
+          "name": "trip_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "trips"
+        },
+        {
+          "name": "stage",
+          "type": "number",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "recipient_type",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "recipient_email",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "recipient_name",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "subject",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "message",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "sent_at",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_absence_notif_trip ON absence_notifications (trip_id, stage, created DESC)",
+        "CREATE INDEX idx_absence_notif_user ON absence_notifications (user_id, created DESC)"
+      ]
     }
   ]
 }

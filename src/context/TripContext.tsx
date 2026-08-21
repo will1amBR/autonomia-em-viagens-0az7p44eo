@@ -88,12 +88,30 @@ const INITIAL_TRIP: TripData = {
     },
   ],
   checkinConfig: {
-    frequency: 'daily_once',
+    frequency: 'every_12h',
     preferredTime: '21:00',
+    startTime: '08:00',
     shareLocation: true,
     active: true,
-    gracePeriodMinutes: 60,
+    notifyGuardiansOnAbsence: true,
+    gracePeriodMinutes: 30,
   },
+  currentAbsenceStage: 0,
+  absenceNotifications: [
+    {
+      id: 'notif-demo-1',
+      userId: 'usr-1',
+      tripId: 'trip-demo-roma-1',
+      stage: 1,
+      recipientType: 'traveler',
+      recipientEmail: 'camila.rocha@email.com',
+      recipientName: 'Camila Rocha',
+      subject: 'SafeTrip: Verificação de rotina — Está tudo bem?',
+      message: 'Aviso direto enviado ao próprio viajante após 30 min sem resposta.',
+      status: 'sent',
+      sentAt: new Date(Date.now() - 3600000 * 5).toISOString(),
+    },
+  ],
   checkinHistory: [
     {
       id: 'chk-1',
@@ -131,6 +149,7 @@ interface TripContextType {
   performCheckin: (status: CheckinStatus, note?: string) => Promise<void>
   updateCheckinConfig: (config: Partial<TripData['checkinConfig']>) => Promise<void>
   triggerEmergencyAlert: (details: { reason: string; location?: string }) => Promise<void>
+  simulateAbsenceStage: (stage: 1 | 2 | 3 | 4) => Promise<void>
   resetToDefault: () => void
   isQuickExitActive: boolean
   triggerQuickExit: () => void
@@ -396,9 +415,52 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     setCurrentTrip((prev) => ({
       ...prev,
+      currentAbsenceStage: status !== 'cancelled' ? 0 : prev.currentAbsenceStage,
+      lastCheckinAt: new Date().toISOString(),
       checkinHistory: [newLog, ...prev.checkinHistory],
       updatedAt: new Date().toISOString(),
     }))
+  }
+
+  const simulateAbsenceStage = async (stage: 1 | 2 | 3 | 4) => {
+    if (authUser?.id && currentTrip.id) {
+      await tripsService.triggerAbsenceCheck(currentTrip.id, stage)
+      await refreshTrip()
+    } else {
+      // Local state fallback for demo
+      const newNotif = {
+        id: `notif-${Date.now()}`,
+        userId: user.id,
+        tripId: currentTrip.id,
+        stage,
+        recipientType:
+          stage <= 2
+            ? ('traveler' as const)
+            : stage === 3
+              ? ('guardians_security' as const)
+              : ('guardians_all' as const),
+        recipientEmail: stage <= 2 ? user.email : currentTrip.guardians[0]?.email || user.email,
+        recipientName: stage <= 2 ? user.name : currentTrip.guardians[0]?.name || 'Guardian',
+        subject:
+          stage === 1
+            ? 'SafeTrip: Verificação de rotina — Está tudo bem?'
+            : stage === 2
+              ? 'SafeTrip: Segunda tentativa de contato — Confirme seu estado'
+              : stage === 3
+                ? `SafeTrip: Alerta preventivo sobre ${user.name}`
+                : `SafeTrip ALERTA: ${user.name} sem contato há 6h`,
+        message: `Disparo automático do Protocolo de Ausência (Etapa ${stage}).`,
+        status: 'sent' as const,
+        sentAt: new Date().toISOString(),
+      }
+
+      setCurrentTrip((prev) => ({
+        ...prev,
+        currentAbsenceStage: stage,
+        absenceNotifications: [newNotif, ...(prev.absenceNotifications || [])],
+        updatedAt: new Date().toISOString(),
+      }))
+    }
   }
 
   const updateCheckinConfig = async (config: Partial<TripData['checkinConfig']>) => {
@@ -475,6 +537,7 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
         performCheckin,
         updateCheckinConfig,
         triggerEmergencyAlert,
+        simulateAbsenceStage,
         resetToDefault,
         isQuickExitActive,
         triggerQuickExit,

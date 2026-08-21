@@ -101,6 +101,8 @@ const App = () => (
               />
 
               {/* Helper aliases */}
+              <Route path="/library" element={<Navigate to="/security-library" replace />} />
+              <Route path="/trip/:id/checkin" element={<Navigate to="/checkin" replace />} />
               <Route path="/quiz" element={<Navigate to="/assessment" replace />} />
               <Route path="/score" element={<Navigate to="/score-result" replace />} />
               <Route path="/safety" element={<Navigate to="/security-library" replace />} />

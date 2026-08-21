@@ -1,4 +1,4 @@
-import { ChecklistItem, TripDestination } from '../types/trip'
+import { ChecklistItem, TripDestination, DestinationSupportContacts } from '../types/trip'
 
 export const DEFAULT_CHECKLIST: ChecklistItem[] = [
   {
@@ -65,7 +65,7 @@ export const DEFAULT_CHECKLIST: ChecklistItem[] = [
     category: 'financeiro',
     completed: true,
     whyItMatters:
-      'Facilidade de compra imediata de passagens de trem/ônibus ou passagens aéreas emergenciais.',
+      'Facilidade de compra imediata de passagens de trem/ônibus ou passagens aéreas emergências.',
     actionTip:
       'Cadastre no Apple Pay / Google Wallet e garanta que você sabe as senhas de 4 dígitos do chip.',
     isRequiredForHighAutonomy: true,
@@ -150,6 +150,145 @@ export const DEFAULT_CHECKLIST: ChecklistItem[] = [
     isRequiredForHighAutonomy: true,
   },
 ]
+
+export const COUNTRY_EMERGENCY_CONTACTS: Record<string, DestinationSupportContacts> = {
+  Italia: {
+    country: 'Itália',
+    city: 'Roma',
+    policeNumber: '112 / 113',
+    medicalEmergencyNumber: '118',
+    generalEmergencyNumber: '112 (Número Único Europeu)',
+    consulateEmbassyName: 'Consulado-Geral do Brasil em Roma / Embaixada',
+    consulateAddress: 'Piazza Navona, 14 - 00186 Roma',
+    consulatePhone: '+39 06 6889 661',
+    consulateEmail: 'consular.roma@itamaraty.gov.br',
+    consulateEmergency24h: '+39 333 306 4545 (Plantão Consular 24h)',
+    referenceHospital: 'Ospedale Policlinico Umberto I (Viale del Policlinico, 155 - Roma)',
+    womenHelpline: '1522 (Linha Nacional Antiviolência e Stalking — Gratuita e 24h)',
+    foreignerNote:
+      'Se você é cidadão de outro país, contate a embaixada ou consulado do seu país de nacionalidade.',
+  },
+  Franca: {
+    country: 'França',
+    city: 'Paris',
+    policeNumber: '17 / 112',
+    medicalEmergencyNumber: '15 (SAMU)',
+    generalEmergencyNumber: '112',
+    consulateEmbassyName: 'Consulado-Geral do Brasil em Paris',
+    consulateAddress: '65 Avenue Franklin Delano Roosevelt, 75008 Paris',
+    consulatePhone: '+33 1 45 61 63 00',
+    consulateEmail: 'cg.paris@itamaraty.gov.br',
+    consulateEmergency24h: '+33 6 80 12 32 34 (Plantão Consular 24h)',
+    referenceHospital:
+      "Hôpital Hôtel-Dieu de Paris / Hôpital Pitié-Salpêtrière (47-83 Bd de l'Hôpital)",
+    womenHelpline: '3919 (Violences Femmes Info — Gratuito, anônimo e confidencial)',
+    foreignerNote:
+      'Se você é cidadão de outro país, contate a embaixada ou consulado do seu país de nacionalidade.',
+  },
+  Portugal: {
+    country: 'Portugal',
+    city: 'Lisboa',
+    policeNumber: '112 (PSP / GNR)',
+    medicalEmergencyNumber: '112 (INEM) / 808 24 24 24 (SNS 24)',
+    generalEmergencyNumber: '112',
+    consulateEmbassyName: 'Consulado-Geral do Brasil em Lisboa / Embaixada',
+    consulateAddress: 'Praça Luís de Camões, 22, 1200-243 Lisboa',
+    consulatePhone: '+351 21 321 4100',
+    consulateEmail: 'cg.lisboa@itamaraty.gov.br',
+    consulateEmergency24h: '+351 96 252 0581 (Plantão Consular 24h)',
+    referenceHospital: 'Hospital de Santa Maria - CHULN (Av. Prof. Egas Moniz, Lisboa)',
+    womenHelpline:
+      '800 202 148 (Linha de Apoio a Vítimas de Violência Doméstica - CIG) e 144 (Emergência Social)',
+    foreignerNote:
+      'Se você é cidadão de outro país, contate a embaixada ou consulado do seu país de nacionalidade.',
+  },
+  Espanha: {
+    country: 'Espanha',
+    city: 'Madri',
+    policeNumber: '112 / 091 (Policía Nacional) / 092 (Municipal)',
+    medicalEmergencyNumber: '112 / 061 (SAMUR)',
+    generalEmergencyNumber: '112',
+    consulateEmbassyName: 'Consulado-Geral do Brasil em Madri / Embaixada',
+    consulateAddress: 'Calle de Fernando el Santo, 6, 28010 Madrid',
+    consulatePhone: '+34 91 700 4650',
+    consulateEmail: 'cg.madri@itamaraty.gov.br',
+    consulateEmergency24h: '+34 677 547 004 (Plantão Madri) / +34 659 078 057 (Barcelona)',
+    referenceHospital: 'Hospital Universitario La Paz (P.º de la Castellana, 261, 28046 Madrid)',
+    womenHelpline:
+      '016 (Atendimento a vítimas de violência contra a mulher — não aparece na fatura telefônica)',
+    foreignerNote:
+      'Se você é cidadão de outro país, contate a embaixada ou consulado do seu país de nacionalidade.',
+  },
+  ReinoUnido: {
+    country: 'Reino Unido',
+    city: 'Londres',
+    policeNumber: '999 (Emergência) / 101 (Não-emergência)',
+    medicalEmergencyNumber: '999 (Ambulância) / 111 (Triagem NHS)',
+    generalEmergencyNumber: '999 ou 112',
+    consulateEmbassyName: 'Consulado-Geral do Brasil em Londres / Embaixada',
+    consulateAddress: '14-16 Cockspur Street, London SW1Y 5BL',
+    consulatePhone: '+44 20 7747 4500',
+    consulateEmail: 'cg.londres@itamaraty.gov.br',
+    consulateEmergency24h: '+44 77 2021 4422 (Plantão Consular 24h)',
+    referenceHospital: "St Thomas' Hospital (Westminster Bridge Rd, London SE1 7EH)",
+    womenHelpline: '0808 2000 247 (National Domestic Abuse Helpline / Refuge — 24h gratuita)',
+    foreignerNote:
+      'Se você é cidadão de outro país, contate a embaixada ou consulado do seu país de nacionalidade.',
+  },
+  EstadosUnidos: {
+    country: 'Estados Unidos',
+    city: 'Nova York / Washington',
+    policeNumber: '911',
+    medicalEmergencyNumber: '911',
+    generalEmergencyNumber: '911',
+    consulateEmbassyName: 'Consulado-Geral do Brasil em Nova York / Washington',
+    consulateAddress: '225 E 41st St, New York, NY 10017',
+    consulatePhone: '+1 917 777 7777',
+    consulateEmail: 'cg.novayork@itamaraty.gov.br',
+    consulateEmergency24h: '+1 646 405 3352 (Plantão Consular 24h NY)',
+    referenceHospital: 'Bellevue Hospital Center (462 1st Avenue, New York, NY 10016)',
+    womenHelpline:
+      '1-800-799-SAFE (7233) — National Domestic Violence Hotline (ou envie "START" para 88788)',
+    foreignerNote:
+      'Se você é cidadão de outro país, contate a embaixada ou consulado do seu país de nacionalidade.',
+  },
+  Argentina: {
+    country: 'Argentina',
+    city: 'Buenos Aires',
+    policeNumber: '911 (Policía de la Ciudad) / 101',
+    medicalEmergencyNumber: '107 (SAME Ambulância pública)',
+    generalEmergencyNumber: '911',
+    consulateEmbassyName: 'Consulado-Geral do Brasil em Buenos Aires / Embaixada',
+    consulateAddress: 'Av. Carlos Pellegrini, 1363, C1011AAA Buenos Aires',
+    consulatePhone: '+54 11 4515 2400',
+    consulateEmail: 'consular.baires@itamaraty.gov.br',
+    consulateEmergency24h: '+54 9 11 4199 9668 (Plantão Consular 24h)',
+    referenceHospital:
+      'Hospital General de Agudos Dr. Juan A. Fernández (Cerviño 3356, Buenos Aires)',
+    womenHelpline:
+      '144 (Linha Nacional de Orientação a Mulheres em Situação de Violência — 24h gratuita)',
+    foreignerNote:
+      'Se você é cidadão de outro país, contate a embaixada ou consulado do seu país de nacionalidade.',
+  },
+  Japao: {
+    country: 'Japão',
+    city: 'Tóquio',
+    policeNumber: '110 (Polícia)',
+    medicalEmergencyNumber: '119 (Ambulância e Bombeiros)',
+    generalEmergencyNumber: '110 (Polícia) / 119 (Ambulância)',
+    consulateEmbassyName: 'Embaixada e Consulado-Geral do Brasil em Tóquio',
+    consulateAddress: '2-11-12 Kita-Aoyama, Minato-ku, Tokyo 107-8633',
+    consulatePhone: '+81 3 3404 5211',
+    consulateEmail: 'consular.toquio@itamaraty.gov.br',
+    consulateEmergency24h: '+81 90 1445 5473 (Plantão Consular Tóquio) / +81 90 2136 0888 (Nagoia)',
+    referenceHospital:
+      "St. Luke's International Hospital - Seiroka (9-1 Akashicho, Chuo City, Tokyo)",
+    womenHelpline:
+      '0120-279-338 (Linha de Apoio a Estrangeiros no Japão - Yorisoi Hotline com atendimento em português)',
+    foreignerNote:
+      'Se você é cidadão de outro país, contate a embaixada ou consulado do seu país de nacionalidade.',
+  },
+}
 
 export const DESTINATIONS_CATALOG: Record<string, TripDestination> = {
   Italia: {
@@ -438,230 +577,284 @@ export const DESTINATIONS_CATALOG: Record<string, TripDestination> = {
   },
 }
 
-export interface SecurityLibraryCategory {
+export interface SecurityLibraryScenario {
   id: string
   title: string
   iconName: string
   urgencyLevel: 'alta' | 'critica' | 'moderada'
   shortSummary: string
-  immediateSteps: string[]
-  whatNotToDo: string[]
+  immediateSteps: string[] // Exatamente 5 passos práticos
+  whatNotToDo: string[] // Exatamente 3 comportamentos de risco a evitar
   rightsAndResources: string[]
 }
 
-export const SECURITY_LIBRARY: SecurityLibraryCategory[] = [
+// Alias for backwards compatibility
+export type SecurityLibraryCategory = SecurityLibraryScenario
+
+// The EXACT 11 scenarios requested in the specification
+export const SECURITY_LIBRARY: SecurityLibraryScenario[] = [
   {
     id: 'retencao-passaporte',
-    title: 'Retenção de passaporte por outra pessoa',
+    title: '1. Retenção de passaporte/documentos',
     iconName: 'FileLock',
     urgencyLevel: 'critica',
     shortSummary:
-      'Ninguém tem o direito legal de confiscar seu passaporte ou documento de identidade no exterior.',
+      'Alguém pegou seus documentos e não devolve. Reter passaporte alheio é crime internacional.',
     immediateSteps: [
-      'Vá com calma até um local público e seguro (hotel com recepção 24h, aeroporto, delegacia de polícia).',
-      'Não confronte fisicamente a pessoa caso sinta risco à sua integridade física.',
-      'Ligue para a polícia local (112 na Europa, 911 nos EUA) e relate que seu documento de viagem foi retido.',
-      'Entre em contato imediatamente com o Plantão Consular do Brasil no país para emissão de documento emergencial (ARB).',
-      'Acione seu Guardian de segurança através do aplicativo.',
+      'Mantenha a calma e dirija-se imediatamente a um local público seguro e movimentado (recepção de hotel 24h, aeroporto ou delegacia).',
+      'Solicite a devolução de maneira firme e educada por escrito (mensagem de texto/WhatsApp), registrando a data e o horário da recusa.',
+      'Ligue para o número de emergência policial local (112 na Europa, 911 nos EUA) informando que seu documento de viagem estrangeiro foi retido.',
+      'Contate com urgência o Plantão Consular do Brasil para relatar a retenção e iniciar a emissão de documento de viagem emergencial (ARB).',
+      'Acione seus Guardians no aplicativo informando sua localização exata e situação atual.',
     ],
     whatNotToDo: [
-      'Não tente recuperar à força caso haja risco de agressão.',
-      'Não assine nenhum documento de renúncia de direitos ou termo em língua estrangeira que não compreenda.',
+      'Não tente recuperar o documento através de confronto físico ou agressão verbal direta.',
+      'Não assine nenhum documento de desistência, confissão de dívida inventada ou acordo sob pressão.',
+      'Não permaneça sozinho(a) em local isolado com quem reteve seus documentos.',
     ],
     rightsAndResources: [
-      'O passaporte é propriedade do governo emissor cedido ao cidadão; reter documento de terceiro configura crime na maioria dos países.',
-      'Os consulados brasileiros prestam auxílio imediato para emissão de Autorização de Retorno ao Brasil.',
-    ],
-  },
-  {
-    id: 'perda-documentos',
-    title: 'Perda ou furto de documentos no exterior',
-    iconName: 'FileQuestion',
-    urgencyLevel: 'moderada',
-    shortSummary: 'Passo a passo rápido para registrar boletim e obter retorno seguro ao Brasil.',
-    immediateSteps: [
-      'Procure a delegacia de polícia local mais próxima (ou polícia de turismo) e registre a ocorrência policial (Police Report / Denuncia).',
-      'Acesse as cópias digitais salvas no aplicativo ou e-mail seguro.',
-      'Contate o Consulado Brasileiro mais próximo informando a data do seu voo de retorno.',
-      'Solicite a emissão do Passaporte de Emergência ou Autorização de Retorno ao Brasil (ARB).',
-    ],
-    whatNotToDo: [
-      'Não deixe para ir ao consulado poucas horas antes do voo sem antes contatar o plantão.',
-    ],
-    rightsAndResources: [
-      'A ARB é emitida gratuitamente ou com taxa reduzida para permitir o retorno direto ao país de origem.',
+      'O passaporte é propriedade soberana do governo emissor cedido ao titular; sua retenção arbitrária por terceiros é ilegal em quase todas as jurisdições.',
+      'Os consulados brasileiros prestam assistência direta e podem emitir a Autorização de Retorno ao Brasil (ARB) para embarque imediato.',
     ],
   },
   {
     id: 'impedido-de-sair',
-    title: 'Impedido(a) de sair da hospedagem ou trancado(a)',
+    title: '2. Impedido(a) de sair do local',
     iconName: 'DoorClosed',
     urgencyLevel: 'critica',
     shortSummary:
-      'Privação de liberdade é crime grave. Sua prioridade máxima é comunicação de emergência e segurança pessoal.',
+      'Você não consegue deixar a hospedagem ou está trancado(a). A restrição de locomoção exige ação prioritária.',
     immediateSteps: [
-      'Ligue imediatamente para o número de emergência da polícia local (112, 911).',
-      'Ative o Emergency Mode no aplicativo para enviar sua localização e alerta aos seus Guardians.',
-      'Se não puder falar, envie mensagem de texto ao Guardian com seu endereço exato e palavra-chave.',
-      'Permaneça perto de janelas ou acessos visíveis se for seguro chamar atenção de vizinhos ou transeuntes.',
-      'Mantenha seu celular carregado e desligue sons de notificação caso precise de discrição.',
+      'Ligue discretamente para o serviço de emergência policial local (112, 911 ou 999) informando endereço exato e que está retido(a).',
+      'Ative o Emergency Mode no aplicativo para enviar localização e alerta em tempo real para todos os seus Guardians.',
+      'Se não puder falar, envie mensagem de texto ao seu Guardian principal com sua localização e código de socorro.',
+      'Identifique saídas secundárias seguras, janelas acessíveis ou pontos onde seja possível pedir socorro a pedestres sem se colocar em risco.',
+      'Mantenha a bateria do celular protegida em modo de economia e mantenha pertences essenciais no bolso.',
     ],
-    whatNotToDo: ['Não anuncie suas intenções caso a outra pessoa esteja alterada ou armada.'],
+    whatNotToDo: [
+      'Não anuncie previamente sua intenção de fuga ou de chamar a polícia se a outra pessoa demonstrar agressividade.',
+      'Não tente saltos perigosos de locais altos ou manobras que causem risco de queda e fratura grave.',
+      'Não aceite promessas de liberação condicionadas a entrega de dinheiro, senhas ou favores.',
+    ],
     rightsAndResources: [
-      'Polícias locais tratam cárcere e restrição de liberdade com intervenção prioritária imediata.',
+      'Cárcere privado e restrição arbitrária de liberdade são crimes de prioridade máxima para forças policiais em qualquer país.',
+      'A polícia local tem prerrogativa legal de arrombamento técnico em situações de risco à vida ou integridade física.',
     ],
   },
   {
     id: 'sem-dinheiro',
-    title: 'Fiquei sem dinheiro ou acesso a fundos',
+    title: '3. Sem dinheiro próprio',
     iconName: 'CreditCardOff',
     urgencyLevel: 'alta',
-    shortSummary: 'Recursos imediatos para garantir alimentação, abrigo e emissão de passagem.',
+    shortSummary:
+      'Ficou sem acesso a recursos financeiros próprios. Recuperar autonomia monetária básica é o foco imediato.',
     immediateSteps: [
-      'Contate seu Guardian ou familiares de confiança para envio de remessa emergencial via Western Union, Wise ou Pix internacional.',
-      'Se não tiver hospedagem, dirija-se a um aeroporto internacional ou estação central com funcionamento 24h e segurança.',
-      'Contate o serviço consular brasileiro que pode orientar canais de apoio humanitário e contato com familiares.',
-      'Use redes de acolhimento internacionais e albergues municipais de emergência.',
+      'Contate imediatamente familiares ou Guardians de confiança solicitando remessa de emergência via Western Union, Wise, Nomad ou Pix internacional.',
+      'Se não tiver como pagar acomodação, dirija-se a um local público seguro e aquecido 24 horas (aeroporto internacional ou terminal ferroviário central).',
+      'Contate o serviço consular brasileiro para orientação sobre redes de acolhimento social, albergues municipais ou mediação com familiares no Brasil.',
+      'Localize uma agência da Western Union ou banco conveniado onde seja possível retirar dinheiro em espécie apenas com documento de identificação.',
+      'Consulte sua seguradora de viagem para verificar coberturas de adiantamento de fundos por perda/extravio de meios de pagamento.',
     ],
     whatNotToDo: [
-      'Não aceite ofertas de desconhecidos que condicionem hospedagem ou dinheiro a trabalho forçado ou favores.',
+      'Não aceite propostas de trabalho informal rápido de estranhos que condicionem abrigo a atividades suspeitas ou retenção de documentos.',
+      'Não recorra a empréstimos informais com desconhecidos no destino.',
+      'Não durma em praças públicas desprotegidas ou áreas ermas desprovidas de vigilância.',
     ],
     rightsAndResources: [
-      'Serviços como Western Union permitem retirada de dinheiro em espécie na boca do caixa com documento de identidade em minutos.',
+      'Serviços de remessa instantânea internacional permitem retirada em espécie na boca do caixa com código de transferência em minutos.',
+      'Apoio consular auxilia na facilitação de repatriação com apoio da rede familiar no Brasil.',
     ],
   },
   {
-    id: 'perda-celular',
-    title: 'Perda ou roubo do celular no exterior',
+    id: 'celular-cortado',
+    title: '4. Celular/internet cortados',
     iconName: 'SmartphoneOff',
     urgencyLevel: 'alta',
-    shortSummary: 'Como recuperar acesso às comunicações e proteger seus dados.',
+    shortSummary:
+      'Perdeu a comunicação com o exterior por falta de sinal, bateria ou bloqueio intencional.',
     immediateSteps: [
-      'Acesse um computador público seguro ou aparelho de um hotel/aeroporto e bloqueie o aparelho via iCloud / Google Find My.',
-      'Compre um chip local pré-pago barato ou use WhatsApp Web em dispositivo seguro para avisar seus contatos de confiança.',
-      'Notifique seus Guardians de que você está temporariamente com novo número.',
-      'Troque as senhas de seus bancos e e-mails principais.',
+      "Procure um estabelecimento comercial com Wi-Fi público e seguro (Starbucks, McDonald's, lobby de grande hotel, biblioteca municipal ou aeroporto).",
+      'Conecte-se e envie uma mensagem rápida aos seus Guardians avisando que você está seguro(a) mas temporariamente sem linha telefônica.',
+      'Compre um chip local pré-pago físico barato (em bancas ou supermercados) ou ative um plano eSIM internacional de emergência.',
+      'Grave números fundamentais de emergência, do Consulado e do seu Guardian à mão em um papel guardado no bolso.',
+      'Se o aparelho foi retido ou danificado por terceiro, use terminais de computador públicos de hotéis para contatar sua rede de apoio.',
     ],
     whatNotToDo: [
-      'Não deixe de avisar seus contatos de emergência para que não pensem que você desapareceu.',
+      'Não deixe de comunicar seus contatos de emergência por mais de poucas horas, para evitar disparos falsos do protocolo de busca.',
+      'Não insira senhas bancárias em computadores públicos abertos e desprotegidos sem autenticação em duas etapas.',
+      'Não confie em redes Wi-Fi desconhecidas sem senha em áreas de risco.',
     ],
     rightsAndResources: [
-      'Muitos consulados possuem terminais e telefones para contato de emergência com familiares.',
+      'Chamadas para números de emergência (112, 911, 999) funcionam em qualquer aparelho celular mesmo sem chip e sem saldo.',
+      'Postos consulares e balcões de informação em aeroportos disponibilizam acesso a ligações de urgência para viajantes.',
     ],
   },
   {
-    id: 'ameaca',
-    title: 'Ameaças verbais, chantagem ou intimidação',
-    iconName: 'ShieldAlert',
-    urgencyLevel: 'critica',
-    shortSummary: 'Como agir quando a convivência se torna ameaçadora ou controladora.',
+    id: 'perda-documentos',
+    title: '5. Perda ou roubo de documentos',
+    iconName: 'FileQuestion',
+    urgencyLevel: 'moderada',
+    shortSummary:
+      'Passaporte ou identidade foram perdidos ou furtados. Roteiro objetivo para emissão de documento emergencial.',
     immediateSteps: [
-      'Priorize sair do mesmo ambiente físico com calma e sem confronto direto.',
-      'Vá para um café, lobby de hotel de grande rede ou posto de transporte público.',
-      'Documente e salve prints, áudios ou anotações das ameaças em sua nuvem segura.',
-      'Acione seu Guardian de nível de emergência e passe sua posição em tempo real.',
-      'Se houver risco de violência física iminente, contate a polícia local.',
+      'Procure a delegacia de polícia mais próxima (ou Comissaria de Turismo) e registre a ocorrência policial oficial (Police Report / Denúncia de furto).',
+      'Acesse as cópias digitais salvas no SafeTrip, no seu e-mail ou na nuvem segura para comprovar sua identidade.',
+      'Agende atendimento de urgência no Consulado Brasileiro mais próximo ou contate o Plantão Consular caso seu voo seja nas próximas 24-48 horas.',
+      'Solicite a emissão do Passaporte de Emergência ou da Autorização de Retorno ao Brasil (ARB gratuita/tarifa reduzida).',
+      'Avise a companhia aérea sobre o registro da ocorrência e informe os novos dados do documento de viagem.',
     ],
     whatNotToDo: [
-      'Não responda com ameaças recíprocas que possam escalar o conflito.',
-      'Não ceda a chantagens financeiras ou emocionais isoladamente.',
+      'Não espere o dia do embarque para procurar o Consulado sem aviso prévio ao plantão consular.',
+      'Não pague intermediários não oficiais que prometem agilizar passaportes consulares fora dos canais legítimos do Itamaraty.',
+      'Não viaje entre países sem antes regularizar o documento oficial de trânsito internacional.',
     ],
     rightsAndResources: [
-      'Você tem o direito inalienável de encerrar a viagem e voltar a qualquer momento.',
+      'A ARB (Autorização de Retorno ao Brasil) é um documento oficial garantido por lei consular para repatriar brasileiros de volta ao território nacional.',
+      'A certidão ou boletim de ocorrência policial protege você contra uso fraudulento do seu documento perdido por criminosos.',
     ],
   },
   {
-    id: 'agressao',
-    title: 'Agressão física ou violência',
+    id: 'agressao-ameaca',
+    title: '6. Agressão física ou ameaça',
     iconName: 'HeartCrack',
     urgencyLevel: 'critica',
-    shortSummary: 'Atendimento médico imediato, proteção policial e suporte consular.',
+    shortSummary:
+      'Sofreu violência física, tentativa de agressão ou ameaças graves contra sua integridade.',
     immediateSteps: [
-      'Afaste-se imediatamente do agressor e busque socorro de terceiros ou de autoridades.',
-      'Ligue para a emergência médica e policial (112 / 911).',
-      'Procure o Pronto Socorro (Hospital) mais próximo para atendimento médico e relatório de lesões.',
-      'Acione o Plantão Consular brasileiro para acompanhamento institucional.',
-      'Ative o Emergency Mode no app.',
+      'Afaste-se imediatamente do agressor e busque abrigo em local com segurança profissional ou grande fluxo de pessoas.',
+      'Ligue para a polícia (112, 911, 999) solicitando viatura urgente e informe se há necessidade de atendimento médico ambulatorial.',
+      'Dirija-se ao pronto-socorro hospitalar de referência pública para realização de atendimento e laudo médico de lesões corporais.',
+      'Acione o Plantão Consular do Brasil para acompanhamento institucional, lista de advogados credenciados e apoio psicológico/social.',
+      'Ative o Emergency Mode no aplicativo para mobilizar sua rede de Guardians.',
     ],
-    whatNotToDo: ['Não retorne ao local compartilhado desacompanhado(a) da polícia.'],
+    whatNotToDo: [
+      'Não retorne ao local compartilhado desacompanhado(a) de escolta policial para buscar pertences.',
+      'Não minimize o episódio de violência nem acredite em desculpas ou promessas de que não se repetirá.',
+      'Não descarte roupas ou evidências físicas antes do exame médico/pericial hospitalar.',
+    ],
     rightsAndResources: [
-      'Vítimas de violência possuem canais de atendimento especializado e abrigo temporário em capitais europeias e norte-americanas.',
+      'Quase todos os países contam com redes especializadas de proteção à mulher e acolhimento a vítimas de crimes violentos com abrigos anônimos.',
+      'O Consulado brasileiro tem dever funcional de acompanhar casos de agressão a cidadãos nacionais no exterior.',
     ],
   },
   {
-    id: 'perseguicao',
-    title: 'Suspeita de perseguição ou vigilância',
+    id: 'isolamento-forcado',
+    title: '7. Isolamento forçado',
     iconName: 'EyeOff',
     urgencyLevel: 'alta',
-    shortSummary: 'Como despistar e buscar proteção em locais monitorados e movimentados.',
+    shortSummary:
+      'Está sendo impedido(a) de contatar amigos, familiares ou pessoas do exterior por terceiros.',
     immediateSteps: [
-      'Entre imediatamente em um estabelecimento comercial movimentado (shopping, supermercado, hotel conceituado).',
-      'Comunique a segurança privada do local sobre a pessoa que está te seguindo.',
-      'Não vá para um beco escuro ou para o seu local de hospedagem se estiver sendo seguido(a).',
-      'Peça um táxi ou transporte oficial de dentro do estabelecimento fechado.',
-      'Se necessário, solicite que o gerente ou segurança chame a viatura policial.',
+      'Aproveite qualquer ida ao banheiro, farmácia, supermercado ou saguão para enviar uma mensagem curta de alerta ao seu Guardian.',
+      'Utilize o modo de navegação anônima no navegador para acessar serviços de e-mail e registrar sua situação.',
+      'Combine previamente com seu Guardian palavras-código simples que indiquem que você precisa de contato sem levantar suspeitas.',
+      'Dirija-se à farmácia ou posto de saúde local e peça ajuda reservada a um atendente ou profissional de saúde.',
+      'Mapeie a estação de transporte ou posto policial mais próximo para saída autônoma na primeira oportunidade.',
     ],
-    whatNotToDo: ['Não tente confrontar a pessoa em locais ermos.'],
+    whatNotToDo: [
+      'Não deixe mensagens de socorro abertas na tela ou no histórico visível do celular compartilhado.',
+      'Não aceite que terceiros atendam suas ligações pessoais ou respondam por você perante familiares.',
+      'Não se convença de que o isolamento é "para sua proteção" — o controle comunicativo é sinal clássico de vulnerabilização.',
+    ],
     rightsAndResources: [
-      'Grandes estações e centros urbanos possuem monitoramento por câmeras de segurança integradas às forças policiais.',
+      'Nenhum anfitrião, empregador ou parceiro tem direito de restringir suas comunicações privadas com o exterior.',
+      'Profissionais de saúde e farmácias na Europa e Américas são treinados para acolher relatos discretos de isolamento e acionar auxílio.',
     ],
   },
   {
-    id: 'nao-sei-onde-estou',
-    title: 'Perdido(a) ou sem localização conhecida',
+    id: 'coacao-chantagem',
+    title: '8. Coação emocional ou chantagem',
+    iconName: 'ShieldAlert',
+    urgencyLevel: 'alta',
+    shortSummary:
+      'Está sendo pressionado(a), manipulado(a) ou chantageado(a) com ameaças financeiras, morais ou jurídicas.',
+    immediateSteps: [
+      'Guarde cópias e prints de todas as conversas, áudios, cobranças e mensagens ameaçadoras em nuvem segura ou envie para seu Guardian.',
+      'Lembre-se de que ameaças jurídicas infundadas (como "mandar te prender na imigração") são comumente falsas e usadas para criar medo.',
+      'Consulte a assistência jurídica consular brasileira para entender a real legislação do país e seus direitos.',
+      'Reúna seus itens vitais (documento, cartão, celular) e mude-se para uma hospedagem independente mapeada.',
+      'Comunique aos seus Guardians o teor das chantagens para que eles não sejam enganados por terceiros no Brasil.',
+    ],
+    whatNotToDo: [
+      'Não ceda a exigências financeiras extorsivas ou assinatura de confissões de dívida.',
+      'Não responda com ofensas ou ameaças que possam ser tiradas de contexto pela outra pessoa.',
+      'Não se isole nem guarde o sofrimento para si — compartilhe a verdade com sua rede de apoio.',
+    ],
+    rightsAndResources: [
+      'Chantagem, extorsão e violência psicológica configuram infrações penais na maioria das legislações internacionais.',
+      'Você tem o direito absoluto de romper qualquer compromisso de viagem e retornar para sua casa a qualquer instante.',
+    ],
+  },
+  {
+    id: 'hospedagem-insegura',
+    title: '9. Hospedagem insegura ou inadequada',
+    iconName: 'AlertTriangle',
+    urgencyLevel: 'alta',
+    shortSummary:
+      'O local onde está acomodado(a) não oferece segurança, fechaduras adequadas ou viola sua privacidade.',
+    immediateSteps: [
+      'Pegue seus pertences essenciais imediatamente e retire-se com calma do local durante o dia ou em horário movimentado.',
+      'Vá para o lobby de um hotel de rede conhecida ou café movimentado e faça a reserva de uma acomodação segura (hotel com recepção 24h).',
+      'Se a reserva foi feita por plataforma (Airbnb, Booking), acione o suporte de segurança do app reportando acomodação insegura para reembolso/realocação.',
+      'Atualize o novo endereço no SafeTrip e avise seus Guardians sobre a mudança de hospedagem.',
+      'Se houver suspeita de câmeras ocultas ou fechaduras adulteradas, registre fotos como prova antes de sair.',
+    ],
+    whatNotToDo: [
+      'Não permaneça em quarto sem tranca interna ou com terceiros não autorizados com acesso à chave.',
+      'Não aceite quartos compartilhados improvisados que não estavam previstos no acordo original.',
+      'Não economize na hospedagem às custas da sua integridade física ou psicológica básica.',
+    ],
+    rightsAndResources: [
+      'Plataformas internacionais de hospedagem possuem protocolos de reassentamento de emergência 24h com custeio de novo hotel.',
+      'O consumidor turista tem direito a rescisão contratual imediata diante de insalubridade ou insegurança.',
+    ],
+  },
+  {
+    id: 'problemas-imigracao',
+    title: '10. Problemas com visto ou imigração',
     iconName: 'Compass',
     urgencyLevel: 'moderada',
-    shortSummary: 'Como recuperar sua orientação e compartilhar coordenadas precisas.',
+    shortSummary:
+      'Questões legais com prazo de permanência, documentação irregular no destino ou fiscalização de fronteira.',
     immediateSteps: [
-      'Abra o mapa do celular ou conecte-se a um Wi-Fi público e compartilhe seu PIN de localização via WhatsApp/app com seu Guardian.',
-      'Identifique o nome da rua mais próxima e número de edificação ou placa comercial.',
-      'Dirija-se a uma farmácia, posto de combustível ou estação de metrô.',
-      'Se a bateria estiver fraca, anote o endereço em um pedaço de papel.',
+      'Verifique a data limite real do seu carimbo de entrada ou autorização eletrônica de viagem (Schengen, ESTA, etc).',
+      'Contate o setor de assistência a cidadãos do Consulado-Geral do Brasil para receber orientação jurídica consular precisa.',
+      'Se for abordado(a) por autoridades policiais ou de imigração, mantenha postura calma, apresente seu passaporte e solicite falar com o Consulado.',
+      'Não tente atravessar fronteiras terrestres clandestinamente ou sem controle migratório formal.',
+      'Em caso de overstay (permanência acima do prazo), planeje a saída voluntária pelo aeroporto e consulte um advogado de imigração local.',
     ],
-    whatNotToDo: ['Não continue caminhando a esmo para bairros desconhecidos sem iluminação.'],
+    whatNotToDo: [
+      'Não apresente documentos falsos, vistos adulterados ou declarações inverídicas a oficiais de fronteira.',
+      'Não assine termos em língua estrangeira que você não domine sem a presença de tradutor juramentado ou representante consular.',
+      'Não fuja de postos de fiscalização oficial.',
+    ],
     rightsAndResources: [
-      'A maioria dos aplicativos de transporte permite solicitar corrida com o GPS do ponto atual.',
+      'A Convenção de Viena sobre Relações Consulares assegura ao estrangeiro detido o direito inalienável de contatar seu Consulado de origem.',
+      'A saída voluntária costuma implicar apenas sanção administrativa (multa), enquanto fraudes ativas geram consequências penais.',
     ],
   },
   {
-    id: 'suspeita-exploracao',
-    title: 'Suspeita de exploração ou promessa de emprego falsa',
-    iconName: 'AlertTriangle',
+    id: 'emergencia-saude',
+    title: '11. Emergência de saúde',
+    iconName: 'HeartCrack',
     urgencyLevel: 'critica',
     shortSummary:
-      'Identificação de armadilhas de trabalho irregular, retenção salarial ou tráfico velado.',
+      'Precisa de atendimento médico urgente, sofreu acidente ou apresenta sintomas graves de enfermidade.',
     immediateSteps: [
-      'Não entregue seus documentos a empregadores informais ou intermediários sob pretexto algum.',
-      'Recuse propostas com cobrança de taxas de hospedagem que criem dívidas impagáveis.',
-      'Contate a Embaixada/Consulado do Brasil e linhas nacionais de apoio a trabalhadores migrantes.',
-      'Organize seu plano de retorno ao país de origem com sua rede de segurança.',
+      'Ligue imediatamente para o número de emergência médica local (112 na Europa, 911 nos EUA/Argentina, 999 no Reino Unido, 119 no Japão).',
+      'Acione a central de assistência 24h do seu Seguro Viagem internacional para autorização de cobertura e indicação de hospital credenciado.',
+      'Dirija-se ao pronto-socorro do hospital público de referência mais próximo da sua localização.',
+      'Tenha em mãos sua apólice de seguro, passaporte e histórico de alergias ou medicamentos de uso contínuo.',
+      'Avise seu Guardian de Emergência para que ele possa acompanhar seu boletim médico e contatar o hospital se necessário.',
     ],
     whatNotToDo: [
-      'Não confie em promessas verbais que contradigam o contrato oficial ou a lei do país.',
+      'Não hesite em chamar socorro médico por medo de custo financeiro — a vida e integridade são prioridade absoluta.',
+      'Não tome medicações fortes desconhecidas oferecidas por leigos no exterior.',
+      'Não saia do hospital sem o relatório médico de alta (Medical Report) detalhado com diagnósticos e receitas para reembolso do seguro.',
     ],
     rightsAndResources: [
-      'Linhas telefônicas gratuitas internacionais atendem anonimamente denúncias de exploração de trabalhadores.',
-    ],
-  },
-  {
-    id: 'preciso-sair-imediatamente',
-    title: 'Preciso sair imediatamente e voltar para o Brasil',
-    iconName: 'PlaneTakeoff',
-    urgencyLevel: 'critica',
-    shortSummary: 'Protocolo de saída emergencial e retorno seguro para casa.',
-    immediateSteps: [
-      'Pegue seus itens essenciais prioritários: Passaporte, celular, cartões/dinheiro e medicação de uso contínuo.',
-      'Dirija-se diretamente ao aeroporto internacional ou estação central de transporte.',
-      'No aeroporto, vá ao balcão da companhia aérea ou use seu cartão internacional para emitir o primeiro voo disponível com destino ao Brasil.',
-      'Avise seu Guardian de que você está em trânsito no aeroporto e aguardando embarque.',
-      'Se faltarem fundos ou documentos, procure o posto policial do aeroporto ou contate o plantão consular.',
-    ],
-    whatNotToDo: [
-      'Não perca tempo tentando carregar malas pesadas se isso colocar sua saída em risco.',
-      'Não hesite em deixar pertences materiais para trás quando a sua segurança e autonomia estiverem em jogo.',
-    ],
-    rightsAndResources: [
-      'Aeroportos internacionais são zonas controladas de alta segurança com presença policial permanente 24h.',
+      'Hospitais públicos na União Europeia e nas Américas têm obrigação legal de estabilização de urgência com risco de vida para qualquer pessoa.',
+      'A maioria das apólices de seguro viagem inclui garantia de repatriação médica com acompanhante em caso de gravidade.',
     ],
   },
 ]

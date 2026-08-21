@@ -118,13 +118,39 @@ export type CheckinStatus =
   | 'cancelled'
   | 'missed'
 
+export type CheckinFrequency =
+  | 'every_4h'
+  | 'every_6h'
+  | 'every_8h'
+  | 'every_12h'
+  | 'every_24h'
+  | 'daily_once'
+  | 'daily_twice'
+  | 'custom'
+
 export interface CheckinConfig {
-  frequency: 'daily_once' | 'daily_twice' | 'every_12h' | 'custom'
-  preferredTime: string // e.g. "21:00"
+  frequency: CheckinFrequency
+  preferredTime: string // e.g. "21:00" ou startTime
+  startTime?: string // e.g. "08:00"
   secondaryTime?: string
   shareLocation: boolean
   active: boolean
-  gracePeriodMinutes: number // e.g. 60 min before escalation
+  notifyGuardiansOnAbsence: boolean // sim/não
+  gracePeriodMinutes: number // 30 min window before Stage 1
+}
+
+export interface AbsenceNotificationLog {
+  id: string
+  userId: string
+  tripId: string
+  stage: 1 | 2 | 3 | 4
+  recipientType: 'traveler' | 'guardians_security' | 'guardians_all'
+  recipientEmail: string
+  recipientName?: string
+  subject: string
+  message?: string
+  status: 'sent' | 'simulated' | 'failed'
+  sentAt: string
 }
 
 export interface CheckinLogEvent {
@@ -134,6 +160,22 @@ export interface CheckinLogEvent {
   note?: string
   locationApprox?: string
   escalationStage?: 1 | 2 | 3 | 4
+}
+
+export interface DestinationSupportContacts {
+  country: string
+  city: string
+  policeNumber: string
+  medicalEmergencyNumber: string
+  generalEmergencyNumber: string
+  consulateEmbassyName: string
+  consulateAddress: string
+  consulatePhone: string
+  consulateEmail: string
+  consulateEmergency24h: string
+  referenceHospital: string
+  womenHelpline?: string
+  foreignerNote?: string
 }
 
 export interface TripDestination {
@@ -177,6 +219,9 @@ export interface TripData {
   guardians: GuardianContact[]
   checkinConfig: CheckinConfig
   checkinHistory: CheckinLogEvent[]
+  absenceNotifications?: AbsenceNotificationLog[]
+  currentAbsenceStage?: number
+  lastCheckinAt?: string
   destinationInfo: TripDestination
   quickNotes?: string
   createdAt: string

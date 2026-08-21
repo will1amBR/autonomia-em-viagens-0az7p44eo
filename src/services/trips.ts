@@ -51,6 +51,30 @@ export const tripsService = {
 
       const tripRec = tripRecords.items[0]
 
+      // Fetch absence notifications
+      let absenceLogs: any[] = []
+      try {
+        const notifRecords = await pb.collection('absence_notifications').getList(1, 30, {
+          filter: `trip_id = "${tripRec.id}"`,
+          sort: '-created',
+        })
+        absenceLogs = notifRecords.items.map((n) => ({
+          id: n.id,
+          userId: n.user_id,
+          tripId: n.trip_id,
+          stage: n.stage,
+          recipientType: n.recipient_type,
+          recipientEmail: n.recipient_email,
+          recipientName: n.recipient_name,
+          subject: n.subject,
+          message: n.message,
+          status: n.status || 'sent',
+          sentAt: n.sent_at || n.created,
+        }))
+      } catch (e) {
+        console.warn('Failed to load absence notifications', e)
+      }
+
       // Fetch assessment
       let assessmentAnswers: TripAssessmentAnswers | undefined
       try {
@@ -189,13 +213,18 @@ export const tripsService = {
         checklist: checklistItems,
         guardians: guardiansList,
         checkinConfig: {
-          frequency: (tripRec.checkin_frequency as any) || 'daily_once',
+          frequency: (tripRec.checkin_frequency as any) || 'every_12h',
           preferredTime: tripRec.checkin_preferred_time || '21:00',
+          startTime: tripRec.checkin_start_time || '08:00',
           shareLocation: true,
           active: tripRec.checkin_active !== false,
-          gracePeriodMinutes: 60,
+          notifyGuardiansOnAbsence: tripRec.notify_guardians_on_absence ?? true,
+          gracePeriodMinutes: 30,
         },
         checkinHistory: checkinsList,
+        absenceNotifications: absenceLogs,
+        currentAbsenceStage: tripRec.current_absence_stage || 0,
+        lastCheckinAt: tripRec.last_checkin_at || '',
         destinationInfo: destInfo,
         quickNotes: tripRec.quick_notes || '',
         createdAt: tripRec.created,
@@ -223,9 +252,11 @@ export const tripsService = {
       host_responsible_person: trip.hostResponsiblePerson || '',
       destination_contact: trip.destinationContact || '',
       quick_notes: trip.quickNotes || '',
-      checkin_frequency: trip.checkinConfig?.frequency || 'daily_once',
+      checkin_frequency: trip.checkinConfig?.frequency || 'every_12h',
       checkin_preferred_time: trip.checkinConfig?.preferredTime || '21:00',
+      checkin_start_time: trip.checkinConfig?.startTime || '08:00',
       checkin_active: trip.checkinConfig?.active ?? true,
+      notify_guardians_on_absence: trip.checkinConfig?.notifyGuardiansOnAbsence ?? true,
     }
 
     if (trip.id && !trip.id.startsWith('trip-demo-') && !trip.id.startsWith('custom-')) {
@@ -321,10 +352,39 @@ export const tripsService = {
         location_approx: location || '',
         timestamp: new Date().toISOString(),
       })
+
+      // Reset trip absence stage
+      if (status !== 'cancelled') {
+        try {
+          await pb.collection('trips').update(tripId, {
+            current_absence_stage: 0,
+            last_checkin_at: new Date().toISOString(),
+          })
+        } catch {
+          /* intentionally ignored */
+        }
+      }
+
       return rec.id
     } catch (e) {
       console.warn('Error logging checkin to server', e)
       return `chk-${Date.now()}`
+    }
+  },
+
+  async triggerAbsenceCheck(tripId: string, stage?: number) {
+    try {
+      const response = await pb.send('/api/v1/absence/check', {
+        method: 'POST',
+        body: {
+          trip_id: tripId,
+          stage: stage || 0,
+        },
+      })
+      return response
+    } catch (e) {
+      console.warn('Could not run absence check API:', e)
+      return null
     }
   },
 
