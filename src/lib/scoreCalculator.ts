@@ -200,12 +200,23 @@ export function calculateAutonomyScore(answers: TripAssessmentAnswers): Autonomy
     ((housePoints + mobPoints) / 2) * 0.15 +
     networkPoints * 0.1
 
+  // Check paying and traveling dynamics if provided
+  if (
+    answers.whoPaysTrip === 'other_person' ||
+    answers.whoPaysTrip === 'Outra pessoa está pagando tudo'
+  ) {
+    if (!answers.hasOwnMoney) {
+      dependenceFactors.push(
+        'Passagens e custos 100% assumidos por terceiro, aumentando a dependência logística.',
+      )
+    }
+  }
+
   // Penalty adjustments for pressure factors (measuring autonomy, not crime)
   if (answers.canReturnTomorrow === 'no') rawScore -= 15
   if (answers.feelsPressureToAcceptConditions) rawScore -= 8
   if (answers.minimizesConcerns === 'frequently') rawScore -= 6
   if (!answers.hasPhysicalControlOfPassport) rawScore -= 12
-
   const overallScore = Math.max(5, Math.min(100, Math.round(rawScore)))
 
   let tier: ScoreTier = 'HIGH'

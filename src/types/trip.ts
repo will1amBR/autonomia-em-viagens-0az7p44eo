@@ -53,8 +53,8 @@ export interface TripAssessmentAnswers {
   hasOwnMoney: boolean
   hasInternationalCard: boolean
   hasEmergencyReserve: boolean
-  whoPaysTrip: 'myself' | 'shared' | 'other_person' | 'company'
-  whoPaysHousing: 'myself' | 'shared' | 'other_person' | 'host'
+  whoPaysTrip?: 'myself' | 'shared' | 'other_person' | 'company' | string
+  whoPaysHousing?: 'myself' | 'shared' | 'other_person' | 'host' | string
 
   // Communication & Mobility
   hasWorkingPhone: boolean
@@ -202,15 +202,17 @@ export interface TripDestination {
 export interface TripData {
   id: string
   title: string
+  originCity?: string
   destinationCountry: string
   destinationCity: string
+  transitCountries?: string
   departureDate: string
   returnDate: string
   tripReason: string
   accommodationType: string
   accommodationAddress: string
-  whoIsPaying: string
-  travelingWith: string
+  whoIsPaying: string // "Eu mesmo(a)" | "Dividido (eu e outra pessoa)" | "Outra pessoa está pagando tudo" | "Prefiro não responder"
+  travelingWith: string // "Sozinho(a)" | "Com amigos(as)" | "Com familiares" | "Com parceiro(a)/namorado(a)" | "Com alguém que conheci recentemente"
   hostResponsiblePerson: string
   destinationContact: string
   assessment: TripAssessmentAnswers

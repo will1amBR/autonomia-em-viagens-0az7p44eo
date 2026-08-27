@@ -52,8 +52,10 @@ const INITIAL_TRIP: TripData = {
   tripReason: 'Férias e convite pessoal',
   accommodationType: 'Apartamento alugado / Anfitrião',
   accommodationAddress: 'Via Nazionale, 114 - Roma RM, Itália',
-  whoIsPaying: 'Pessoa conhecida recentemente assumindo passagens e hospedagem',
-  travelingWith: 'Acompanhante / Convite pessoal',
+  originCity: 'São Paulo',
+  transitCountries: 'Reino Unido (Londres)',
+  whoIsPaying: 'Outra pessoa está pagando tudo',
+  travelingWith: 'Com alguém que conheci recentemente',
   hostResponsiblePerson: 'Marco Bellini',
   destinationContact: '+39 345 987 6543',
   assessment: INITIAL_ANSWERS,
@@ -138,9 +140,10 @@ const INITIAL_USER: UserProfile = {
 interface TripContextType {
   user: UserProfile
   setUser: (u: UserProfile) => void
-  currentTrip: TripData
+  currentTrip: TripData | null
+  hasTrip: boolean
   updateTripAssessment: (answers: TripAssessmentAnswers) => Promise<void>
-  updateTripDetails: (details: Partial<TripData>) => Promise<void>
+  updateTripDetails: (details: Partial<TripData>) => Promise<string | undefined>
   toggleChecklistItem: (id: string) => Promise<void>
   addChecklistItem: (item: { title: string; category: any; whyItMatters: string }) => Promise<void>
   addGuardian: (guardian: Omit<GuardianContact, 'id'>) => Promise<void>
@@ -176,12 +179,13 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   })
 
-  const [currentTrip, setCurrentTrip] = useState<TripData>(() => {
+  const [currentTrip, setCurrentTrip] = useState<TripData | null>(() => {
+    // For non-authenticated visitors, default to demo trip or saved demo
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY)
       if (saved) {
         const parsed = JSON.parse(saved)
-        if (parsed.assessment) {
+        if (parsed && parsed.assessment) {
           parsed.scoreResult = calculateAutonomyScore(parsed.assessment)
         }
         return parsed
@@ -207,7 +211,8 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [authUser])
 
-  // Fetch or persist trip from PocketBase when user logs in
+  // Fetch trip from PocketBase when user logs in.
+  // When there is NO trip in the DB, set currentTrip to null (no demo injection for logged in users).
   const refreshTrip = useCallback(async () => {
     if (!authUser?.id) return
     setIsLoadingTrip(true)
@@ -216,33 +221,50 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (dbTrip) {
         setCurrentTrip(dbTrip)
       } else {
-        // Save initial trip for new user
-        const newTripId = await tripsService.saveTrip(authUser.id, {
-          ...currentTrip,
-          title: `Viagem de ${authUser.name}`,
-        })
-        setCurrentTrip((prev) => ({ ...prev, id: newTripId }))
+        // Logged-in user has no trip in database
+        setCurrentTrip(null)
       }
     } catch (e) {
       console.warn('Could not sync user trip with database', e)
+      setCurrentTrip(null)
     } finally {
       setIsLoadingTrip(false)
     }
-  }, [authUser, currentTrip])
+  }, [authUser?.id])
 
   useEffect(() => {
     if (isAuthenticated && authUser?.id) {
       refreshTrip()
+    } else if (!isAuthenticated) {
+      // Visitor / unauthenticated: restore demo or local trip
+      try {
+        const saved = localStorage.getItem(LOCAL_STORAGE_KEY)
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          if (parsed && parsed.assessment) {
+            parsed.scoreResult = calculateAutonomyScore(parsed.assessment)
+          }
+          setCurrentTrip(parsed || INITIAL_TRIP)
+        } else {
+          setCurrentTrip(INITIAL_TRIP)
+        }
+      } catch {
+        setCurrentTrip(INITIAL_TRIP)
+      }
     }
-  }, [isAuthenticated, authUser?.id])
+  }, [isAuthenticated, authUser?.id, refreshTrip])
 
   useEffect(() => {
     try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(currentTrip))
+      if (currentTrip) {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(currentTrip))
+      } else if (isAuthenticated) {
+        localStorage.removeItem(LOCAL_STORAGE_KEY)
+      }
     } catch {
       // ignore
     }
-  }, [currentTrip])
+  }, [currentTrip, isAuthenticated])
 
   useEffect(() => {
     try {
@@ -258,36 +280,39 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateTripAssessment = async (answers: TripAssessmentAnswers) => {
     const scoreResult = calculateAutonomyScore(answers)
-    const updated = {
-      ...currentTrip,
+    const base = currentTrip || INITIAL_TRIP
+    const updated: TripData = {
+      ...base,
       assessment: answers,
       scoreResult,
       updatedAt: new Date().toISOString(),
     }
     setCurrentTrip(updated)
 
-    if (authUser?.id && currentTrip.id) {
+    if (authUser?.id && updated.id && !updated.id.startsWith('trip-demo-')) {
       try {
-        await tripsService.saveAssessment(authUser.id, currentTrip.id, answers)
+        await tripsService.saveAssessment(authUser.id, updated.id, answers)
       } catch (e) {
         console.warn('Error saving assessment', e)
       }
     }
   }
 
-  const updateTripDetails = async (details: Partial<TripData>) => {
-    let destInfo = currentTrip.destinationInfo
-    if (details.destinationCountry) {
-      const formattedKey = details.destinationCountry.replace(/\s+/g, '')
-      if (DESTINATIONS_CATALOG[details.destinationCountry]) {
-        destInfo = DESTINATIONS_CATALOG[details.destinationCountry]
+  const updateTripDetails = async (details: Partial<TripData>): Promise<string | undefined> => {
+    const base = currentTrip || INITIAL_TRIP
+    let destInfo = base.destinationInfo
+    const destCountry = details.destinationCountry || base.destinationCountry
+    if (destCountry) {
+      const formattedKey = destCountry.replace(/\s+/g, '')
+      if (DESTINATIONS_CATALOG[destCountry]) {
+        destInfo = DESTINATIONS_CATALOG[destCountry]
       } else if (DESTINATIONS_CATALOG[formattedKey]) {
         destInfo = DESTINATIONS_CATALOG[formattedKey]
       }
     }
 
     const updatedTrip: TripData = {
-      ...currentTrip,
+      ...base,
       ...details,
       destinationInfo: destInfo,
       updatedAt: new Date().toISOString(),
@@ -297,24 +322,31 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (authUser?.id) {
       try {
         const savedId = await tripsService.saveTrip(authUser.id, updatedTrip)
-        if (savedId && savedId !== currentTrip.id) {
-          setCurrentTrip((prev) => ({ ...prev, id: savedId }))
+        if (savedId) {
+          setCurrentTrip((prev) => (prev ? { ...prev, id: savedId } : null))
+          return savedId
         }
       } catch (e) {
         console.warn('Error updating trip details in backend', e)
       }
     }
+    return updatedTrip.id
   }
 
   const toggleChecklistItem = async (id: string) => {
+    if (!currentTrip) return
     const updatedChecklist = currentTrip.checklist.map((item) =>
       item.id === id ? { ...item, completed: !item.completed } : item,
     )
-    setCurrentTrip((prev) => ({
-      ...prev,
-      checklist: updatedChecklist,
-      updatedAt: new Date().toISOString(),
-    }))
+    setCurrentTrip((prev) =>
+      prev
+        ? {
+            ...prev,
+            checklist: updatedChecklist,
+            updatedAt: new Date().toISOString(),
+          }
+        : null,
+    )
 
     if (authUser?.id && currentTrip.id) {
       tripsService.syncChecklist(authUser.id, currentTrip.id, updatedChecklist)
@@ -322,6 +354,7 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   const addChecklistItem = async (item: { title: string; category: any; whyItMatters: string }) => {
+    if (!currentTrip) return
     const newItem: ChecklistItem = {
       id: `custom-${Date.now()}`,
       title: item.title,
@@ -333,11 +366,15 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isRequiredForHighAutonomy: false,
     }
     const updatedChecklist = [newItem, ...currentTrip.checklist]
-    setCurrentTrip((prev) => ({
-      ...prev,
-      checklist: updatedChecklist,
-      updatedAt: new Date().toISOString(),
-    }))
+    setCurrentTrip((prev) =>
+      prev
+        ? {
+            ...prev,
+            checklist: updatedChecklist,
+            updatedAt: new Date().toISOString(),
+          }
+        : null,
+    )
 
     if (authUser?.id && currentTrip.id) {
       tripsService.syncChecklist(authUser.id, currentTrip.id, updatedChecklist)
@@ -345,6 +382,7 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   const addGuardian = async (guardian: Omit<GuardianContact, 'id'>) => {
+    if (!currentTrip) return
     let assignedId = `g-${Date.now()}`
     if (authUser?.id && currentTrip.id) {
       try {
@@ -359,39 +397,54 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
       id: assignedId,
     }
 
-    setCurrentTrip((prev) => ({
-      ...prev,
-      guardians: [...prev.guardians, newG],
-      updatedAt: new Date().toISOString(),
-    }))
+    setCurrentTrip((prev) =>
+      prev
+        ? {
+            ...prev,
+            guardians: [...prev.guardians, newG],
+            updatedAt: new Date().toISOString(),
+          }
+        : null,
+    )
   }
 
   const updateGuardian = async (id: string, updates: Partial<GuardianContact>) => {
+    if (!currentTrip) return
     const target = currentTrip.guardians.find((g) => g.id === id)
     if (target && authUser?.id && currentTrip.id) {
       const merged = { ...target, ...updates }
       tripsService.saveGuardian(authUser.id, currentTrip.id, merged, id)
     }
 
-    setCurrentTrip((prev) => ({
-      ...prev,
-      guardians: prev.guardians.map((g) => (g.id === id ? { ...g, ...updates } : g)),
-      updatedAt: new Date().toISOString(),
-    }))
+    setCurrentTrip((prev) =>
+      prev
+        ? {
+            ...prev,
+            guardians: prev.guardians.map((g) => (g.id === id ? { ...g, ...updates } : g)),
+            updatedAt: new Date().toISOString(),
+          }
+        : null,
+    )
   }
 
   const removeGuardian = async (id: string) => {
+    if (!currentTrip) return
     if (authUser?.id) {
       tripsService.deleteGuardian(id)
     }
-    setCurrentTrip((prev) => ({
-      ...prev,
-      guardians: prev.guardians.filter((g) => g.id !== id),
-      updatedAt: new Date().toISOString(),
-    }))
+    setCurrentTrip((prev) =>
+      prev
+        ? {
+            ...prev,
+            guardians: prev.guardians.filter((g) => g.id !== id),
+            updatedAt: new Date().toISOString(),
+          }
+        : null,
+    )
   }
 
   const performCheckin = async (status: CheckinStatus, note?: string) => {
+    if (!currentTrip) return
     let checkinId = `chk-${Date.now()}`
     const approx = currentTrip.destinationCity + ', ' + currentTrip.destinationCountry
     if (authUser?.id && currentTrip.id) {
@@ -413,16 +466,21 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
           : 'Alerta de check-in disparado.'),
       locationApprox: approx,
     }
-    setCurrentTrip((prev) => ({
-      ...prev,
-      currentAbsenceStage: status !== 'cancelled' ? 0 : prev.currentAbsenceStage,
-      lastCheckinAt: new Date().toISOString(),
-      checkinHistory: [newLog, ...prev.checkinHistory],
-      updatedAt: new Date().toISOString(),
-    }))
+    setCurrentTrip((prev) =>
+      prev
+        ? {
+            ...prev,
+            currentAbsenceStage: status !== 'cancelled' ? 0 : prev.currentAbsenceStage,
+            lastCheckinAt: new Date().toISOString(),
+            checkinHistory: [newLog, ...prev.checkinHistory],
+            updatedAt: new Date().toISOString(),
+          }
+        : null,
+    )
   }
 
   const simulateAbsenceStage = async (stage: 1 | 2 | 3 | 4) => {
+    if (!currentTrip) return
     if (authUser?.id && currentTrip.id) {
       await tripsService.triggerAbsenceCheck(currentTrip.id, stage)
       await refreshTrip()
@@ -454,16 +512,21 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
         sentAt: new Date().toISOString(),
       }
 
-      setCurrentTrip((prev) => ({
-        ...prev,
-        currentAbsenceStage: stage,
-        absenceNotifications: [newNotif, ...(prev.absenceNotifications || [])],
-        updatedAt: new Date().toISOString(),
-      }))
+      setCurrentTrip((prev) =>
+        prev
+          ? {
+              ...prev,
+              currentAbsenceStage: stage,
+              absenceNotifications: [newNotif, ...(prev.absenceNotifications || [])],
+              updatedAt: new Date().toISOString(),
+            }
+          : null,
+      )
     }
   }
 
   const updateCheckinConfig = async (config: Partial<TripData['checkinConfig']>) => {
+    if (!currentTrip) return
     const updated = {
       ...currentTrip,
       checkinConfig: {
@@ -480,6 +543,7 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   const triggerEmergencyAlert = async (details: { reason: string; location?: string }) => {
+    if (!currentTrip) return
     const loc = details.location || currentTrip.destinationCity
     const emergencyEvent: CheckinLogEvent = {
       id: `emergency-${Date.now()}`,
@@ -489,11 +553,15 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
       locationApprox: loc,
       escalationStage: 4,
     }
-    setCurrentTrip((prev) => ({
-      ...prev,
-      checkinHistory: [emergencyEvent, ...prev.checkinHistory],
-      updatedAt: new Date().toISOString(),
-    }))
+    setCurrentTrip((prev) =>
+      prev
+        ? {
+            ...prev,
+            checkinHistory: [emergencyEvent, ...prev.checkinHistory],
+            updatedAt: new Date().toISOString(),
+          }
+        : null,
+    )
 
     if (authUser?.id && currentTrip.id) {
       tripsService.logCheckin(
@@ -527,6 +595,7 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         setUser,
         currentTrip,
+        hasTrip: !!currentTrip,
         updateTripAssessment,
         updateTripDetails,
         toggleChecklistItem,

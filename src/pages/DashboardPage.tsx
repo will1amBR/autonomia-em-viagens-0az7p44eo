@@ -56,21 +56,27 @@ export const DashboardPage: React.FC = () => {
               </Badge>
               <span className="text-xs text-slate-400">ID: {currentTrip.id}</span>
             </div>
-            <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-2">
-              <span>São Paulo</span>
+            <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-2 flex-wrap">
+              <span>{originCity || 'Sua cidade'}</span>
               <span className="text-sky-400">→</span>
               <span>
-                {destinationCity} ({destinationCountry})
+                {destinationCity}, {destinationCountry}
               </span>
             </h1>
-            <p className="text-xs sm:text-sm text-slate-300 flex items-center gap-2">
+            <p className="text-xs sm:text-sm text-slate-300 flex items-center gap-2 flex-wrap">
               <Calendar className="w-3.5 h-3.5 text-sky-400" />
               <span>
                 {departureDate} até {returnDate}
               </span>
+              {transitCountries && (
+                <>
+                  <span>•</span>
+                  <span className="text-sky-300 font-medium">Escala: {transitCountries}</span>
+                </>
+              )}
               <span>•</span>
-              <span className="text-slate-400">{title}</span>
-            </p>
+              <span className="text-sky-300 font-medium">Viagem Monitorada SafeTrip</span>
+            </p>{' '}
           </div>
 
           {/* Quick Check-in CTA button */}
@@ -360,31 +366,50 @@ export const DashboardPage: React.FC = () => {
           <Card className="border-slate-200 shadow-sm bg-gradient-to-br from-slate-50 to-sky-50/30">
             <CardHeader className="p-5 pb-3">
               <CardTitle className="text-sm font-bold flex items-center gap-2 text-slate-900">
-                <MapPin className="w-4 h-4 text-sky-600" /> Contatos em {destinationCountry}
+                <MapPin className="w-4 h-4 text-sky-600" /> Contatos de Emergência & Trânsito
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-5 pt-0 space-y-2 text-xs text-slate-700">
+            <CardContent className="p-5 pt-0 space-y-2.5 text-xs text-slate-700">
               <div className="flex justify-between py-1 border-b border-slate-200">
-                <span className="text-slate-500 font-medium">Polícia Geral:</span>
+                <span className="text-slate-500">Polícia ({destinationCountry}):</span>
                 <span className="font-bold text-slate-900">
-                  {currentTrip.destinationInfo.policeNumber}
+                  {destinationInfo?.policeNumber || '112'}
                 </span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-200">
-                <span className="text-slate-500 font-medium">Emergência Médica:</span>
+                <span className="text-slate-500">Emergência Médica:</span>
                 <span className="font-bold text-slate-900">
-                  {currentTrip.destinationInfo.medicalEmergencyNumber}
+                  {destinationInfo?.ambulanceNumber || '118'}
                 </span>
               </div>
-              <div className="py-1 space-y-1">
-                <span className="text-slate-500 font-medium block">Plantão Consular 24h:</span>
-                <span className="font-bold text-sky-700 block">
-                  {currentTrip.destinationInfo.consulateEmergency24h}
+              <div className="flex justify-between py-1 border-b border-slate-200">
+                <span className="text-slate-500">Plantão Consular BR:</span>
+                <span className="font-bold text-sky-700">
+                  {destinationInfo?.consulateEmergencyPhone || '+39 333 306 0545'}
                 </span>
               </div>
+
+              {transitCountries && (
+                <div className="p-2.5 rounded-xl bg-white border border-sky-200/80 space-y-1 mt-2">
+                  <span className="text-[10px] font-bold text-sky-800 uppercase tracking-wide block">
+                    Escala / Conexão: {transitCountries}
+                  </span>
+                  <p className="text-[11px] text-slate-600">
+                    {transitCountries.toLowerCase().includes('londres') ||
+                    transitCountries.toLowerCase().includes('reino unido') ||
+                    transitCountries.toLowerCase().includes('uk')
+                      ? 'Plantão Consular Londres: +44 772 108 8431 • Emergência UK: 999'
+                      : 'Tenha o telefone do consulado do país de escala salvo.'}
+                  </p>
+                </div>
+              )}
+
+              <p className="text-[11px] text-slate-500 pt-1">
+                Tomada: {destinationInfo?.plugType || 'Tipo C/F/L'} • Fuso:{' '}
+                {destinationInfo?.timezoneOffsetFromBrasilia || '+4h ou +5h'}
+              </p>
             </CardContent>
           </Card>
-
           {/* Quick SOS Card */}
           <div className="p-4 rounded-2xl bg-red-50 border border-red-200 space-y-2">
             <div className="flex items-center gap-2 text-red-800 font-bold text-xs">

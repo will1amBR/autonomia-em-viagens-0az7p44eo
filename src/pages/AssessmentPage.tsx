@@ -34,11 +34,50 @@ export const AssessmentPage: React.FC = () => {
   const { currentTrip, updateTripAssessment } = useTrip()
   const { toast } = useToast()
 
-  const [answers, setAnswers] = useState<TripAssessmentAnswers>(currentTrip.assessment)
+  const defaultAnswers: TripAssessmentAnswers = {
+    canReturnTomorrow: 'yes_dependent',
+    hasValidPassport: true,
+    hasDigitalCopies: false,
+    hasRequiredVisas: true,
+    hasPhysicalControlOfPassport: true,
+    hasReturnTicket: false,
+    hasOwnMoney: false,
+    hasInternationalCard: true,
+    hasEmergencyReserve: false,
+    whoPaysTrip: 'other_person',
+    whoPaysHousing: 'other_person',
+    hasWorkingPhone: true,
+    hasInternetEsim: false,
+    canBuyEssentialsAlone: true,
+    canLeaveHousingAlone: true,
+    canStayElsewhereIfNecessary: false,
+    relationshipDuration: '1_to_6_months',
+    inPersonMeetingsCount: '1_to_2_times',
+    hasVisitedCountryBefore: false,
+    knowsHostPersonally: 'partially',
+    exactAddressKnown: true,
+    respectsLimits: 'sometimes',
+    minimizesConcerns: 'sometimes',
+    feelsPressureToAcceptConditions: true,
+    feltNeedToChooseBetweenSafetyAndTrip: false,
+    familyFriendsInformedDetailed: true,
+  }
+
+  const [answers, setAnswers] = useState<TripAssessmentAnswers>(
+    currentTrip?.assessment || defaultAnswers,
+  )
+  // Steps:
+  // 1: Pergunta Central
+  // 2: Pausa Pedagógica 1 ("Autonomia não é desconfiança")
+  // 3: Documentação & Posse Física
+  // 4: Retorno & Financeiro
+  // 5: Comunicação & Hospedagem
+  // 6: Pausa Pedagógica 2 ("Dinâmica da Viagem sem Julgamentos")
+  // 7: Dinâmica do Relacionamento & Limites
   const [currentStep, setCurrentStep] = useState<number>(1)
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
-  const totalSteps = 4
+  const totalSteps = 7
 
   const handleUpdate = <K extends keyof TripAssessmentAnswers>(
     key: K,
@@ -76,32 +115,18 @@ export const AssessmentPage: React.FC = () => {
             variant="outline"
             className="text-xs px-2.5 py-0.5 border-sky-300 bg-sky-50 text-sky-800 font-semibold"
           >
-            Pilar {currentStep} de {totalSteps}
+            Etapa {currentStep} de {totalSteps}
           </Badge>
           <span className="text-xs text-slate-500 font-medium">
-            Progresso do Quiz: {Math.round((currentStep / totalSteps) * 100)}%
+            Progresso da Avaliação: {Math.round((currentStep / totalSteps) * 100)}%
           </span>
         </div>
         <Progress value={(currentStep / totalSteps) * 100} className="h-2" />
       </div>
 
-      {/* Educational Banner Reminder */}
-      <div className="p-4 bg-slate-900 text-slate-100 rounded-2xl border border-slate-800 shadow-md space-y-2">
-        <div className="flex items-center gap-2 text-sky-300 font-bold text-xs">
-          <Shield className="w-4 h-4" />
-          <span>AUTONOMIA NÃO É DESCONFIANÇA</span>
-        </div>
-        <p className="text-xs sm:text-xs text-slate-300 leading-relaxed">
-          Ter seu próprio dinheiro e passagem de volta não significa desconfiar de quem te convidou.
-          Significa garantir que você continue sendo dono(a) do seu próprio tempo e das suas
-          próprias decisões.
-        </p>
-      </div>
-
-      {/* STEP 1: A PERGUNTA CENTRAL & DOCUMENTAÇÃO */}
+      {/* STEP 1: A PERGUNTA CENTRAL */}
       {currentStep === 1 && (
         <div className="space-y-6">
-          {/* THE CENTRAL QUESTION SPECIAL HIGHLIGHT */}
           <Card className="border-2 border-indigo-500/80 bg-gradient-to-br from-indigo-50/70 via-white to-sky-50/50 shadow-md">
             <CardHeader className="p-5 pb-3">
               <span className="text-xs font-bold text-indigo-700 uppercase tracking-wider block">
@@ -112,7 +137,7 @@ export const AssessmentPage: React.FC = () => {
               </CardTitle>
               <CardDescription className="text-xs text-slate-600">
                 Considere se você tem acesso a passagens, fundos e transporte para o aeroporto sem
-                pedir autorização.
+                pedir autorização a ninguém.
               </CardDescription>
             </CardHeader>
             <CardContent className="p-5 pt-0">
@@ -152,7 +177,7 @@ export const AssessmentPage: React.FC = () => {
                     htmlFor="ret-dep"
                     className="text-xs sm:text-sm font-semibold text-slate-800 cursor-pointer"
                   >
-                    Consigo, mas dependo de outra pessoa para comprar a passagem ou levar.
+                    Consigo, mas dependo de outra pessoa para comprar a passagem ou me levar.
                     <span className="block text-[11px] font-normal text-slate-500 mt-0.5">
                       Não possuo saldo individual suficiente ou transporte próprio para o embarque.
                     </span>
@@ -197,16 +222,61 @@ export const AssessmentPage: React.FC = () => {
               </RadioGroup>
             </CardContent>
           </Card>
+        </div>
+      )}
 
-          {/* DOCUMENTATION SUB-SECTION */}
+      {/* STEP 2: PAUSA EDUCATIVA 1 (ENTRE A PERGUNTA CENTRAL E OS PILARES) */}
+      {currentStep === 2 && (
+        <Card className="border-sky-300 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl space-y-5">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-sky-500/20 text-sky-300 flex items-center justify-center border border-sky-400/30">
+              <Shield className="w-6 h-6" />
+            </div>
+            <div>
+              <span className="text-xs uppercase tracking-wider text-sky-400 font-bold block">
+                Momento de Reflexão
+              </span>
+              <h2 className="text-xl sm:text-2xl font-black text-white">
+                Autonomia não é desconfiança
+              </h2>
+            </div>
+          </div>
+
+          <div className="space-y-3 text-slate-200 text-sm sm:text-base leading-relaxed border-l-4 border-sky-400 pl-4">
+            <p>
+              Ter seu próprio dinheiro, sua passagem de volta e seus documentos não significa que
+              você desconfia de alguém.
+            </p>
+            <p className="font-semibold text-white">
+              Significa que você tem autonomia para tomar decisões a qualquer instante.
+            </p>
+            <p className="text-xs sm:text-sm text-slate-300">
+              As próximas perguntas vão ajudar você a avaliar sua independência durante a viagem em
+              3 pilares práticos: Documentação, Finanças e Hospedagem.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-white/10 border border-white/10 text-xs text-slate-200 space-y-1">
+            <span className="font-bold text-sky-300">Lembre-se:</span>
+            <p>
+              Você não está prestando contas a ninguém. Esse diagnóstico é uma ferramenta para você
+              identificar pontos em que pode se fortalecer antes de embarcar.
+            </p>
+          </div>
+        </Card>
+      )}
+
+      {/* STEP 3: DOCUMENTAÇÃO & POSSE FÍSICA */}
+      {currentStep === 3 && (
+        <div className="space-y-6">
           <Card className="border-slate-200 shadow-sm">
             <CardHeader className="p-5 pb-3">
               <CardTitle className="text-base flex items-center gap-2">
-                <FileCheck className="w-4 h-4 text-sky-600" /> 2. Documentação Pessoal & Posse
-                Física
+                <FileCheck className="w-4 h-4 text-sky-600" /> Documentação Pessoal & Posse Física
               </CardTitle>
               <CardDescription className="text-xs">
-                Garantir que seus documentos estejam válidos e sob seu controle contínuo.
+                Garantir que seus documentos estejam válidos e sob seu controle contínuo durante
+                toda a viagem.
               </CardDescription>
             </CardHeader>
             <CardContent className="p-5 pt-0 space-y-4">
@@ -291,14 +361,13 @@ export const AssessmentPage: React.FC = () => {
         </div>
       )}
 
-      {/* STEP 2: RETORNO & FINANCEIRO */}
-      {currentStep === 2 && (
+      {/* STEP 4: RETORNO & FINANCEIRO */}
+      {currentStep === 4 && (
         <div className="space-y-6">
           <Card className="border-slate-200 shadow-sm">
             <CardHeader className="p-5 pb-3">
               <CardTitle className="text-base flex items-center gap-2">
-                <CreditCard className="w-4 h-4 text-emerald-600" /> 3. Autonomia Financeira &
-                Passagens
+                <CreditCard className="w-4 h-4 text-emerald-600" /> Autonomia Financeira & Passagens
               </CardTitle>
               <CardDescription className="text-xs">
                 A capacidade de comprar refeições, transporte e passagens sem pedir autorização.
@@ -415,13 +484,13 @@ export const AssessmentPage: React.FC = () => {
         </div>
       )}
 
-      {/* STEP 3: COMUNICAÇÃO, HOSPEDAGEM & MOBILIDADE */}
-      {currentStep === 3 && (
+      {/* STEP 5: COMUNICAÇÃO, HOSPEDAGEM & MOBILIDADE */}
+      {currentStep === 5 && (
         <div className="space-y-6">
           <Card className="border-slate-200 shadow-sm">
             <CardHeader className="p-5 pb-3">
               <CardTitle className="text-base flex items-center gap-2">
-                <Smartphone className="w-4 h-4 text-indigo-600" /> 4. Comunicação & Mobilidade no
+                <Smartphone className="w-4 h-4 text-indigo-600" /> Comunicação & Mobilidade no
                 Destino
               </CardTitle>
               <CardDescription className="text-xs">
@@ -519,13 +588,54 @@ export const AssessmentPage: React.FC = () => {
         </div>
       )}
 
-      {/* STEP 4: RELATIONSHIP & PRESSURE CHECK */}
-      {currentStep === 4 && (
+      {/* STEP 6: PAUSA EDUCATIVA 2 (ANTES DO RELATIONSHIP & DYNAMICS CHECK) */}
+      {currentStep === 6 && (
+        <Card className="border-indigo-300 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl space-y-5">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center border border-indigo-400/30">
+              <HeartHandshake className="w-6 h-6" />
+            </div>
+            <div>
+              <span className="text-xs uppercase tracking-wider text-indigo-400 font-bold block">
+                Pausa Pedagógica
+              </span>
+              <h2 className="text-xl sm:text-2xl font-black text-white">
+                Dinâmica da Viagem sem Julgamentos
+              </h2>
+            </div>
+          </div>
+
+          <div className="space-y-3 text-slate-200 text-sm sm:text-base leading-relaxed border-l-4 border-indigo-400 pl-4">
+            <p>
+              As próximas perguntas são sobre a dinâmica da sua viagem, não sobre julgar ninguém.
+            </p>
+            <p className="font-semibold text-white">
+              Nosso objetivo é unicamente mapear eventuais pressões ou pontos cegos para que você
+              esteja preparado(a) para qualquer situação.
+            </p>
+            <p className="text-xs sm:text-sm text-slate-300">
+              Seja 100% sincero(a). Suas respostas são estritamente confidenciais e protegidas por
+              criptografia.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-white/10 border border-white/10 text-xs text-slate-200 space-y-1">
+            <span className="font-bold text-indigo-300">Privacidade Garantida:</span>
+            <p>
+              Nenhum anfitrião ou acompanhante tem acesso às respostas deste questionário. O
+              SafeTrip existe para proteger você.
+            </p>
+          </div>
+        </Card>
+      )}
+
+      {/* STEP 7: RELATIONSHIP & PRESSURE CHECK */}
+      {currentStep === 7 && (
         <div className="space-y-6">
           <Card className="border-slate-200 shadow-sm">
             <CardHeader className="p-5 pb-3">
               <CardTitle className="text-base flex items-center gap-2">
-                <Users className="w-4 h-4 text-sky-700" /> 5. Dinâmica do Relacionamento & Limites
+                <Users className="w-4 h-4 text-sky-700" /> Dinâmica do Relacionamento & Limites
                 Pessoais
               </CardTitle>
               <CardDescription className="text-xs">

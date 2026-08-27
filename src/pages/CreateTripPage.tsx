@@ -24,29 +24,33 @@ export const CreateTripPage: React.FC = () => {
   const { currentTrip, updateTripDetails, updateTripAssessment } = useTrip()
 
   const [formData, setFormData] = useState({
-    title: currentTrip.title || 'Minha Próxima Viagem Internacional',
-    destinationCountry: currentTrip.destinationCountry || 'Itália',
-    destinationCity: currentTrip.destinationCity || 'Roma',
-    departureDate: currentTrip.departureDate || '2025-06-10',
-    returnDate: currentTrip.returnDate || '2025-06-25',
-    tripReason: currentTrip.tripReason || 'Turismo e convite',
-    accommodationType: currentTrip.accommodationType || 'Casa de anfitrião / Apartamento',
-    accommodationAddress: currentTrip.accommodationAddress || 'Via Nazionale, 114',
-    whoIsPaying: currentTrip.whoIsPaying || 'Outra pessoa pagando a maior parte',
-    travelingWith: currentTrip.travelingWith || 'Acompanhante conhecido recentemente',
-    hostResponsiblePerson: currentTrip.hostResponsiblePerson || 'Marco B.',
-    destinationContact: currentTrip.destinationContact || '+39 345 000 0000',
-    hasVisitedBefore: currentTrip.assessment.hasVisitedCountryBefore ? 'yes' : 'no',
-    knowsHostPersonally: currentTrip.assessment.knowsHostPersonally || 'partially',
+    title: currentTrip?.title || 'Minha Primeira Viagem Internacional',
+    originCity: currentTrip?.originCity || 'São Paulo',
+    destinationCountry: currentTrip?.destinationCountry || 'Itália',
+    destinationCity: currentTrip?.destinationCity || 'Roma',
+    transitCountries: currentTrip?.transitCountries || 'Reino Unido (Londres)',
+    departureDate: currentTrip?.departureDate || '2025-06-10',
+    returnDate: currentTrip?.returnDate || '2025-06-25',
+    tripReason: currentTrip?.tripReason || 'Turismo e convite',
+    accommodationType: currentTrip?.accommodationType || 'Casa de anfitrião / Apartamento',
+    accommodationAddress: currentTrip?.accommodationAddress || 'Via Nazionale, 114',
+    whoIsPaying: currentTrip?.whoIsPaying || 'Outra pessoa está pagando tudo',
+    travelingWith: currentTrip?.travelingWith || 'Com alguém que conheci recentemente',
+    hostResponsiblePerson: currentTrip?.hostResponsiblePerson || 'Marco B.',
+    destinationContact: currentTrip?.destinationContact || '+39 345 000 0000',
+    hasVisitedBefore: currentTrip?.assessment?.hasVisitedCountryBefore ? 'yes' : 'no',
+    knowsHostPersonally: currentTrip?.assessment?.knowsHostPersonally || 'partially',
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    updateTripDetails({
+    await updateTripDetails({
       title: formData.title,
+      originCity: formData.originCity,
       destinationCountry: formData.destinationCountry,
       destinationCity: formData.destinationCity,
+      transitCountries: formData.transitCountries,
       departureDate: formData.departureDate,
       returnDate: formData.returnDate,
       tripReason: formData.tripReason,
@@ -58,17 +62,50 @@ export const CreateTripPage: React.FC = () => {
       destinationContact: formData.destinationContact,
     })
 
-    updateTripAssessment({
-      ...currentTrip.assessment,
+    const baseAssessment = currentTrip?.assessment || {
+      canReturnTomorrow: 'yes_dependent',
+      hasValidPassport: true,
+      hasDigitalCopies: false,
+      hasRequiredVisas: true,
+      hasPhysicalControlOfPassport: true,
+      hasReturnTicket: false,
+      hasOwnMoney: false,
+      hasInternationalCard: true,
+      hasEmergencyReserve: false,
+      whoPaysTrip: formData.whoIsPaying.includes('Outra pessoa') ? 'other_person' : 'myself',
+      whoPaysHousing: 'other_person',
+      hasWorkingPhone: true,
+      hasInternetEsim: false,
+      canBuyEssentialsAlone: true,
+      canLeaveHousingAlone: true,
+      canStayElsewhereIfNecessary: false,
+      relationshipDuration: '1_to_6_months',
+      inPersonMeetingsCount: '1_to_2_times',
+      hasVisitedCountryBefore: false,
+      knowsHostPersonally: 'partially',
+      exactAddressKnown: true,
+      respectsLimits: 'sometimes',
+      minimizesConcerns: 'sometimes',
+      feelsPressureToAcceptConditions: true,
+      feltNeedToChooseBetweenSafetyAndTrip: false,
+      familyFriendsInformedDetailed: true,
+    }
+
+    await updateTripAssessment({
+      ...baseAssessment,
       hasVisitedCountryBefore: formData.hasVisitedBefore === 'yes',
       knowsHostPersonally:
         (formData.knowsHostPersonally as 'yes' | 'no' | 'partially') || 'partially',
+      whoPaysTrip: formData.whoIsPaying.includes('Outra pessoa')
+        ? 'other_person'
+        : formData.whoIsPaying.includes('Dividido')
+          ? 'shared'
+          : 'myself',
     })
 
     // Advance to assessment step
     navigate('/assessment')
   }
-
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl space-y-6">
       <div className="space-y-2 text-center sm:text-left">
@@ -108,7 +145,21 @@ export const CreateTripPage: React.FC = () => {
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="originCity" className="text-xs font-semibold">
+                  Cidade de Origem
+                </Label>
+                <Input
+                  id="originCity"
+                  value={formData.originCity}
+                  onChange={(e) => setFormData({ ...formData, originCity: e.target.value })}
+                  placeholder="Ex: São Paulo, Rio de Janeiro, Curitiba"
+                  required
+                  className="h-10 text-sm"
+                />
+              </div>
+
               <div className="space-y-1.5">
                 <Label htmlFor="destinationCountry" className="text-xs font-semibold">
                   País de Destino
@@ -133,17 +184,34 @@ export const CreateTripPage: React.FC = () => {
 
               <div className="space-y-1.5">
                 <Label htmlFor="destinationCity" className="text-xs font-semibold">
-                  Cidade Principal
+                  Cidade de Destino
                 </Label>
                 <Input
                   id="destinationCity"
                   value={formData.destinationCity}
                   onChange={(e) => setFormData({ ...formData, destinationCity: e.target.value })}
-                  placeholder="Ex: Roma, Paris, Orlando"
+                  placeholder="Ex: Roma, Paris, Londres"
                   required
                   className="h-10 text-sm"
                 />
               </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="transitCountries" className="text-xs font-semibold">
+                País(es) de escala/trânsito (opcional)
+              </Label>
+              <Input
+                id="transitCountries"
+                value={formData.transitCountries}
+                onChange={(e) => setFormData({ ...formData, transitCountries: e.target.value })}
+                placeholder="Ex: Reino Unido (Londres), Espanha (Madri)"
+                className="h-10 text-sm"
+              />
+              <p className="text-[11px] text-slate-500">
+                Se o seu voo faz conexão em outro país, salvamos contatos de emergência do trânsito
+                também.
+              </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -265,28 +333,41 @@ export const CreateTripPage: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="whoIsPaying" className="text-xs font-semibold">
-                  Quem está pagando as despesas?
+                  Quem está pagando a viagem?
                 </Label>
-                <Input
+                <select
                   id="whoIsPaying"
                   value={formData.whoIsPaying}
                   onChange={(e) => setFormData({ ...formData, whoIsPaying: e.target.value })}
-                  placeholder="Ex: Eu mesmo, Outra pessoa integralmente, Dividido"
-                  className="h-10 text-sm"
-                />
+                  className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="Eu mesmo(a)">Eu mesmo(a)</option>
+                  <option value="Dividido (eu e outra pessoa)">Dividido (eu e outra pessoa)</option>
+                  <option value="Outra pessoa está pagando tudo">
+                    Outra pessoa está pagando tudo
+                  </option>
+                  <option value="Prefiro não responder">Prefiro não responder</option>
+                </select>
               </div>
 
               <div className="space-y-1.5">
                 <Label htmlFor="travelingWith" className="text-xs font-semibold">
-                  Com quem está viajando?
+                  Com quem você está viajando?
                 </Label>
-                <Input
+                <select
                   id="travelingWith"
                   value={formData.travelingWith}
                   onChange={(e) => setFormData({ ...formData, travelingWith: e.target.value })}
-                  placeholder="Ex: Sozinho(a), Conhecido recente, Amigo, Familiar"
-                  className="h-10 text-sm"
-                />
+                  className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="Sozinho(a)">Sozinho(a)</option>
+                  <option value="Com amigos(as)">Com amigos(as)</option>
+                  <option value="Com familiares">Com familiares</option>
+                  <option value="Com parceiro(a)/namorado(a)">Com parceiro(a)/namorado(a)</option>
+                  <option value="Com alguém que conheci recentemente">
+                    Com alguém que conheci recentemente
+                  </option>
+                </select>
               </div>
             </div>
           </CardContent>
