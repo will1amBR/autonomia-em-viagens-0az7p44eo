@@ -5,14 +5,17 @@ export interface PBUser {
   id: string
   email: string
   name: string
-  role?: 'user' | 'admin'
+  role: 'user' | 'admin' | 'police'
   phone?: string
   emergency_passcode?: string
+  duressMethod?: 'hold_3s' | 'volume_key' | 'secret_code'
+  duressSecretCode?: string
+  lastOnlineAt?: string
+  lastLocationApprox?: string
   avatar?: string
-  created?: string
-  updated?: string
+  created: string
+  updated: string
 }
-
 export const authService = {
   getCurrentUser(): PBUser | null {
     if (!pb.authStore.isValid || !pb.authStore.record) {
@@ -22,10 +25,14 @@ export const authService = {
     return {
       id: rec.id,
       email: rec.email,
-      name: rec.name || rec.email.split('@')[0],
-      role: (rec.role as 'user' | 'admin') || 'user',
-      phone: rec.phone || '',
-      emergency_passcode: rec.emergency_passcode || '',
+      name: rec.name,
+      role: (rec.role as 'user' | 'admin' | 'police') || 'user',
+      phone: rec.phone,
+      emergency_passcode: rec.emergency_passcode,
+      duressMethod: (rec.duress_method as any) || 'volume_key',
+      duressSecretCode: rec.duress_secret_code || '',
+      lastOnlineAt: rec.last_online_at || '',
+      lastLocationApprox: rec.last_location_approx || '',
       avatar: rec.avatar || '',
       created: rec.created,
       updated: rec.updated,
@@ -81,7 +88,15 @@ export const authService = {
 
   async updateProfile(
     id: string,
-    data: Partial<{ name: string; phone: string; emergency_passcode: string }>,
+    data: Partial<{
+      name: string
+      phone: string
+      emergency_passcode: string
+      duress_method?: string
+      duress_secret_code?: string
+      last_online_at?: string
+      last_location_approx?: string
+    }>,
   ): Promise<PBUser> {
     const rec = await pb.collection('users').update(id, data)
     return {
@@ -91,6 +106,10 @@ export const authService = {
       role: rec.role as 'user' | 'admin',
       phone: rec.phone,
       emergency_passcode: rec.emergency_passcode,
+      duressMethod: (rec.duress_method as any) || 'volume_key',
+      duressSecretCode: rec.duress_secret_code || '',
+      lastOnlineAt: rec.last_online_at || '',
+      lastLocationApprox: rec.last_location_approx || '',
       avatar: rec.avatar || '',
       created: rec.created,
       updated: rec.updated,

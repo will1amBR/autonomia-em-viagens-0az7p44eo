@@ -4,6 +4,68 @@ export interface UserProfile {
   email: string
   phone?: string
   emergencyPasscode?: string // Safe quick exit code
+  duressMethod?: 'hold_3s' | 'volume_key' | 'secret_code'
+  duressSecretCode?: string
+  lastOnlineAt?: string
+  lastLocationApprox?: string
+}
+
+export interface PresenceLog {
+  id: string
+  userId: string
+  tripId?: string
+  eventType:
+    | 'login'
+    | 'heartbeat'
+    | 'checkin'
+    | 'manual_update'
+    | 'media_upload'
+    | 'duress_signal'
+    | 'guardian_gps_notification'
+  locationLat?: number
+  locationLng?: number
+  locationName?: string
+  accuracyMeters?: number
+  deviceInfo?: string
+  ipAddress?: string
+  batteryLevel?: string
+  notes?: string
+  isDuress?: boolean
+  timestamp: string
+  created?: string
+}
+
+export interface ConfirmationMedia {
+  id: string
+  userId: string
+  tripId?: string
+  mediaType: 'photo_routine' | 'video_morning' | 'video_night' | 'photo_emergency'
+  file?: string
+  fileUrl?: string
+  caption?: string
+  locationApprox?: string
+  locationLat?: number
+  locationLng?: number
+  takenUnderDuress?: boolean
+  deviceInfo?: string
+  timestamp: string
+  created?: string
+}
+
+export interface DuressAlert {
+  id: string
+  userId: string
+  tripId?: string
+  triggerMethod: string
+  locationLat?: number
+  locationLng?: number
+  locationAddress?: string
+  deviceInfo?: string
+  notifiedGuardiansCount?: number
+  notifiedPolice?: boolean
+  status: 'dispatched' | 'acknowledged' | 'investigating' | 'resolved'
+  timestamp: string
+  created?: string
 }
 
 export type IndependenceCategory =
@@ -214,6 +276,11 @@ export interface TripData {
   whoIsPaying: string // "Eu mesmo(a)" | "Dividido (eu e outra pessoa)" | "Outra pessoa está pagando tudo" | "Prefiro não responder"
   travelingWith: string // "Sozinho(a)" | "Com amigos(as)" | "Com familiares" | "Com parceiro(a)/namorado(a)" | "Com alguém que conheci recentemente"
   hostResponsiblePerson: string
+  hostRelationship?: string
+  hostPhone?: string
+  hostDocument?: string
+  companionDetails?: string
+  accommodationDetails?: Record<string, any>
   destinationContact: string
   assessment: TripAssessmentAnswers
   scoreResult: AutonomyScoreResult

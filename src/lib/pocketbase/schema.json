@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-31T15:02:59.153Z",
+  "generatedAt": "2026-08-31T15:24:11.257Z",
   "collections": [
     {
       "name": "users",
@@ -53,6 +53,30 @@
         },
         {
           "name": "emergency_passcode",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "duress_method",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "duress_secret_code",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "last_online_at",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "last_location_approx",
           "type": "text",
           "required": false,
           "system": false
@@ -338,6 +362,36 @@
         {
           "name": "transit_countries",
           "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "host_relationship",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "host_phone",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "host_document",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "companion_details",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "accommodation_details",
+          "type": "json",
           "required": false,
           "system": false
         }
@@ -862,6 +916,312 @@
         "CREATE INDEX idx_absence_notif_trip ON absence_notifications (trip_id, stage, created DESC)",
         "CREATE INDEX idx_absence_notif_user ON absence_notifications (user_id, created DESC)"
       ]
+    },
+    {
+      "name": "presence_logs",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin' || @request.auth.role = 'police' || @collection.guardians.user_id ?= user_id && @collection.guardians.email ?= @request.auth.email && @collection.guardians.access_type ?= 'emergency')",
+        "view": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin' || @request.auth.role = 'police' || @collection.guardians.user_id ?= user_id && @collection.guardians.email ?= @request.auth.email && @collection.guardians.access_type ?= 'emergency')",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
+        "delete": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')"
+      },
+      "fields": [
+        {
+          "name": "user_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "users"
+        },
+        {
+          "name": "trip_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "trips"
+        },
+        {
+          "name": "event_type",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "location_lat",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "location_lng",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "location_name",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "accuracy_meters",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "device_info",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "ip_address",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "battery_level",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "notes",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "is_duress",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "timestamp",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_presence_user_time ON presence_logs (user_id, created DESC)",
+        "CREATE INDEX idx_presence_trip ON presence_logs (trip_id, created DESC)"
+      ]
+    },
+    {
+      "name": "confirmation_media",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin' || @request.auth.role = 'police' || @collection.guardians.user_id ?= user_id && @collection.guardians.email ?= @request.auth.email && @collection.guardians.access_type ?= 'emergency')",
+        "view": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin' || @request.auth.role = 'police' || @collection.guardians.user_id ?= user_id && @collection.guardians.email ?= @request.auth.email && @collection.guardians.access_type ?= 'emergency')",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
+        "delete": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')"
+      },
+      "fields": [
+        {
+          "name": "user_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "users"
+        },
+        {
+          "name": "trip_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "trips"
+        },
+        {
+          "name": "media_type",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "file",
+          "type": "file",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "caption",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "location_approx",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "location_lat",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "location_lng",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "taken_under_duress",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "device_info",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "timestamp",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_conf_media_user ON confirmation_media (user_id, created DESC)",
+        "CREATE INDEX idx_conf_media_trip ON confirmation_media (trip_id, created DESC)"
+      ]
+    },
+    {
+      "name": "duress_alerts",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin' || @request.auth.role = 'police' || @collection.guardians.user_id ?= user_id && @collection.guardians.email ?= @request.auth.email && @collection.guardians.access_type ?= 'emergency')",
+        "view": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin' || @request.auth.role = 'police' || @collection.guardians.user_id ?= user_id && @collection.guardians.email ?= @request.auth.email && @collection.guardians.access_type ?= 'emergency')",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != '' && @request.auth.role = 'admin'",
+        "delete": "@request.auth.id != '' && @request.auth.role = 'admin'"
+      },
+      "fields": [
+        {
+          "name": "user_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "users"
+        },
+        {
+          "name": "trip_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "trips"
+        },
+        {
+          "name": "trigger_method",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "location_lat",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "location_lng",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "location_address",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "device_info",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "notified_guardians_count",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "notified_police",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "timestamp",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE INDEX idx_duress_user ON duress_alerts (user_id, created DESC)"]
     }
   ]
 }
