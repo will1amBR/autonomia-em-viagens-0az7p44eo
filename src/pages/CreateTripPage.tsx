@@ -2,469 +2,469 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Plane,
-  MapPin,
   Calendar,
-  User,
-  CreditCard,
+  MapPin,
+  Users,
   Building,
-  HelpCircle,
-  ArrowRight,
   Shield,
+  ArrowRight,
   Info,
+  DollarSign,
+  Phone,
+  FileText,
+  UserCheck,
+  Home,
+  CheckCircle2,
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
-import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group'
+import { Textarea } from '../components/ui/textarea'
+import { Badge } from '../components/ui/badge'
+import { DESTINATIONS_CATALOG, COUNTRY_EMERGENCY_CONTACTS } from '../lib/constants'
 import { useTrip } from '../context/TripContext'
+import { useToast } from '../hooks/use-toast'
 
 export const CreateTripPage: React.FC = () => {
   const navigate = useNavigate()
-  const { currentTrip, createTrip, updateTripAssessment } = useTrip()
+  const { createTrip } = useTrip()
+  const { toast } = useToast()
 
-  const [formData, setFormData] = useState({
-    title: '',
-    originCity: '',
-    destinationCountry: 'Itália',
-    destinationCity: '',
-    transitCountries: '',
-    departureDate: '',
-    returnDate: '',
-    tripReason: '',
-    accommodationType: 'Hotel / Pousada',
-    accommodationAddress: '',
-    whoIsPaying: 'Eu mesmo(a)',
-    travelingWith: 'Sozinho(a)',
-    hostResponsiblePerson: '',
-    destinationContact: '',
-    hasVisitedBefore: 'no',
-    knowsHostPersonally: 'partially',
-  })
+  // Form State
+  const [title, setTitle] = useState('')
+  const [selectedDestinationKey, setSelectedDestinationKey] = useState('Portugal')
+  const [originCity, setOriginCity] = useState('São Paulo, Brasil')
+  const [transitCountries, setTransitCountries] = useState('')
+  const [departureDate, setDepartureDate] = useState('')
+  const [returnDate, setReturnDate] = useState('')
+
+  // Accommodation & Host Details (Maximized traveler information)
+  const [accommodationType, setAccommodationType] = useState('hotel')
+  const [accommodationAddress, setAccommodationAddress] = useState('')
+  const [destinationContact, setDestinationContact] = useState('')
+  const [whoIsPaying, setWhoIsPaying] = useState('Eu mesmo(a)')
+  const [travelingWith, setTravelingWith] = useState('Sozinho(a)')
+
+  // Detailed Host & Companion Data
+  const [hostResponsiblePerson, setHostResponsiblePerson] = useState('')
+  const [hostRelationship, setHostRelationship] = useState('')
+  const [hostPhone, setHostPhone] = useState('')
+  const [hostDocument, setHostDocument] = useState('')
+  const [companionDetails, setCompanionDetails] = useState('')
+  const [quickNotes, setQuickNotes] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const selectedDest =
+    DESTINATIONS_CATALOG[selectedDestinationKey] || DESTINATIONS_CATALOG['Portugal']
+  const destEmergency =
+    COUNTRY_EMERGENCY_CONTACTS[selectedDestinationKey] || COUNTRY_EMERGENCY_CONTACTS['Portugal']
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    const newTripId = await createTrip({
-      title:
-        formData.title || `Viagem para ${formData.destinationCity || formData.destinationCountry}`,
-      originCity: formData.originCity || 'Brasil',
-      destinationCountry: formData.destinationCountry,
-      destinationCity: formData.destinationCity || 'Capital',
-      transitCountries: formData.transitCountries,
-      departureDate: formData.departureDate,
-      returnDate: formData.returnDate,
-      tripReason: formData.tripReason,
-      accommodationType: formData.accommodationType,
-      accommodationAddress: formData.accommodationAddress,
-      whoIsPaying: formData.whoIsPaying,
-      travelingWith: formData.travelingWith,
-      hostResponsiblePerson: formData.hostResponsiblePerson,
-      destinationContact: formData.destinationContact,
-    })
-
-    const baseAssessment = currentTrip?.assessment || {
-      canReturnTomorrow: 'yes_dependent',
-      hasValidPassport: true,
-      hasDigitalCopies: false,
-      hasRequiredVisas: true,
-      hasPhysicalControlOfPassport: true,
-      hasReturnTicket: false,
-      hasOwnMoney: false,
-      hasInternationalCard: true,
-      hasEmergencyReserve: false,
-      whoPaysTrip: formData.whoIsPaying.includes('Outra pessoa') ? 'other_person' : 'myself',
-      whoPaysHousing: 'other_person',
-      hasWorkingPhone: true,
-      hasInternetEsim: false,
-      canBuyEssentialsAlone: true,
-      canLeaveHousingAlone: true,
-      canStayElsewhereIfNecessary: false,
-      relationshipDuration: '1_to_6_months',
-      inPersonMeetingsCount: '1_to_2_times',
-      hasVisitedCountryBefore: false,
-      knowsHostPersonally: 'partially',
-      exactAddressKnown: true,
-      respectsLimits: 'sometimes',
-      minimizesConcerns: 'sometimes',
-      feelsPressureToAcceptConditions: true,
-      feltNeedToChooseBetweenSafetyAndTrip: false,
-      familyFriendsInformedDetailed: true,
+    if (!title || !departureDate || !returnDate) {
+      toast({
+        title: 'Preencha os campos obrigatórios',
+        description: 'Título, data de partida e retorno são necessários.',
+        variant: 'destructive',
+      })
+      return
     }
 
-    await updateTripAssessment({
-      ...baseAssessment,
-      hasVisitedCountryBefore: formData.hasVisitedBefore === 'yes',
-      knowsHostPersonally:
-        (formData.knowsHostPersonally as 'yes' | 'no' | 'partially') || 'partially',
-      whoPaysTrip: formData.whoIsPaying.includes('Outra pessoa')
-        ? 'other_person'
-        : formData.whoIsPaying.includes('Dividido')
-          ? 'shared'
-          : 'myself',
-    })
+    setIsSubmitting(true)
+    try {
+      await createTrip({
+        title: title.trim(),
+        destinationCountry: selectedDest.country,
+        destinationCity: selectedDest.city,
+        originCity: originCity.trim() || 'Brasil',
+        transitCountries: transitCountries.trim(),
+        departureDate,
+        returnDate,
+        accommodationType: accommodationType as any,
+        accommodationAddress: accommodationAddress.trim(),
+        destinationContact: destinationContact.trim() || hostPhone.trim(),
+        whoIsPaying,
+        travelingWith,
+        hostResponsiblePerson: hostResponsiblePerson.trim(),
+        tripReason: quickNotes.trim() || companionDetails.trim() || 'Viagem Internacional',
+      })
+      toast({
+        title: 'Viagem cadastrada com sucesso!',
+        description: 'Agora realize o diagnóstico de autonomia para personalizar suas proteções.',
+      })
 
-    // Advance to assessment step
-    navigate('/assessment')
+      // Go to assessment / quiz
+      navigate('/assessment')
+    } catch (err: any) {
+      console.error(err)
+      toast({
+        title: 'Erro ao cadastrar viagem',
+        description: err.message || 'Tente novamente mais tarde.',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
+
   return (
-    <div className="container mx-auto px-4 py-8 max-w-3xl space-y-6">
-      <div className="space-y-2 text-center sm:text-left">
-        <span className="text-xs font-bold text-sky-600 uppercase tracking-wider">
-          Passo 1 de 2
-        </span>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-          Cadastrar Informações da Viagem
+    <div className="space-y-6 max-w-4xl mx-auto pb-12">
+      {/* Header */}
+      <div className="space-y-1">
+        <div className="flex items-center gap-2">
+          <Badge className="bg-sky-100 text-sky-800 border-sky-300 text-xs font-semibold">
+            <Plane className="w-3.5 h-3.5 mr-1 text-sky-600" /> Cadastro de Rota & Hospedagem
+          </Badge>
+          <span className="text-xs text-slate-500 font-medium">14 Destinos Verificados</span>
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          Planejar Nova Viagem Segura
         </h1>
-        <p className="text-xs sm:text-sm text-slate-600">
-          Reúna os dados básicos sobre destino, datas e contatos. Essas informações ficarão salvas
-          em seu dispositivo para consulta offline.
+        <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
+          Coletamos as informações essenciais de rota, acomodação e anfitrião para que você tenha
+          respaldo total e autonomia durante toda a estadia.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Main Info Card */}
+        {/* Section 1: Basic Trip Details */}
         <Card className="border-slate-200 shadow-sm">
           <CardHeader className="p-5 pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Plane className="w-4 h-4 text-sky-600" /> Destino e Datas
-            </CardTitle>
-            <CardDescription className="text-xs">Onde e quando a viagem acontecerá</CardDescription>
-          </CardHeader>
-          <CardContent className="p-5 pt-0 space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="title" className="text-xs font-semibold">
-                Identificação da Viagem
-              </Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="Ex: Férias em Roma, Viagem a Lisboa"
-                required
-                className="h-10 text-sm"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="originCity" className="text-xs font-semibold">
-                  Cidade de Origem
-                </Label>
-                <Input
-                  id="originCity"
-                  value={formData.originCity}
-                  onChange={(e) => setFormData({ ...formData, originCity: e.target.value })}
-                  placeholder="Ex: São Paulo, Rio de Janeiro, Curitiba"
-                  required
-                  className="h-10 text-sm"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="destinationCountry" className="text-xs font-semibold">
-                  País de Destino
-                </Label>
-                <select
-                  id="destinationCountry"
-                  value={formData.destinationCountry}
-                  onChange={(e) => setFormData({ ...formData, destinationCountry: e.target.value })}
-                  className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
-                >
-                  <option value="Itália">Itália</option>
-                  <option value="França">França</option>
-                  <option value="Portugal">Portugal</option>
-                  <option value="Estados Unidos">Estados Unidos</option>
-                  <option value="Espanha">Espanha</option>
-                  <option value="Reino Unido">Reino Unido</option>
-                  <option value="Argentina">Argentina</option>
-                  <option value="Japão">Japão</option>
-                  <option value="Outro">Outro País Internacional</option>
-                </select>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="destinationCity" className="text-xs font-semibold">
-                  Cidade de Destino
-                </Label>
-                <Input
-                  id="destinationCity"
-                  value={formData.destinationCity}
-                  onChange={(e) => setFormData({ ...formData, destinationCity: e.target.value })}
-                  placeholder="Ex: Roma, Paris, Londres"
-                  required
-                  className="h-10 text-sm"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="transitCountries" className="text-xs font-semibold">
-                País(es) de escala/trânsito (opcional)
-              </Label>
-              <Input
-                id="transitCountries"
-                value={formData.transitCountries}
-                onChange={(e) => setFormData({ ...formData, transitCountries: e.target.value })}
-                placeholder="Ex: Reino Unido (Londres), Espanha (Madri)"
-                className="h-10 text-sm"
-              />
-              <p className="text-[11px] text-slate-500">
-                Se o seu voo faz conexão em outro país, salvamos contatos de emergência do trânsito
-                também.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="departureDate" className="text-xs font-semibold">
-                  Data de Saída / Embarque
-                </Label>
-                <Input
-                  id="departureDate"
-                  type="date"
-                  value={formData.departureDate}
-                  onChange={(e) => setFormData({ ...formData, departureDate: e.target.value })}
-                  required
-                  className="h-10 text-sm"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="returnDate" className="text-xs font-semibold">
-                  Data Prevista de Retorno
-                </Label>
-                <Input
-                  id="returnDate"
-                  type="date"
-                  value={formData.returnDate}
-                  onChange={(e) => setFormData({ ...formData, returnDate: e.target.value })}
-                  required
-                  className="h-10 text-sm"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="tripReason" className="text-xs font-semibold">
-                Motivo da Viagem
-              </Label>
-              <Input
-                id="tripReason"
-                value={formData.tripReason}
-                onChange={(e) => setFormData({ ...formData, tripReason: e.target.value })}
-                placeholder="Ex: Turismo, Convite de conhecido, Estudo, etc"
-                className="h-10 text-sm"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Accommodation & Host Details */}
-        <Card className="border-slate-200 shadow-sm">
-          <CardHeader className="p-5 pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Building className="w-4 h-4 text-indigo-600" /> Hospedagem e Anfitrião
+            <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <Plane className="w-4 h-4 text-sky-600" /> 1. Destino e Período da Viagem
             </CardTitle>
             <CardDescription className="text-xs">
-              Quem controla o local de permanência e quais são os endereços
+              Escolha o país de destino e as datas de ida e volta.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-5 pt-0 space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="trip-title" className="text-xs font-semibold text-slate-700">
+                Título ou Apelido da Viagem *
+              </Label>
+              <Input
+                id="trip-title"
+                required
+                placeholder="Ex: Intercâmbio em Portugal, Férias em Roma, Trabalho em Berlim"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="h-10 text-xs"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Destination Selector */}
+              <div className="space-y-1.5">
+                <Label htmlFor="trip-dest" className="text-xs font-semibold text-slate-700">
+                  País de Destino (Consulados Verificados) *
+                </Label>
+                <select
+                  id="trip-dest"
+                  value={selectedDestinationKey}
+                  onChange={(e) => setSelectedDestinationKey(e.target.value)}
+                  className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                >
+                  {Object.entries(DESTINATIONS_CATALOG).map(([key, d]) => (
+                    <option key={key} value={key}>
+                      {d.country} ({d.city})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Origin City */}
+              <div className="space-y-1.5">
+                <Label htmlFor="trip-origin" className="text-xs font-semibold text-slate-700">
+                  Cidade de Origem (Embarque)
+                </Label>
+                <Input
+                  id="trip-origin"
+                  placeholder="Ex: São Paulo, Rio de Janeiro, Brasília"
+                  value={originCity}
+                  onChange={(e) => setOriginCity(e.target.value)}
+                  className="h-10 text-xs"
+                />
+              </div>
+            </div>
+
+            {/* Travel Dates */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="trip-start" className="text-xs font-semibold text-slate-700">
+                  Data de Ida / Embarque *
+                </Label>
+                <Input
+                  id="trip-start"
+                  type="date"
+                  required
+                  value={departureDate}
+                  onChange={(e) => setDepartureDate(e.target.value)}
+                  className="h-10 text-xs"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="trip-end" className="text-xs font-semibold text-slate-700">
+                  Data Prevista de Retorno *
+                </Label>
+                <Input
+                  id="trip-end"
+                  type="date"
+                  required
+                  value={returnDate}
+                  onChange={(e) => setReturnDate(e.target.value)}
+                  className="h-10 text-xs"
+                />{' '}
+              </div>
+            </div>
+
+            {/* Transit Countries */}
+            <div className="space-y-1.5">
+              <Label htmlFor="trip-transit" className="text-xs font-semibold text-slate-700">
+                Países de Conexão ou Escala (opcional):
+              </Label>
+              <Input
+                id="trip-transit"
+                placeholder="Ex: Escala em Madri (Espanha) ou Frankfurt (Alemanha)"
+                value={transitCountries}
+                onChange={(e) => setTransitCountries(e.target.value)}
+                className="h-10 text-xs"
+              />
+            </div>
+
+            {/* Live Destination Info Card */}
+            {destEmergency && (
+              <div className="p-3.5 rounded-2xl bg-sky-50 border border-sky-100 flex items-start gap-3 text-xs text-sky-950">
+                <Info className="w-4 h-4 text-sky-700 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="font-bold">
+                    Dados Consulares de {destEmergency.country} já vinculados à sua viagem:
+                  </p>
+                  <p className="text-[11px] text-slate-600">
+                    Emergência Local: <strong>{destEmergency.generalEmergencyNumber}</strong> |
+                    Plantão Consular 24h: <strong>{destEmergency.consulateEmergency24h}</strong>
+                  </p>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Section 2: Accommodation & Host Details (Detailed information) */}
+        <Card className="border-slate-200 shadow-sm">
+          <CardHeader className="p-5 pb-3">
+            <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <Building className="w-4 h-4 text-indigo-600" /> 2. Hospedagem & Dados do Anfitrião
+            </CardTitle>
+            <CardDescription className="text-xs">
+              Registrar o endereço completo e dados de quem irá recebê-lo(a) garante autonomia e
+              respaldo caso ocorra qualquer imprevisto.
             </CardDescription>
           </CardHeader>
           <CardContent className="p-5 pt-0 space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="accommodationType" className="text-xs font-semibold">
-                  Tipo de Hospedagem
-                </Label>
-                <Input
-                  id="accommodationType"
-                  value={formData.accommodationType}
-                  onChange={(e) => setFormData({ ...formData, accommodationType: e.target.value })}
-                  placeholder="Ex: Hotel, Airbnb, Casa de outra pessoa"
-                  className="h-10 text-sm"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="accommodationAddress" className="text-xs font-semibold">
-                  Endereço Completo
-                </Label>
-                <Input
-                  id="accommodationAddress"
-                  value={formData.accommodationAddress}
-                  onChange={(e) =>
-                    setFormData({ ...formData, accommodationAddress: e.target.value })
-                  }
-                  placeholder="Rua, número, bairro, código postal"
-                  className="h-10 text-sm"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="hostResponsiblePerson" className="text-xs font-semibold">
-                  Pessoa Responsável / Anfitrião
-                </Label>
-                <Input
-                  id="hostResponsiblePerson"
-                  value={formData.hostResponsiblePerson}
-                  onChange={(e) =>
-                    setFormData({ ...formData, hostResponsiblePerson: e.target.value })
-                  }
-                  placeholder="Nome de quem reservou ou te receberá"
-                  className="h-10 text-sm"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="destinationContact" className="text-xs font-semibold">
-                  Contato no Destino (Telefone/WhatsApp)
-                </Label>
-                <Input
-                  id="destinationContact"
-                  value={formData.destinationContact}
-                  onChange={(e) => setFormData({ ...formData, destinationContact: e.target.value })}
-                  placeholder="+XX (DDD) XXXXX-XXXX"
-                  className="h-10 text-sm"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="whoIsPaying" className="text-xs font-semibold">
-                  Quem está pagando a viagem?
+                <Label htmlFor="acc-type" className="text-xs font-semibold text-slate-700">
+                  Tipo de Acomodação:
                 </Label>
                 <select
-                  id="whoIsPaying"
-                  value={formData.whoIsPaying}
-                  onChange={(e) => setFormData({ ...formData, whoIsPaying: e.target.value })}
-                  className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+                  id="acc-type"
+                  value={accommodationType}
+                  onChange={(e) => setAccommodationType(e.target.value)}
+                  className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500"
                 >
-                  <option value="Eu mesmo(a)">Eu mesmo(a)</option>
-                  <option value="Dividido (eu e outra pessoa)">Dividido (eu e outra pessoa)</option>
-                  <option value="Outra pessoa está pagando tudo">
-                    Outra pessoa está pagando tudo
-                  </option>
-                  <option value="Prefiro não responder">Prefiro não responder</option>
+                  <option value="hotel">Hotel / Pousada</option>
+                  <option value="airbnb">Airbnb / Aluguel por Temporada</option>
+                  <option value="family_friends">Casa de Familiares / Amigos</option>
+                  <option value="hostel">Hostel / Albergue</option>
+                  <option value="other">Outro (Alojamento / Residência Universitária)</option>
                 </select>
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="travelingWith" className="text-xs font-semibold">
-                  Com quem você está viajando?
+                <Label htmlFor="acc-contact" className="text-xs font-semibold text-slate-700">
+                  Telefone / Recepção da Hospedagem:
+                </Label>
+                <Input
+                  id="acc-contact"
+                  placeholder="Ex: +351 21 000 0000"
+                  value={destinationContact}
+                  onChange={(e) => setDestinationContact(e.target.value)}
+                  className="h-10 text-xs"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="acc-address" className="text-xs font-semibold text-slate-700">
+                Endereço Completo da Hospedagem:
+              </Label>
+              <Input
+                id="acc-address"
+                placeholder="Rua, número, complemento, bairro, cidade e código postal"
+                value={accommodationAddress}
+                onChange={(e) => setAccommodationAddress(e.target.value)}
+                className="h-10 text-xs"
+              />
+            </div>
+
+            {/* WITH WHOM ARE YOU STAYING? (HOST & COMPANIONS) */}
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+              <div className="flex items-center gap-2 text-slate-900 font-bold text-xs">
+                <UserCheck className="w-4 h-4 text-sky-600" />
+                <span>Com quem você irá ficar? (Dados do Anfitrião / Responsável)</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="host-name" className="text-xs font-semibold text-slate-700">
+                    Nome da Pessoa / Anfitrião:
+                  </Label>
+                  <Input
+                    id="host-name"
+                    placeholder="Ex: Carlos Silva ou Gerência do Hotel"
+                    value={hostResponsiblePerson}
+                    onChange={(e) => setHostResponsiblePerson(e.target.value)}
+                    className="h-9 text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <Label htmlFor="host-rel" className="text-xs font-semibold text-slate-700">
+                    Relação com o Anfitrião:
+                  </Label>
+                  <Input
+                    id="host-rel"
+                    placeholder="Ex: Amigo, Contratante de Trabalho, Parente, Locador"
+                    value={hostRelationship}
+                    onChange={(e) => setHostRelationship(e.target.value)}
+                    className="h-9 text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="host-phone" className="text-xs font-semibold text-slate-700">
+                    Telefone / WhatsApp do Anfitrião:
+                  </Label>
+                  <Input
+                    id="host-phone"
+                    placeholder="Ex: +351 91 000 0000"
+                    value={hostPhone}
+                    onChange={(e) => setHostPhone(e.target.value)}
+                    className="h-9 text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <Label htmlFor="host-doc" className="text-xs font-semibold text-slate-700">
+                    Documento / Identificação do Anfitrião (opcional):
+                  </Label>
+                  <Input
+                    id="host-doc"
+                    placeholder="Ex: Passaporte / ID / NIF"
+                    value={hostDocument}
+                    onChange={(e) => setHostDocument(e.target.value)}
+                    className="h-9 text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="comp-details" className="text-xs font-semibold text-slate-700">
+                  Companheiros de Viagem / Outras pessoas no local:
+                </Label>
+                <Input
+                  id="comp-details"
+                  placeholder="Ex: Viajando com colega de trabalho Mariana; mais 2 hóspedes no apartamento"
+                  value={companionDetails}
+                  onChange={(e) => setCompanionDetails(e.target.value)}
+                  className="h-9 text-xs"
+                />
+              </div>
+            </div>
+
+            {/* Financial Independence & Relationship Factors */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+              <div className="space-y-1.5">
+                <Label htmlFor="who-pays" className="text-xs font-semibold text-slate-700">
+                  Quem financia as despesas e passagens?
                 </Label>
                 <select
-                  id="travelingWith"
-                  value={formData.travelingWith}
-                  onChange={(e) => setFormData({ ...formData, travelingWith: e.target.value })}
-                  className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+                  id="who-pays"
+                  value={whoIsPaying}
+                  onChange={(e) => setWhoIsPaying(e.target.value)}
+                  className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                >
+                  <option value="Eu mesmo(a)">Eu mesmo(a) (Recursos próprios)</option>
+                  <option value="Familiar / Parentes">Familiar / Parentes</option>
+                  <option value="Empresa / Empregador">Empresa / Empregador</option>
+                  <option value="Amigo / Conhecido">Amigo / Conhecido</option>
+                  <option value="Terceiro / Financiamento informal">
+                    Terceiro / Financiamento informal
+                  </option>
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="travel-with" className="text-xs font-semibold text-slate-700">
+                  Companhia durante o trajeto:
+                </Label>
+                <select
+                  id="travel-with"
+                  value={travelingWith}
+                  onChange={(e) => setTravelingWith(e.target.value)}
+                  className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500"
                 >
                   <option value="Sozinho(a)">Sozinho(a)</option>
-                  <option value="Com amigos(as)">Com amigos(as)</option>
+                  <option value="Com amigos / conhecidos">Com amigos / conhecidos</option>
                   <option value="Com familiares">Com familiares</option>
-                  <option value="Com parceiro(a)/namorado(a)">Com parceiro(a)/namorado(a)</option>
-                  <option value="Com alguém que conheci recentemente">
-                    Com alguém que conheci recentemente
+                  <option value="Em grupo de excursão / trabalho">
+                    Em grupo de excursão / trabalho
                   </option>
+                  <option value="Com pessoa recém-conhecida">Com pessoa recém-conhecida</option>
                 </select>
               </div>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Initial Autonomy Diagnostic Questions */}
-        <Card className="border-slate-200 shadow-sm bg-sky-50/40">
-          <CardHeader className="p-5 pb-3">
-            <CardTitle className="text-base flex items-center gap-2 text-slate-900">
-              <HelpCircle className="w-4 h-4 text-sky-700" /> Perguntas de Contexto Pré-Avaliação
-            </CardTitle>
-            <CardDescription className="text-xs text-slate-600">
-              Isso nos ajuda a calibrar a pontuação de familiaridade e mobilidade
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-5 pt-0 space-y-5">
-            {/* Q1 */}
-            <div className="space-y-2">
-              <Label className="text-xs font-bold text-slate-800">
-                Você já esteve neste país anteriormente?
+            <div className="space-y-1.5">
+              <Label htmlFor="trip-notes" className="text-xs font-semibold text-slate-700">
+                Observações Adicionais / Anotações Pessoais:
               </Label>
-              <RadioGroup
-                value={formData.hasVisitedBefore}
-                onValueChange={(val) => setFormData({ ...formData, hasVisitedBefore: val })}
-                className="flex gap-4"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="yes" id="visit-yes" />
-                  <Label htmlFor="visit-yes" className="text-xs font-normal cursor-pointer">
-                    Sim, já estive
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="no" id="visit-no" />
-                  <Label htmlFor="visit-no" className="text-xs font-normal cursor-pointer">
-                    Não, primeira vez
-                  </Label>
-                </div>
-              </RadioGroup>
-            </div>
-
-            {/* Q2 */}
-            <div className="space-y-2">
-              <Label className="text-xs font-bold text-slate-800">
-                Você conhece pessoalmente as pessoas com quem ficará hospedado(a)?
-              </Label>
-              <RadioGroup
-                value={formData.knowsHostPersonally}
-                onValueChange={(val: 'yes' | 'no' | 'partially') =>
-                  setFormData({ ...formData, knowsHostPersonally: val })
-                }
-                className="flex flex-col sm:flex-row gap-3"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="yes" id="host-yes" />
-                  <Label htmlFor="host-yes" className="text-xs font-normal cursor-pointer">
-                    Sim, conheço bem pessoalmente
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="partially" id="host-partially" />
-                  <Label htmlFor="host-partially" className="text-xs font-normal cursor-pointer">
-                    Parcialmente (poucos encontros ou online)
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="no" id="host-no" />
-                  <Label htmlFor="host-no" className="text-xs font-normal cursor-pointer">
-                    Não conheço pessoalmente
-                  </Label>
-                </div>
-              </RadioGroup>
+              <Textarea
+                id="trip-notes"
+                rows={3}
+                placeholder="Ex: Voo com parada de 4h em Lisboa. Reserva confirmada sob número #1234."
+                value={quickNotes}
+                onChange={(e) => setQuickNotes(e.target.value)}
+                className="text-xs"
+              />
             </div>
           </CardContent>
         </Card>
 
-        {/* Buttons */}
-        <div className="flex items-center justify-between pt-2">
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => navigate('/onboarding')}
-            className="text-xs text-slate-600"
-          >
-            ← Voltar
-          </Button>
-
+        {/* Submit Button */}
+        <div className="flex justify-end pt-2">
           <Button
             type="submit"
-            className="bg-sky-600 hover:bg-sky-700 text-white font-bold px-8 h-11 rounded-xl flex items-center gap-2 shadow-md shadow-sky-600/20"
+            disabled={isSubmitting}
+            className="bg-sky-600 hover:bg-sky-500 text-white font-bold h-12 px-8 rounded-2xl text-xs sm:text-sm shadow-lg shadow-sky-900/20"
           >
-            <span>Avançar para Avaliação de Autonomia</span>
-            <ArrowRight className="w-4 h-4" />
+            {isSubmitting ? (
+              'Salvando Viagem...'
+            ) : (
+              <>
+                Salvar Viagem & Ir para Avaliação de Autonomia{' '}
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </>
+            )}
           </Button>
         </div>
       </form>
     </div>
   )
 }
+
+export default CreateTripPage

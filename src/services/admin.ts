@@ -16,7 +16,104 @@ export interface PlatformMetrics {
   recentTrips: any[]
 }
 
+export interface AdminTripOverview {
+  id: string
+  userId: string
+  user_id?: string
+  userName?: string
+  user_name?: string
+  userEmail?: string
+  user_email?: string
+  title: string
+  originCity?: string
+  origin_city?: string
+  destinationCountry: string
+  destination_country?: string
+  destinationCity: string
+  destination_city?: string
+  transitCountries?: string
+  transit_countries?: string
+  startDate?: string
+  start_date?: string
+  endDate?: string
+  end_date?: string
+  accommodationType?: string
+  accommodation_type?: string
+  accommodationAddress?: string
+  accommodation_address?: string
+  hostResponsiblePerson?: string
+  host_responsible_person?: string
+  hostRelationship?: string
+  host_relationship?: string
+  hostPhone?: string
+  host_phone?: string
+  stayingWith?: string
+  staying_with?: string
+  destinationContact?: string
+  destination_contact?: string
+  whoIsPaying?: string
+  who_is_paying?: string
+  travelingWith?: string
+  traveling_with?: string
+  status?: string
+  autonomyScore?: number
+}
+
 export const adminService = {
+  async listActiveTrips(): Promise<AdminTripOverview[]> {
+    try {
+      const records = await pb.collection('trips').getFullList({
+        sort: '-created',
+        expand: 'user_id',
+      })
+      return records.map((r) => ({
+        id: r.id,
+        userId: r.user_id,
+        user_id: r.user_id,
+        userName: r.expand?.user_id?.name || 'Viajante',
+        user_name: r.expand?.user_id?.name || 'Viajante',
+        userEmail: r.expand?.user_id?.email || '',
+        user_email: r.expand?.user_id?.email || '',
+        title: r.title,
+        originCity: r.origin_city,
+        origin_city: r.origin_city,
+        destinationCountry: r.destination_country,
+        destination_country: r.destination_country,
+        destinationCity: r.destination_city,
+        destination_city: r.destination_city,
+        transitCountries: r.transit_countries,
+        transit_countries: r.transit_countries,
+        startDate: r.start_date,
+        start_date: r.start_date,
+        endDate: r.end_date,
+        end_date: r.end_date,
+        accommodationType: r.accommodation_type,
+        accommodation_type: r.accommodation_type,
+        accommodationAddress: r.accommodation_address,
+        accommodation_address: r.accommodation_address,
+        hostResponsiblePerson: r.host_responsible_person,
+        host_responsible_person: r.host_responsible_person,
+        hostRelationship: r.host_relationship,
+        host_relationship: r.host_relationship,
+        hostPhone: r.host_phone,
+        host_phone: r.host_phone,
+        stayingWith: r.staying_with,
+        staying_with: r.staying_with,
+        destinationContact: r.destination_contact,
+        destination_contact: r.destination_contact,
+        whoIsPaying: r.who_is_paying,
+        who_is_paying: r.who_is_paying,
+        travelingWith: r.traveling_with,
+        traveling_with: r.traveling_with,
+        status: r.status,
+        autonomyScore: r.autonomy_score,
+      }))
+    } catch (err) {
+      console.warn('Error fetching active trips for admin:', err)
+      return []
+    }
+  },
+
   async getPlatformMetrics(): Promise<PlatformMetrics> {
     try {
       const [users, trips, assessments] = await Promise.all([

@@ -9,6 +9,14 @@ interface AuthContextType {
   isPolice: boolean
   isLoading: boolean
   login: (email: string, pass: string) => Promise<PBUser>
+  register: (data: {
+    email: string
+    password: string
+    passwordConfirm: string
+    name: string
+    phone?: string
+  }) => Promise<PBUser>
+  requestPasswordReset: (email: string) => Promise<void>
   logout: () => void
   refreshUser: () => void
 }
@@ -20,6 +28,12 @@ const AuthContext = createContext<AuthContextType>({
   isPolice: false,
   isLoading: true,
   login: async () => {
+    throw new Error('Not implemented')
+  },
+  register: async () => {
+    throw new Error('Not implemented')
+  },
+  requestPasswordReset: async () => {
     throw new Error('Not implemented')
   },
   logout: () => {},
@@ -72,6 +86,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return u
   }
 
+  const register = async (data: {
+    email: string
+    password: string
+    passwordConfirm: string
+    name: string
+    phone?: string
+  }) => {
+    const u = await authService.register({
+      ...data,
+      name: data.name || data.email.split('@')[0],
+    })
+    setUser(u)
+    return u
+  }
+
+  const requestPasswordReset = async (email: string) => {
+    await authService.requestPasswordReset(email)
+  }
+
   const logout = () => {
     authService.logout()
     setUser(null)
@@ -86,6 +119,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isPolice: user?.role === 'police',
         isLoading,
         login,
+        register,
+        requestPasswordReset,
         logout,
         refreshUser,
       }}

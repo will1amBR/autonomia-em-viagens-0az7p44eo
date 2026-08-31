@@ -28,6 +28,7 @@ import { SecurityLibraryPage } from './pages/SecurityLibraryPage'
 import { PlanSpecExplorerPage } from './pages/PlanSpecExplorerPage'
 import { DestinationsPublicPage } from './pages/DestinationsPublicPage'
 import { ProfilePage } from './pages/ProfilePage'
+import { PresenceLogsPage } from './pages/PresenceLogsPage'
 import NotFound from './pages/NotFound'
 
 const App = () => (
@@ -104,6 +105,16 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/presence-logs"
+                element={
+                  <ProtectedRoute>
+                    <PresenceLogsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/presenca" element={<Navigate to="/presence-logs" replace />} />
+              <Route path="/media" element={<Navigate to="/presence-logs" replace />} />
               <Route
                 path="/perfil"
                 element={

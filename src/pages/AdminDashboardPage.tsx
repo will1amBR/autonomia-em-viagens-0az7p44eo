@@ -48,6 +48,10 @@ export const AdminDashboardPage: React.FC = () => {
   const [metrics, setMetrics] = useState<PlatformMetrics | null>(null)
   const [destinations, setDestinations] = useState<any[]>([])
   const [securityArticles, setSecurityArticles] = useState<any[]>([])
+  const [activeTrips, setActiveTrips] = useState<any[]>([])
+  const [selectedTripDetail, setSelectedTripDetail] = useState<any | null>(null)
+  const [isTripModalOpen, setIsTripModalOpen] = useState(false)
+  const [tripSearch, setTripSearch] = useState('')
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
   // Modals state
@@ -61,14 +65,16 @@ export const AdminDashboardPage: React.FC = () => {
   const loadAllData = async () => {
     setIsLoading(true)
     try {
-      const [m, d, s] = await Promise.all([
+      const [m, d, s, trips] = await Promise.all([
         adminService.getPlatformMetrics(),
         adminService.listDestinations(),
         adminService.listSecurityLibrary(),
+        adminService.listActiveTrips(),
       ])
       setMetrics(m)
       setDestinations(d)
       setSecurityArticles(s)
+      setActiveTrips(trips)
     } catch (e) {
       console.error(e)
       toast({
@@ -200,7 +206,7 @@ export const AdminDashboardPage: React.FC = () => {
           </TabsTrigger>
         </TabsList>
 
-        {/* 1. METRICS TAB */}
+        {/* 1. METRICS & ACTIVE TRIPS TAB */}
         <TabsContent value="metrics" className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="border-slate-200 shadow-sm bg-gradient-to-br from-white to-sky-50/40">
@@ -214,22 +220,22 @@ export const AdminDashboardPage: React.FC = () => {
               </CardHeader>
               <CardContent className="p-4 pt-0 text-[11px] text-slate-500 flex items-center gap-1">
                 <Users className="w-3.5 h-3.5 text-sky-600" />
-                <span>Contas ativas no sistema</span>
+                <span>Contas cadastradas no PocketBase</span>
               </CardContent>
             </Card>
 
             <Card className="border-slate-200 shadow-sm bg-gradient-to-br from-white to-indigo-50/40">
               <CardHeader className="p-4 pb-2">
                 <CardDescription className="text-xs font-medium text-slate-500">
-                  Planos de Viagem Criados
+                  Viagens Registradas
                 </CardDescription>
                 <CardTitle className="text-2xl font-black text-indigo-900">
-                  {metrics?.totalTrips ?? '...'}
+                  {metrics?.totalTrips ?? activeTrips.length}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-4 pt-0 text-[11px] text-slate-500 flex items-center gap-1">
                 <Compass className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Viagens estruturadas</span>
+                <span>Rotas e itinerários criados</span>
               </CardContent>
             </Card>
 
@@ -264,52 +270,130 @@ export const AdminDashboardPage: React.FC = () => {
             </Card>
           </div>
 
-          {/* Distribution Card */}
+          {/* ACTIVE TRIPS LIST & DETAILS SECTION */}
           <Card className="border-slate-200 shadow-sm">
-            <CardHeader className="p-5">
-              <CardTitle className="text-base font-bold text-slate-900">
-                Distribuição de Nível de Autonomia dos Viajantes
-              </CardTitle>
-              <CardDescription className="text-xs">
-                Mapeamento das faixas de risco e prontidão dos usuários avaliados.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-5 pt-0 space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-1">
-                  <span className="text-xs font-semibold text-emerald-800">
-                    Alta Autonomia (75-100)
-                  </span>
-                  <p className="text-2xl font-black text-emerald-900">
-                    {metrics?.scoreDistribution.high ?? 0} viajantes
-                  </p>
-                  <p className="text-[11px] text-emerald-700">
-                    Controle financeiro e retorno garantido
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 space-y-1">
-                  <span className="text-xs font-semibold text-amber-800">
-                    Autonomia Moderada (45-74)
-                  </span>
-                  <p className="text-2xl font-black text-amber-900">
-                    {metrics?.scoreDistribution.moderate ?? 0} viajantes
-                  </p>
-                  <p className="text-[11px] text-amber-700">Pontos de dependência a mitigar</p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-red-50 border border-red-200 space-y-1">
-                  <span className="text-xs font-semibold text-red-800">
-                    Atenção Crítica (&lt;45)
-                  </span>
-                  <p className="text-2xl font-black text-red-900">
-                    {metrics?.scoreDistribution.low ?? 0} viajantes
-                  </p>
-                  <p className="text-[11px] text-red-700">
-                    Alta vulnerabilidade / sem retorno próprio
-                  </p>
-                </div>
+            <CardHeader className="p-5 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <Compass className="w-4 h-4 text-sky-600" /> Lista de Viagens Ativas & Detalhes de
+                  Hospedagem
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  Monitoramento administrativo: dados do viajante, origem→destino, datas, anfitrião
+                  e endereço completo de estadia.
+                </CardDescription>
               </div>
+
+              <div className="w-full sm:w-64">
+                <Input
+                  placeholder="Filtrar por cidade, país ou viajante..."
+                  value={tripSearch}
+                  onChange={(e) => setTripSearch(e.target.value)}
+                  className="h-8 text-xs"
+                />
+              </div>
+            </CardHeader>
+            <CardContent className="p-5 pt-0 space-y-3">
+              {activeTrips.length === 0 ? (
+                <div className="p-8 text-center bg-slate-50 rounded-2xl text-slate-500 text-xs">
+                  Nenhuma viagem registrada até o momento no backend.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-200 text-slate-500 font-bold bg-slate-50/50">
+                        <th className="p-3">Viajante</th>
+                        <th className="p-3">Rota (Origem → Destino)</th>
+                        <th className="p-3">Datas</th>
+                        <th className="p-3">Com Quem Ficará / Anfitrião</th>
+                        <th className="p-3">Hospedagem & Endereço</th>
+                        <th className="p-3 text-right">Ação</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {activeTrips
+                        .filter((t) => {
+                          if (!tripSearch) return true
+                          const term = tripSearch.toLowerCase()
+                          return (
+                            t.title?.toLowerCase().includes(term) ||
+                            t.destination_city?.toLowerCase().includes(term) ||
+                            t.destination_country?.toLowerCase().includes(term) ||
+                            t.user_email?.toLowerCase().includes(term) ||
+                            t.userName?.toLowerCase().includes(term) ||
+                            t.host_responsible_person?.toLowerCase().includes(term)
+                          )
+                        })
+                        .map((t) => (
+                          <tr key={t.id} className="hover:bg-slate-50/80 transition-colors">
+                            <td className="p-3 font-semibold text-slate-900">
+                              <div>{t.userName || t.user_name || 'Viajante'}</div>
+                              <div className="text-[10px] text-slate-400 font-normal">
+                                {t.user_email || t.userEmail || 'ID: ' + t.user_id}
+                              </div>
+                            </td>
+                            <td className="p-3">
+                              <span className="font-bold text-sky-800">
+                                {t.origin_city || t.originCity || 'Brasil'} →{' '}
+                                {t.destination_city || t.destinationCity},{' '}
+                                {t.destination_country || t.destinationCountry}
+                              </span>
+                              {t.transit_countries && (
+                                <div className="text-[10px] text-slate-400">
+                                  Escala: {t.transit_countries}
+                                </div>
+                              )}
+                            </td>
+                            <td className="p-3 text-slate-600 font-mono text-[11px]">
+                              {t.start_date || t.startDate || '—'} até{' '}
+                              {t.end_date || t.endDate || '—'}
+                            </td>
+                            <td className="p-3 text-slate-700">
+                              <div className="font-semibold text-slate-800">
+                                {t.host_responsible_person ||
+                                  t.hostResponsiblePerson ||
+                                  t.staying_with ||
+                                  'Não informado'}
+                              </div>
+                              {(t.host_phone || t.hostPhone) && (
+                                <div className="text-[10px] text-slate-500">
+                                  Tel: {t.host_phone || t.hostPhone}
+                                </div>
+                              )}
+                            </td>
+                            <td className="p-3 text-slate-600 max-w-xs truncate">
+                              <div className="font-medium capitalize text-slate-800">
+                                {t.accommodation_type || t.accommodationType || 'Hotel'}
+                              </div>
+                              <div
+                                className="text-[10px] text-slate-500 truncate"
+                                title={t.accommodation_address || t.accommodationAddress}
+                              >
+                                {t.accommodation_address ||
+                                  t.accommodationAddress ||
+                                  'Endereço não informado'}
+                              </div>
+                            </td>
+                            <td className="p-3 text-right">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedTripDetail(t)
+                                  setIsTripModalOpen(true)
+                                }}
+                                className="h-7 text-[11px] font-semibold text-sky-700 border-sky-200 hover:bg-sky-50"
+                              >
+                                Ver Detalhes
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -629,6 +713,143 @@ export const AdminDashboardPage: React.FC = () => {
               </DialogFooter>
             </form>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* TRIP DETAIL MODAL (Maximized details view) */}
+      <Dialog open={isTripModalOpen} onOpenChange={setIsTripModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <Compass className="w-5 h-5 text-sky-600" />
+              <span>Detalhes da Viagem: {selectedTripDetail?.title}</span>
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              Registro completo de segurança, acomodação, anfitrião e dados de contato.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedTripDetail && (
+            <div className="space-y-4 pt-2 text-xs">
+              {/* Traveler & Route */}
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase font-bold block">
+                    Viajante
+                  </span>
+                  <span className="font-bold text-slate-800 text-sm">
+                    {selectedTripDetail.userName || selectedTripDetail.user_name || 'Viajante'}
+                  </span>
+                  <span className="text-slate-500 block">
+                    {selectedTripDetail.user_email ||
+                      selectedTripDetail.userEmail ||
+                      'ID: ' + selectedTripDetail.user_id}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase font-bold block">
+                    Rota & Datas
+                  </span>
+                  <span className="font-bold text-sky-800 block">
+                    {selectedTripDetail.origin_city || selectedTripDetail.originCity || 'Brasil'} →{' '}
+                    {selectedTripDetail.destination_city || selectedTripDetail.destinationCity},{' '}
+                    {selectedTripDetail.destination_country ||
+                      selectedTripDetail.destinationCountry}
+                  </span>
+                  <span className="text-slate-500 block font-mono text-[11px]">
+                    {selectedTripDetail.start_date || selectedTripDetail.startDate || '—'} até{' '}
+                    {selectedTripDetail.end_date || selectedTripDetail.endDate || '—'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Host & Companion info */}
+              <div className="p-4 rounded-2xl bg-indigo-50/40 border border-indigo-100 space-y-2">
+                <span className="font-bold text-indigo-950 block text-xs">
+                  Anfitrião & Pessoas no Destino:
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <span className="text-[10px] text-slate-500 block">
+                      Responsável / Anfitrião:
+                    </span>
+                    <span className="font-semibold text-slate-800">
+                      {selectedTripDetail.host_responsible_person ||
+                        selectedTripDetail.hostResponsiblePerson ||
+                        'Não informado'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-500 block">Telefone do Anfitrião:</span>
+                    <span className="font-semibold text-slate-800">
+                      {selectedTripDetail.host_phone ||
+                        selectedTripDetail.hostPhone ||
+                        selectedTripDetail.destination_contact ||
+                        selectedTripDetail.destinationContact ||
+                        'Não informado'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-500 block">Relação com Viajante:</span>
+                    <span className="font-semibold text-slate-800">
+                      {selectedTripDetail.host_relationship ||
+                        selectedTripDetail.hostRelationship ||
+                        'Não informada'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-500 block">Companhia de Viagem:</span>
+                    <span className="font-semibold text-slate-800">
+                      {selectedTripDetail.traveling_with ||
+                        selectedTripDetail.travelingWith ||
+                        'Sozinho(a)'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Accommodation Full Address */}
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <span className="font-bold text-slate-900 block text-xs">
+                  Endereço Completo da Hospedagem:
+                </span>
+                <p className="text-slate-700 leading-relaxed font-medium bg-white p-3 rounded-xl border border-slate-200">
+                  {selectedTripDetail.accommodation_address ||
+                    selectedTripDetail.accommodationAddress ||
+                    'Endereço não cadastrado pelo viajante'}
+                </p>
+                <div className="flex gap-4 text-[11px] text-slate-500 pt-1">
+                  <span>
+                    Tipo:{' '}
+                    <strong className="capitalize text-slate-700">
+                      {selectedTripDetail.accommodation_type ||
+                        selectedTripDetail.accommodationType ||
+                        'Hotel'}
+                    </strong>
+                  </span>
+                  <span>
+                    Pagamento:{' '}
+                    <strong className="text-slate-700">
+                      {selectedTripDetail.who_is_paying ||
+                        selectedTripDetail.whoIsPaying ||
+                        'Não informado'}
+                    </strong>
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="pt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsTripModalOpen(false)}
+              className="text-xs"
+            >
+              Fechar
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

@@ -46,16 +46,22 @@ export const authService = {
     // Asynchronously log presence and update last_online_at
     try {
       const now = new Date().toISOString()
-      pb.collection('presence_logs').create({
-        user_id: rec.id,
-        event_type: 'login',
-        timestamp: now,
-        device_info: typeof navigator !== 'undefined' ? navigator.userAgent.slice(0, 120) : '',
-      }).catch(() => {})
-      pb.collection('users').update(rec.id, {
-        last_online_at: now,
-      }).catch(() => {})
-    } catch { /* intentionally ignored */ }
+      pb.collection('presence_logs')
+        .create({
+          user_id: rec.id,
+          event_type: 'login',
+          timestamp: now,
+          device_info: typeof navigator !== 'undefined' ? navigator.userAgent.slice(0, 120) : '',
+        })
+        .catch(() => {})
+      pb.collection('users')
+        .update(rec.id, {
+          last_online_at: now,
+        })
+        .catch(() => {})
+    } catch {
+      /* intentionally ignored */
+    }
 
     return {
       id: rec.id,
