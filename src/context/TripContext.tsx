@@ -140,8 +140,13 @@ const INITIAL_USER: UserProfile = {
 interface TripContextType {
   user: UserProfile
   setUser: (u: UserProfile) => void
+  trips: TripData[]
   currentTrip: TripData | null
   hasTrip: boolean
+  activeTripId: string | null
+  setActiveTripId: (tripId: string) => void
+  createTrip: (details: Partial<TripData>) => Promise<string>
+  deleteTrip: (tripId: string) => Promise<void>
   updateTripAssessment: (answers: TripAssessmentAnswers) => Promise<void>
   updateTripDetails: (details: Partial<TripData>) => Promise<string | undefined>
   toggleChecklistItem: (id: string) => Promise<void>
@@ -169,6 +174,8 @@ const LOCAL_STORAGE_USER_KEY = 'autonomia_viagens_user_data_v3'
 export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user: authUser, isAuthenticated } = useAuth()
   const [isLoadingTrip, setIsLoadingTrip] = useState<boolean>(false)
+  const [trips, setTrips] = useState<TripData[]>([])
+  const [activeTripId, setActiveTripIdState] = useState<string | null>(null)
 
   const [user, setUserState] = useState<UserProfile>(() => {
     try {
@@ -211,26 +218,32 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [authUser])
 
-  // Fetch trip from PocketBase when user logs in.
-  // When there is NO trip in the DB, set currentTrip to null (no demo injection for logged in users).
+  // Fetch all trips from PocketBase when user logs in.
   const refreshTrip = useCallback(async () => {
     if (!authUser?.id) return
     setIsLoadingTrip(true)
     try {
-      const dbTrip = await tripsService.getUserTrip(authUser.id)
-      if (dbTrip) {
-        setCurrentTrip(dbTrip)
+      const dbTrips = await tripsService.getUserTrips(authUser.id)
+      setTrips(dbTrips)
+      if (dbTrips.length > 0) {
+        // If an activeTripId is already set and exists, keep it; else default to first
+        const matched = activeTripId ? dbTrips.find((t) => t.id === activeTripId) : null
+        const active = matched || dbTrips[0]
+        setCurrentTrip(active)
+        setActiveTripIdState(active.id)
       } else {
-        // Logged-in user has no trip in database
+        // Logged-in user has no trips in database
         setCurrentTrip(null)
+        setActiveTripIdState(null)
       }
     } catch (e) {
-      console.warn('Could not sync user trip with database', e)
+      console.warn('Could not sync user trips with database', e)
       setCurrentTrip(null)
+      setTrips([])
     } finally {
       setIsLoadingTrip(false)
     }
-  }, [authUser?.id])
+  }, [authUser?.id, activeTripId])
 
   useEffect(() => {
     if (isAuthenticated && authUser?.id) {
@@ -245,14 +258,107 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
             parsed.scoreResult = calculateAutonomyScore(parsed.assessment)
           }
           setCurrentTrip(parsed || INITIAL_TRIP)
+          setTrips([parsed || INITIAL_TRIP])
+          setActiveTripIdState((parsed || INITIAL_TRIP).id)
         } else {
           setCurrentTrip(INITIAL_TRIP)
+          setTrips([INITIAL_TRIP])
+          setActiveTripIdState(INITIAL_TRIP.id)
         }
       } catch {
         setCurrentTrip(INITIAL_TRIP)
+        setTrips([INITIAL_TRIP])
+        setActiveTripIdState(INITIAL_TRIP.id)
       }
     }
   }, [isAuthenticated, authUser?.id, refreshTrip])
+
+  const setActiveTripId = (tripId: string) => {
+    setActiveTripIdState(tripId)
+    const found = trips.find((t) => t.id === tripId)
+    if (found) {
+      setCurrentTrip(found)
+    }
+  }
+
+  const createTrip = async (details: Partial<TripData>): Promise<string> => {
+    let destInfo = DESTINATIONS_CATALOG['Italia']
+    const destCountry = details.destinationCountry || 'Itália'
+    const formattedKey = destCountry.replace(/\s+/g, '')
+    if (DESTINATIONS_CATALOG[destCountry]) {
+      destInfo = DESTINATIONS_CATALOG[destCountry]
+    } else if (DESTINATIONS_CATALOG[formattedKey]) {
+      destInfo = DESTINATIONS_CATALOG[formattedKey]
+    }
+
+    const newTripObj: TripData = {
+      id: `trip-${Date.now()}`,
+      title: details.title || 'Nova Viagem',
+      originCity: details.originCity || 'São Paulo',
+      destinationCountry: destCountry,
+      destinationCity: details.destinationCity || 'Roma',
+      transitCountries: details.transitCountries || '',
+      departureDate: details.departureDate || new Date().toISOString().split('T')[0],
+      returnDate:
+        details.returnDate || new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0],
+      tripReason: details.tripReason || 'Turismo',
+      accommodationType: details.accommodationType || 'Hotel',
+      accommodationAddress: details.accommodationAddress || '',
+      whoIsPaying: details.whoIsPaying || 'Eu mesmo(a)',
+      travelingWith: details.travelingWith || 'Sozinho(a)',
+      hostResponsiblePerson: details.hostResponsiblePerson || '',
+      destinationContact: details.destinationContact || '',
+      assessment: INITIAL_ANSWERS,
+      scoreResult: calculateAutonomyScore(INITIAL_ANSWERS),
+      checklist: DEFAULT_CHECKLIST,
+      guardians: [],
+      checkinConfig: {
+        frequency: 'every_12h',
+        preferredTime: '21:00',
+        startTime: '08:00',
+        shareLocation: true,
+        active: true,
+        notifyGuardiansOnAbsence: true,
+        gracePeriodMinutes: 30,
+      },
+      checkinHistory: [],
+      absenceNotifications: [],
+      currentAbsenceStage: 0,
+      destinationInfo: destInfo,
+      quickNotes: '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+
+    if (authUser?.id) {
+      try {
+        const savedId = await tripsService.saveTrip(authUser.id, newTripObj)
+        if (savedId) {
+          newTripObj.id = savedId
+        }
+      } catch (e) {
+        console.warn('Error creating trip in DB', e)
+      }
+    }
+
+    setCurrentTrip(newTripObj)
+    setActiveTripIdState(newTripObj.id)
+    setTrips((prev) => [newTripObj, ...prev.filter((t) => t.id !== newTripObj.id)])
+    return newTripObj.id
+  }
+
+  const deleteTrip = async (tripId: string) => {
+    if (authUser?.id) {
+      await tripsService.deleteTrip(tripId)
+    }
+    const remaining = trips.filter((t) => t.id !== tripId)
+    setTrips(remaining)
+    if (currentTrip?.id === tripId) {
+      const nextActive = remaining.length > 0 ? remaining[0] : null
+      setCurrentTrip(nextActive)
+      setActiveTripIdState(nextActive ? nextActive.id : null)
+    }
+  }
 
   useEffect(() => {
     try {
@@ -318,12 +424,16 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updatedAt: new Date().toISOString(),
     }
     setCurrentTrip(updatedTrip)
+    setTrips((prev) => prev.map((t) => (t.id === updatedTrip.id ? updatedTrip : t)))
 
     if (authUser?.id) {
       try {
         const savedId = await tripsService.saveTrip(authUser.id, updatedTrip)
-        if (savedId) {
-          setCurrentTrip((prev) => (prev ? { ...prev, id: savedId } : null))
+        if (savedId && savedId !== updatedTrip.id) {
+          const finalTrip = { ...updatedTrip, id: savedId }
+          setCurrentTrip(finalTrip)
+          setActiveTripIdState(savedId)
+          setTrips((prev) => prev.map((t) => (t.id === updatedTrip.id ? finalTrip : t)))
           return savedId
         }
       } catch (e) {
@@ -594,8 +704,13 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         user,
         setUser,
+        trips,
         currentTrip,
         hasTrip: !!currentTrip,
+        activeTripId,
+        setActiveTripId,
+        createTrip,
+        deleteTrip,
         updateTripAssessment,
         updateTripDetails,
         toggleChecklistItem,

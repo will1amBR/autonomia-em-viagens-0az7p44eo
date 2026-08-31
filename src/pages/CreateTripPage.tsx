@@ -21,35 +21,36 @@ import { useTrip } from '../context/TripContext'
 
 export const CreateTripPage: React.FC = () => {
   const navigate = useNavigate()
-  const { currentTrip, updateTripDetails, updateTripAssessment } = useTrip()
+  const { currentTrip, createTrip, updateTripAssessment } = useTrip()
 
   const [formData, setFormData] = useState({
-    title: currentTrip?.title || 'Minha Primeira Viagem Internacional',
-    originCity: currentTrip?.originCity || 'São Paulo',
-    destinationCountry: currentTrip?.destinationCountry || 'Itália',
-    destinationCity: currentTrip?.destinationCity || 'Roma',
-    transitCountries: currentTrip?.transitCountries || 'Reino Unido (Londres)',
-    departureDate: currentTrip?.departureDate || '2025-06-10',
-    returnDate: currentTrip?.returnDate || '2025-06-25',
-    tripReason: currentTrip?.tripReason || 'Turismo e convite',
-    accommodationType: currentTrip?.accommodationType || 'Casa de anfitrião / Apartamento',
-    accommodationAddress: currentTrip?.accommodationAddress || 'Via Nazionale, 114',
-    whoIsPaying: currentTrip?.whoIsPaying || 'Outra pessoa está pagando tudo',
-    travelingWith: currentTrip?.travelingWith || 'Com alguém que conheci recentemente',
-    hostResponsiblePerson: currentTrip?.hostResponsiblePerson || 'Marco B.',
-    destinationContact: currentTrip?.destinationContact || '+39 345 000 0000',
-    hasVisitedBefore: currentTrip?.assessment?.hasVisitedCountryBefore ? 'yes' : 'no',
-    knowsHostPersonally: currentTrip?.assessment?.knowsHostPersonally || 'partially',
+    title: '',
+    originCity: '',
+    destinationCountry: 'Itália',
+    destinationCity: '',
+    transitCountries: '',
+    departureDate: '',
+    returnDate: '',
+    tripReason: '',
+    accommodationType: 'Hotel / Pousada',
+    accommodationAddress: '',
+    whoIsPaying: 'Eu mesmo(a)',
+    travelingWith: 'Sozinho(a)',
+    hostResponsiblePerson: '',
+    destinationContact: '',
+    hasVisitedBefore: 'no',
+    knowsHostPersonally: 'partially',
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    await updateTripDetails({
-      title: formData.title,
-      originCity: formData.originCity,
+    const newTripId = await createTrip({
+      title:
+        formData.title || `Viagem para ${formData.destinationCity || formData.destinationCountry}`,
+      originCity: formData.originCity || 'Brasil',
       destinationCountry: formData.destinationCountry,
-      destinationCity: formData.destinationCity,
+      destinationCity: formData.destinationCity || 'Capital',
       transitCountries: formData.transitCountries,
       departureDate: formData.departureDate,
       returnDate: formData.returnDate,

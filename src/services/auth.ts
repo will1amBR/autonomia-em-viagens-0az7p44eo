@@ -91,7 +91,30 @@ export const authService = {
       role: rec.role as 'user' | 'admin',
       phone: rec.phone,
       emergency_passcode: rec.emergency_passcode,
+      avatar: rec.avatar || '',
+      created: rec.created,
+      updated: rec.updated,
     }
+  },
+
+  async changePassword(
+    id: string,
+    oldPassword: string,
+    password: string,
+    passwordConfirm: string,
+  ): Promise<boolean> {
+    await pb.collection('users').update(id, {
+      oldPassword,
+      password,
+      passwordConfirm,
+    })
+    return true
+  },
+
+  async deleteAccount(id: string): Promise<boolean> {
+    await pb.collection('users').delete(id)
+    pb.authStore.clear()
+    return true
   },
 
   logout() {

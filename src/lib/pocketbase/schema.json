@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-27T17:27:50.102Z",
+  "generatedAt": "2026-08-31T15:02:59.153Z",
   "collections": [
     {
       "name": "users",
@@ -325,6 +325,18 @@
         },
         {
           "name": "absence_stage_updated_at",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "origin_city",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "transit_countries",
           "type": "text",
           "required": false,
           "system": false

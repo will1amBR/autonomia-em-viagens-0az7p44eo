@@ -817,7 +817,7 @@ export const AssessmentPage: React.FC = () => {
           variant="outline"
           onClick={() => {
             if (currentStep > 1) setCurrentStep(currentStep - 1)
-            else navigate('/create-trip')
+            else navigate('/trips/new')
           }}
           className="text-xs text-slate-600"
         >

@@ -16,6 +16,8 @@ import {
   CloudRain,
   Sun,
   PlusCircle,
+  Globe,
+  User,
 } from 'lucide-react'
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
@@ -34,8 +36,10 @@ export const NavigationHeader: React.FC = () => {
     { label: 'Avaliação', path: '/assessment', icon: Shield },
     { label: 'Checklist', path: '/checklist', icon: CheckSquare },
     { label: 'Guardiões', path: '/guardians', icon: Users },
+    { label: 'Destinos', path: '/destinos', icon: Globe },
     { label: 'Emergência', path: '/emergency', icon: Phone },
     { label: 'Biblioteca', path: '/library', icon: BookOpen },
+    { label: 'Perfil', path: '/perfil', icon: User },
   ]
 
   const isActive = (path: string) => location.pathname === path
@@ -166,47 +170,132 @@ export const NavigationHeader: React.FC = () => {
 
 export const QuickExitOverlay: React.FC = () => {
   const { isQuickExitActive, restoreFromQuickExit } = useTrip()
+  const [currencyBrl, setCurrencyBrl] = React.useState('100')
+  const [selectedCurrency, setSelectedCurrency] = React.useState<'EUR' | 'USD' | 'GBP'>('EUR')
 
   if (!isQuickExitActive) return null
 
+  const rates = {
+    EUR: 6.22,
+    USD: 5.75,
+    GBP: 7.35,
+  }
+
+  const converted = (parseFloat(currencyBrl || '0') / rates[selectedCurrency]).toFixed(2)
+
+  const handleExternalExit = () => {
+    try {
+      window.location.replace('https://www.google.com')
+    } catch {
+      window.location.href = 'https://www.google.com'
+    }
+  }
+
   return (
-    <div className="fixed inset-0 z-[10000] bg-slate-900 text-slate-100 flex flex-col items-center justify-center p-6 space-y-6 select-none font-sans">
-      <div className="max-w-md w-full bg-slate-800 rounded-3xl p-6 border border-slate-700 shadow-2xl space-y-5 text-center">
-        <div className="flex justify-center">
-          <div className="w-16 h-16 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center border border-sky-400/30">
-            <CloudRain className="w-8 h-8" />
+    <div className="fixed inset-0 z-[100000] bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4 sm:p-6 select-none font-sans overflow-y-auto">
+      <div className="max-w-lg w-full bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-2xl space-y-6 text-center">
+        {/* Weather section */}
+        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold">
+            <Sun className="w-4 h-4 text-amber-400" />
+            <span>Clima & Câmbio Global</span>
           </div>
-        </div>
-
-        <div className="space-y-1">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-            Previsão do Tempo Global
+          <span className="text-[11px] text-slate-500 font-mono">
+            {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
           </span>
-          <h2 className="text-3xl font-black text-white">21°C • Ensolarado</h2>
-          <p className="text-xs text-slate-400">São Paulo, Brasil • Umidade 62% • Vento 12 km/h</p>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-700 text-xs">
-          <div className="p-2 rounded-xl bg-slate-900/60">
-            <span className="text-[10px] text-slate-400 block">Amanhã</span>
-            <span className="font-bold text-white">23°C</span>
+        <div className="space-y-2">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-400 mx-auto flex items-center justify-center border border-amber-500/20">
+            <Sun className="w-8 h-8" />
           </div>
-          <div className="p-2 rounded-xl bg-slate-900/60">
-            <span className="text-[10px] text-slate-400 block">Quinta</span>
-            <span className="font-bold text-white">19°C</span>
+          <h2 className="text-4xl font-black text-white tracking-tight">22°C</h2>
+          <p className="text-xs text-slate-300 font-medium">
+            Parcialmente Ensolarado • Índice UV 4 (Moderado)
+          </p>
+          <p className="text-[11px] text-slate-500">
+            Umidade 58% • Vento ENE 14 km/h • Visibilidade 10 km
+          </p>
+        </div>
+
+        {/* 4 day mini forecast */}
+        <div className="grid grid-cols-4 gap-2 pt-1 text-xs">
+          <div className="p-2.5 rounded-2xl bg-slate-950 border border-slate-800/80">
+            <span className="text-[10px] text-slate-400 block font-semibold">Hoje</span>
+            <span className="font-bold text-white text-sm">22° / 15°</span>
           </div>
-          <div className="p-2 rounded-xl bg-slate-900/60">
-            <span className="text-[10px] text-slate-400 block">Sexta</span>
-            <span className="font-bold text-white">24°C</span>
+          <div className="p-2.5 rounded-2xl bg-slate-950 border border-slate-800/80">
+            <span className="text-[10px] text-slate-400 block font-semibold">Amanhã</span>
+            <span className="font-bold text-white text-sm">24° / 16°</span>
+          </div>
+          <div className="p-2.5 rounded-2xl bg-slate-950 border border-slate-800/80">
+            <span className="text-[10px] text-slate-400 block font-semibold">Quinta</span>
+            <span className="font-bold text-white text-sm">19° / 14°</span>
+          </div>
+          <div className="p-2.5 rounded-2xl bg-slate-950 border border-slate-800/80">
+            <span className="text-[10px] text-slate-400 block font-semibold">Sexta</span>
+            <span className="font-bold text-white text-sm">23° / 15°</span>
           </div>
         </div>
 
-        <div className="pt-4 flex flex-col items-center gap-2">
+        {/* Currency Converter */}
+        <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 text-left">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-bold text-slate-300">Conversor de Moedas</span>
+            <div className="flex gap-1">
+              {(['EUR', 'USD', 'GBP'] as const).map((curr) => (
+                <button
+                  key={curr}
+                  type="button"
+                  onClick={() => setSelectedCurrency(curr)}
+                  className={`px-2 py-0.5 rounded text-[10px] font-bold transition-colors ${
+                    selectedCurrency === curr
+                      ? 'bg-sky-600 text-white'
+                      : 'bg-slate-800 text-slate-400'
+                  }`}
+                >
+                  {curr}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 items-center">
+            <div>
+              <label className="text-[10px] text-slate-500 block mb-1">Reais (BRL)</label>
+              <input
+                type="number"
+                value={currencyBrl}
+                onChange={(e) => setCurrencyBrl(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] text-slate-500 block mb-1">
+                Equivalente ({selectedCurrency})
+              </label>
+              <div className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-bold text-sky-400">
+                {converted} {selectedCurrency}
+              </div>
+            </div>
+          </div>
+          <p className="text-[10px] text-slate-500">Cotação comercial aproximada de referência.</p>
+        </div>
+
+        {/* Quick actions */}
+        <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs border-t border-slate-800">
           <button
-            onClick={restoreFromQuickExit}
-            className="text-[11px] text-slate-500 hover:text-slate-300 underline transition-colors cursor-pointer"
+            type="button"
+            onClick={handleExternalExit}
+            className="text-[11px] text-slate-400 hover:text-white transition-colors"
           >
-            Retomar sessão protegida
+            Abrir Google.com
+          </button>
+          <button
+            type="button"
+            onClick={restoreFromQuickExit}
+            className="text-[11px] text-slate-500 hover:text-sky-400 transition-colors underline cursor-pointer"
+          >
+            Retomar sessão
           </button>
         </div>
       </div>

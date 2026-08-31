@@ -38,206 +38,246 @@ export const tripsService = {
     return Object.values(DESTINATIONS_CATALOG)
   },
 
-  async getUserTrip(userId: string): Promise<TripData | null> {
+  async getUserTrips(userId: string): Promise<TripData[]> {
     try {
-      const tripRecords = await pb.collection('trips').getList(1, 1, {
+      const tripRecords = await pb.collection('trips').getFullList({
         filter: `user_id = "${userId}"`,
         sort: '-created',
       })
 
-      if (tripRecords.items.length === 0) {
-        return null
+      if (tripRecords.length === 0) {
+        return []
       }
 
-      const tripRec = tripRecords.items[0]
+      const fullTrips: TripData[] = []
+      for (const tripRec of tripRecords) {
+        const fullTrip = await this.populateTripRecord(tripRec)
+        fullTrips.push(fullTrip)
+      }
+      return fullTrips
+    } catch (e) {
+      console.error('Error fetching user trips from PocketBase:', e)
+      return []
+    }
+  },
 
-      // Fetch absence notifications
-      let absenceLogs: any[] = []
-      try {
-        const notifRecords = await pb.collection('absence_notifications').getList(1, 30, {
-          filter: `trip_id = "${tripRec.id}"`,
+  async getUserTrip(userId: string, tripId?: string): Promise<TripData | null> {
+    try {
+      let tripRec: any
+      if (tripId) {
+        tripRec = await pb.collection('trips').getOne(tripId)
+      } else {
+        const tripRecords = await pb.collection('trips').getList(1, 1, {
+          filter: `user_id = "${userId}"`,
           sort: '-created',
         })
-        absenceLogs = notifRecords.items.map((n) => ({
-          id: n.id,
-          userId: n.user_id,
-          tripId: n.trip_id,
-          stage: n.stage,
-          recipientType: n.recipient_type,
-          recipientEmail: n.recipient_email,
-          recipientName: n.recipient_name,
-          subject: n.subject,
-          message: n.message,
-          status: n.status || 'sent',
-          sentAt: n.sent_at || n.created,
-        }))
-      } catch (e) {
-        console.warn('Failed to load absence notifications', e)
-      }
 
-      // Fetch assessment
-      let assessmentAnswers: TripAssessmentAnswers | undefined
-      try {
-        const assessRecords = await pb.collection('assessments').getList(1, 1, {
-          filter: `trip_id = "${tripRec.id}"`,
-          sort: '-created',
-        })
-        if (assessRecords.items.length > 0 && assessRecords.items[0].answers) {
-          assessmentAnswers = assessRecords.items[0].answers
+        if (tripRecords.items.length === 0) {
+          return null
         }
-      } catch (e) {
-        console.warn('Failed to load assessment', e)
+        tripRec = tripRecords.items[0]
       }
 
-      // Fetch guardians
-      let guardiansList: GuardianContact[] = []
-      try {
-        const gRecords = await pb.collection('guardians').getFullList({
-          filter: `trip_id = "${tripRec.id}"`,
-          sort: 'created',
-        })
-        guardiansList = gRecords.map((g) => ({
-          id: g.id,
-          name: g.name,
-          relationship: g.relationship || 'Contato',
-          phone: g.phone,
-          email: g.email || '',
-          country: g.country || 'Brasil',
-          accessType: (g.access_type as any) || 'emergency',
-          notifyOnCheckin: !!g.notify_on_checkin,
-          receiveMissedCheckinAlert: !!g.receive_missed_alert,
-          receiveFullItinerary: !!g.receive_full_itinerary,
-          notes: g.notes || '',
-        }))
-      } catch (e) {
-        console.warn('Failed to load guardians', e)
-      }
-
-      // Fetch checkins
-      let checkinsList: CheckinLogEvent[] = []
-      try {
-        const cRecords = await pb.collection('checkins').getList(1, 20, {
-          filter: `trip_id = "${tripRec.id}"`,
-          sort: '-timestamp',
-        })
-        checkinsList = cRecords.items.map((c) => ({
-          id: c.id,
-          timestamp: c.timestamp || c.created,
-          status: c.status as CheckinStatus,
-          note: c.note || '',
-          locationApprox: c.location_approx || '',
-          escalationStage: c.escalation_stage as any,
-        }))
-      } catch (e) {
-        console.warn('Failed to load checkins', e)
-      }
-
-      // Fetch safety plans (checklist)
-      let checklistItems: ChecklistItem[] = []
-      try {
-        const planRecords = await pb.collection('safety_plans').getFullList({
-          filter: `trip_id = "${tripRec.id}"`,
-          sort: 'created',
-        })
-        if (planRecords.length > 0) {
-          checklistItems = planRecords.map((p) => ({
-            id: p.id,
-            title: p.title,
-            description: p.description || '',
-            category: (p.category as any) || 'seguranca',
-            completed: !!p.completed,
-            whyItMatters: p.why_it_matters || '',
-            actionTip: p.action_tip || '',
-            isRequiredForHighAutonomy: !!p.is_required_for_high_autonomy,
-          }))
-        }
-      } catch (e) {
-        console.warn('Failed to load safety plans', e)
-      }
-
-      if (checklistItems.length === 0) {
-        checklistItems = DEFAULT_CHECKLIST
-      }
-
-      const country = tripRec.destination_country || 'Itália'
-      const destInfo = DESTINATIONS_CATALOG[country] || DESTINATIONS_CATALOG['Italia']
-
-      const defaultAnswers: TripAssessmentAnswers = {
-        canReturnTomorrow: 'yes_dependent',
-        hasValidPassport: true,
-        hasDigitalCopies: false,
-        hasRequiredVisas: true,
-        hasPhysicalControlOfPassport: true,
-        hasReturnTicket: false,
-        hasOwnMoney: false,
-        hasInternationalCard: true,
-        hasEmergencyReserve: false,
-        whoPaysTrip: 'other_person',
-        whoPaysHousing: 'other_person',
-        hasWorkingPhone: true,
-        hasInternetEsim: false,
-        canBuyEssentialsAlone: true,
-        canLeaveHousingAlone: true,
-        canStayElsewhereIfNecessary: false,
-        relationshipDuration: '1_to_6_months',
-        inPersonMeetingsCount: '1_to_2_times',
-        hasVisitedCountryBefore: false,
-        knowsHostPersonally: 'partially',
-        exactAddressKnown: true,
-        respectsLimits: 'sometimes',
-        minimizesConcerns: 'sometimes',
-        feelsPressureToAcceptConditions: true,
-        feltNeedToChooseBetweenSafetyAndTrip: false,
-        familyFriendsInformedDetailed: true,
-      }
-
-      const activeAnswers = assessmentAnswers || defaultAnswers
-      const scoreResult = calculateAutonomyScore(activeAnswers)
-
-      return {
-        id: tripRec.id,
-        title: tripRec.title,
-        originCity: tripRec.origin_city || '',
-        destinationCountry: tripRec.destination_country,
-        destinationCity: tripRec.destination_city,
-        transitCountries: tripRec.transit_countries || '',
-        departureDate: tripRec.departure_date,
-        returnDate: tripRec.return_date,
-        tripReason: tripRec.trip_reason || '',
-        accommodationType: tripRec.accommodation_type || '',
-        accommodationAddress: tripRec.accommodation_address || '',
-        whoIsPaying: tripRec.who_is_paying || 'Eu mesmo(a)',
-        travelingWith: tripRec.traveling_with || 'Sozinho(a)',
-        hostResponsiblePerson: tripRec.host_responsible_person || '',
-        destinationContact: tripRec.destination_contact || '',
-        assessment: activeAnswers,
-        scoreResult,
-        checklist: checklistItems,
-        guardians: guardiansList,
-        checkinConfig: {
-          frequency: (tripRec.checkin_frequency as any) || 'every_12h',
-          preferredTime: tripRec.checkin_preferred_time || '21:00',
-          startTime: tripRec.checkin_start_time || '08:00',
-          shareLocation: true,
-          active: tripRec.checkin_active !== false,
-          notifyGuardiansOnAbsence: tripRec.notify_guardians_on_absence ?? true,
-          gracePeriodMinutes: 30,
-        },
-        checkinHistory: checkinsList,
-        absenceNotifications: absenceLogs,
-        currentAbsenceStage: tripRec.current_absence_stage || 0,
-        lastCheckinAt: tripRec.last_checkin_at || '',
-        destinationInfo: destInfo,
-        quickNotes: tripRec.quick_notes || '',
-        createdAt: tripRec.created,
-        updatedAt: tripRec.updated,
-      }
+      return await this.populateTripRecord(tripRec)
     } catch (e) {
       console.error('Error fetching user trip from PocketBase:', e)
       return null
     }
   },
 
+  async populateTripRecord(tripRec: any): Promise<TripData> {
+    // Fetch absence notifications
+    let absenceLogs: any[] = []
+    try {
+      const notifRecords = await pb.collection('absence_notifications').getList(1, 30, {
+        filter: `trip_id = "${tripRec.id}"`,
+        sort: '-created',
+      })
+      absenceLogs = notifRecords.items.map((n) => ({
+        id: n.id,
+        userId: n.user_id,
+        tripId: n.trip_id,
+        stage: n.stage,
+        recipientType: n.recipient_type,
+        recipientEmail: n.recipient_email,
+        recipientName: n.recipient_name,
+        subject: n.subject,
+        message: n.message,
+        status: n.status || 'sent',
+        sentAt: n.sent_at || n.created,
+      }))
+    } catch (e) {
+      console.warn('Failed to load absence notifications', e)
+    }
+
+    // Fetch assessment
+    let assessmentAnswers: TripAssessmentAnswers | undefined
+    try {
+      const assessRecords = await pb.collection('assessments').getList(1, 1, {
+        filter: `trip_id = "${tripRec.id}"`,
+        sort: '-created',
+      })
+      if (assessRecords.items.length > 0 && assessRecords.items[0].answers) {
+        assessmentAnswers = assessRecords.items[0].answers
+      }
+    } catch (e) {
+      console.warn('Failed to load assessment', e)
+    }
+
+    // Fetch guardians
+    let guardiansList: GuardianContact[] = []
+    try {
+      const gRecords = await pb.collection('guardians').getFullList({
+        filter: `trip_id = "${tripRec.id}"`,
+        sort: 'created',
+      })
+      guardiansList = gRecords.map((g) => ({
+        id: g.id,
+        name: g.name,
+        relationship: g.relationship || 'Contato',
+        phone: g.phone,
+        email: g.email || '',
+        country: g.country || 'Brasil',
+        accessType: (g.access_type as any) || 'emergency',
+        notifyOnCheckin: !!g.notify_on_checkin,
+        receiveMissedCheckinAlert: !!g.receive_missed_alert,
+        receiveFullItinerary: !!g.receive_full_itinerary,
+        notes: g.notes || '',
+      }))
+    } catch (e) {
+      console.warn('Failed to load guardians', e)
+    }
+
+    // Fetch checkins
+    let checkinsList: CheckinLogEvent[] = []
+    try {
+      const cRecords = await pb.collection('checkins').getList(1, 20, {
+        filter: `trip_id = "${tripRec.id}"`,
+        sort: '-timestamp',
+      })
+      checkinsList = cRecords.items.map((c) => ({
+        id: c.id,
+        timestamp: c.timestamp || c.created,
+        status: c.status as CheckinStatus,
+        note: c.note || '',
+        locationApprox: c.location_approx || '',
+        escalationStage: c.escalation_stage as any,
+      }))
+    } catch (e) {
+      console.warn('Failed to load checkins', e)
+    }
+
+    // Fetch safety plans (checklist)
+    let checklistItems: ChecklistItem[] = []
+    try {
+      const planRecords = await pb.collection('safety_plans').getFullList({
+        filter: `trip_id = "${tripRec.id}"`,
+        sort: 'created',
+      })
+      if (planRecords.length > 0) {
+        checklistItems = planRecords.map((p) => ({
+          id: p.id,
+          title: p.title,
+          description: p.description || '',
+          category: (p.category as any) || 'seguranca',
+          completed: !!p.completed,
+          whyItMatters: p.why_it_matters || '',
+          actionTip: p.action_tip || '',
+          isRequiredForHighAutonomy: !!p.is_required_for_high_autonomy,
+        }))
+      }
+    } catch (e) {
+      console.warn('Failed to load safety plans', e)
+    }
+
+    if (checklistItems.length === 0) {
+      checklistItems = DEFAULT_CHECKLIST
+    }
+
+    const country = tripRec.destination_country || 'Itália'
+    const destInfo = DESTINATIONS_CATALOG[country] || DESTINATIONS_CATALOG['Italia']
+
+    const defaultAnswers: TripAssessmentAnswers = {
+      canReturnTomorrow: 'yes_dependent',
+      hasValidPassport: true,
+      hasDigitalCopies: false,
+      hasRequiredVisas: true,
+      hasPhysicalControlOfPassport: true,
+      hasReturnTicket: false,
+      hasOwnMoney: false,
+      hasInternationalCard: true,
+      hasEmergencyReserve: false,
+      whoPaysTrip: 'other_person',
+      whoPaysHousing: 'other_person',
+      hasWorkingPhone: true,
+      hasInternetEsim: false,
+      canBuyEssentialsAlone: true,
+      canLeaveHousingAlone: true,
+      canStayElsewhereIfNecessary: false,
+      relationshipDuration: '1_to_6_months',
+      inPersonMeetingsCount: '1_to_2_times',
+      hasVisitedCountryBefore: false,
+      knowsHostPersonally: 'partially',
+      exactAddressKnown: true,
+      respectsLimits: 'sometimes',
+      minimizesConcerns: 'sometimes',
+      feelsPressureToAcceptConditions: true,
+      feltNeedToChooseBetweenSafetyAndTrip: false,
+      familyFriendsInformedDetailed: true,
+    }
+
+    const activeAnswers = assessmentAnswers || defaultAnswers
+    const scoreResult = calculateAutonomyScore(activeAnswers)
+
+    return {
+      id: tripRec.id,
+      title: tripRec.title,
+      originCity: tripRec.origin_city || '',
+      destinationCountry: tripRec.destination_country,
+      destinationCity: tripRec.destination_city,
+      transitCountries: tripRec.transit_countries || '',
+      departureDate: tripRec.departure_date,
+      returnDate: tripRec.return_date,
+      tripReason: tripRec.trip_reason || '',
+      accommodationType: tripRec.accommodation_type || '',
+      accommodationAddress: tripRec.accommodation_address || '',
+      whoIsPaying: tripRec.who_is_paying || 'Eu mesmo(a)',
+      travelingWith: tripRec.traveling_with || 'Sozinho(a)',
+      hostResponsiblePerson: tripRec.host_responsible_person || '',
+      destinationContact: tripRec.destination_contact || '',
+      assessment: activeAnswers,
+      scoreResult,
+      checklist: checklistItems,
+      guardians: guardiansList,
+      checkinConfig: {
+        frequency: (tripRec.checkin_frequency as any) || 'every_12h',
+        preferredTime: tripRec.checkin_preferred_time || '21:00',
+        startTime: tripRec.checkin_start_time || '08:00',
+        shareLocation: true,
+        active: tripRec.checkin_active !== false,
+        notifyGuardiansOnAbsence: tripRec.notify_guardians_on_absence ?? true,
+        gracePeriodMinutes: 30,
+      },
+      checkinHistory: checkinsList,
+      absenceNotifications: absenceLogs,
+      currentAbsenceStage: tripRec.current_absence_stage || 0,
+      lastCheckinAt: tripRec.last_checkin_at || '',
+      destinationInfo: destInfo,
+      quickNotes: tripRec.quick_notes || '',
+      createdAt: tripRec.created,
+      updatedAt: tripRec.updated,
+    }
+  },
+
+  async deleteTrip(tripId: string): Promise<boolean> {
+    try {
+      await pb.collection('trips').delete(tripId)
+      return true
+    } catch (e) {
+      console.error('Error deleting trip:', e)
+      return false
+    }
+  },
   async saveTrip(userId: string, trip: Partial<TripData>): Promise<string> {
     const payload = {
       user_id: userId,

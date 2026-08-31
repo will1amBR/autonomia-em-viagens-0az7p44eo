@@ -17,8 +17,11 @@ import { Progress } from '../components/ui/progress'
 import { Badge } from '../components/ui/badge'
 import { useTrip } from '../context/TripContext'
 
+import { COUNTRY_EMERGENCY_CONTACTS } from '../lib/constants'
+
 export const DashboardPage: React.FC = () => {
-  const { currentTrip, performCheckin, user, isLoadingTrip } = useTrip()
+  const { currentTrip, trips, activeTripId, setActiveTripId, performCheckin, user, isLoadingTrip } =
+    useTrip()
   const [checkinNote, setCheckinNote] = useState('')
   const [isPerformingCheckin, setIsPerformingCheckin] = useState(false)
 
@@ -32,7 +35,7 @@ export const DashboardPage: React.FC = () => {
   }
 
   // EMPTY STATE FOR LOGGED IN USERS WITH NO TRIP
-  if (!currentTrip) {
+  if (!currentTrip || trips.length === 0) {
     return (
       <div className="space-y-8 max-w-3xl mx-auto py-6">
         <div className="rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white p-8 sm:p-12 shadow-xl border border-sky-500/20 text-center space-y-6">
@@ -45,7 +48,7 @@ export const DashboardPage: React.FC = () => {
               Olá, {user.name || 'Viajante'}!
             </Badge>
             <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
-              Você ainda não tem nenhuma viagem
+              Você ainda não tem nenhuma viagem cadastrada
             </h1>
             <p className="text-sm sm:text-base text-slate-300 max-w-xl mx-auto leading-relaxed">
               Cadastre sua cidade de origem, país de destino e conexões para ter acesso imediato ao
@@ -53,7 +56,7 @@ export const DashboardPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="pt-2">
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link to="/trips/new">
               <Button
                 size="lg"
@@ -61,6 +64,15 @@ export const DashboardPage: React.FC = () => {
               >
                 <PlusCircle className="w-5 h-5 mr-2" />
                 Criar minha primeira viagem
+              </Button>
+            </Link>
+            <Link to="/destinos">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-slate-700 bg-slate-900/60 text-slate-200 hover:bg-slate-800 h-12 rounded-xl text-sm"
+              >
+                Explorar Guia de Destinos
               </Button>
             </Link>
           </div>
@@ -139,8 +151,94 @@ export const DashboardPage: React.FC = () => {
   const isHigh = scoreTier === 'HIGH'
   const isModerate = scoreTier === 'MODERATE'
 
+  // Look up transit country emergency contacts if transit is specified
+  const getTransitContact = () => {
+    if (!transitCountries) return null
+    const lower = transitCountries.toLowerCase()
+    if (
+      lower.includes('reino unido') ||
+      lower.includes('londres') ||
+      lower.includes('uk') ||
+      lower.includes('inglaterra')
+    ) {
+      return COUNTRY_EMERGENCY_CONTACTS['ReinoUnido']
+    }
+    if (lower.includes('espanha') || lower.includes('madri') || lower.includes('barcelona')) {
+      return COUNTRY_EMERGENCY_CONTACTS['Espanha']
+    }
+    if (lower.includes('frança') || lower.includes('franca') || lower.includes('paris')) {
+      return COUNTRY_EMERGENCY_CONTACTS['Franca']
+    }
+    if (lower.includes('portugal') || lower.includes('lisboa') || lower.includes('porto')) {
+      return COUNTRY_EMERGENCY_CONTACTS['Portugal']
+    }
+    if (
+      lower.includes('italia') ||
+      lower.includes('itália') ||
+      lower.includes('roma') ||
+      lower.includes('milão')
+    ) {
+      return COUNTRY_EMERGENCY_CONTACTS['Italia']
+    }
+    if (
+      lower.includes('estados unidos') ||
+      lower.includes('eua') ||
+      lower.includes('usa') ||
+      lower.includes('miami') ||
+      lower.includes('nova york')
+    ) {
+      return COUNTRY_EMERGENCY_CONTACTS['EstadosUnidos']
+    }
+    if (lower.includes('argentina') || lower.includes('buenos aires')) {
+      return COUNTRY_EMERGENCY_CONTACTS['Argentina']
+    }
+    if (
+      lower.includes('japao') ||
+      lower.includes('japão') ||
+      lower.includes('toquio') ||
+      lower.includes('tóquio')
+    ) {
+      return COUNTRY_EMERGENCY_CONTACTS['Japao']
+    }
+    return null
+  }
+
+  const transitContact = getTransitContact()
+
   return (
     <div className="space-y-6">
+      {/* Trip Switcher Bar if multiple trips exist */}
+      {trips.length > 1 && (
+        <div className="p-3 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-700">
+              Minhas Viagens ({trips.length}):
+            </span>
+            <select
+              value={activeTripId || currentTrip.id}
+              onChange={(e) => setActiveTripId(e.target.value)}
+              className="h-9 px-3 text-xs font-semibold rounded-lg border border-slate-300 bg-slate-50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+            >
+              {trips.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.title || `${t.originCity || 'Origem'} → ${t.destinationCity || 'Destino'}`} (
+                  {t.destinationCountry})
+                </option>
+              ))}
+            </select>
+          </div>
+          <Link to="/trips/new">
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 text-xs font-semibold border-sky-200 text-sky-700 hover:bg-sky-50"
+            >
+              <PlusCircle className="w-3.5 h-3.5 mr-1" /> Nova Viagem
+            </Button>
+          </Link>
+        </div>
+      )}
+
       {/* Top Welcome / Trip Header Banner */}
       <div className="p-6 rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white shadow-xl relative overflow-hidden border border-slate-800">
         <div className="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
@@ -148,18 +246,21 @@ export const DashboardPage: React.FC = () => {
           <div className="space-y-2">
             <div className="flex items-center gap-2 flex-wrap">
               <Badge className="bg-sky-500/20 text-sky-300 border-sky-400/30 text-xs font-semibold">
-                <Compass className="w-3.5 h-3.5 mr-1" /> Painel de Viagem Ativa
+                <Compass className="w-3.5 h-3.5 mr-1" /> Viagem Ativa
               </Badge>
               {transitCountries && (
-                <Badge variant="outline" className="text-xs border-white/20 text-slate-300">
+                <Badge
+                  variant="outline"
+                  className="text-xs border-sky-400/40 text-sky-200 bg-sky-950/40"
+                >
                   Escala: {transitCountries}
                 </Badge>
               )}
               <span className="text-xs text-slate-400">ID: {currentTrip.id}</span>
             </div>
             <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-2 flex-wrap">
-              <span>{originCity || 'Sua cidade'}</span>
-              <span className="text-sky-400">→</span>
+              <span>{originCity || 'Cidade de Origem'}</span>
+              <span className="text-sky-400 font-black">→</span>
               <span>
                 {destinationCity}, {destinationCountry}
               </span>
@@ -167,12 +268,12 @@ export const DashboardPage: React.FC = () => {
             <p className="text-xs sm:text-sm text-slate-300 flex items-center gap-2 flex-wrap">
               <Calendar className="w-3.5 h-3.5 text-sky-400" />
               <span>
-                {departureDate} até {returnDate}
+                {departureDate || 'Data de saída'} até {returnDate || 'Data de retorno'}
               </span>
               {transitCountries && (
                 <>
                   <span>•</span>
-                  <span className="text-sky-300 font-medium">Escala: {transitCountries}</span>
+                  <span className="text-sky-300 font-medium">Conexão em: {transitCountries}</span>
                 </>
               )}
               <span>•</span>
@@ -310,7 +411,11 @@ export const DashboardPage: React.FC = () => {
               <div className="flex justify-between py-1 border-b border-slate-100">
                 <span>Intervalo de Check-in:</span>
                 <span className="font-bold text-slate-800">
-                  A cada {currentTrip.checkinConfig?.expectedFrequency === 'twice_daily' ? '12h' : currentTrip.checkinConfig?.expectedFrequency === 'multiple_daily' ? '6h' : '24h'}
+                  {currentTrip.checkinConfig?.frequency === 'every_6h'
+                    ? 'A cada 6h'
+                    : currentTrip.checkinConfig?.frequency === 'every_12h'
+                      ? 'A cada 12h'
+                      : 'A cada 24h'}
                 </span>
               </div>
               <div className="flex justify-between py-1">
@@ -437,35 +542,55 @@ export const DashboardPage: React.FC = () => {
               </span>
             </div>
             <div className="flex justify-between py-1 border-b border-slate-200">
-              <span className="text-slate-500">Emergência Geral:</span>
+              <span className="text-slate-500">Emergência Geral ({destinationCountry}):</span>
               <span className="font-bold text-slate-900">
                 {destinationInfo?.generalEmergencyNumber || '112'}
               </span>
             </div>
             <div className="flex justify-between py-1 border-b border-slate-200">
-              <span className="text-slate-500">Plantão Consular BR:</span>
+              <span className="text-slate-500">Plantão Consular Destino:</span>
               <span className="font-bold text-sky-700">
-                {destinationInfo?.consulateEmergency24h || '+39 333 306 0545'}
+                {destinationInfo?.consulateEmergency24h || '+39 333 306 4545'}
               </span>
             </div>
 
+            {/* Scale / Transit contact details */}
             {transitCountries && (
-              <div className="p-2.5 rounded-xl bg-white border border-sky-200/80 space-y-1 mt-2">
-                <span className="text-[10px] font-bold text-sky-800 uppercase tracking-wide block">
-                  Escala / Conexão: {transitCountries}
-                </span>
-                <p className="text-[11px] text-slate-600">
-                  {transitCountries.toLowerCase().includes('londres') ||
-                  transitCountries.toLowerCase().includes('reino unido') ||
-                  transitCountries.toLowerCase().includes('uk')
-                    ? 'Plantão Consular Londres: +44 772 108 8431 • Emergência UK: 999'
-                    : 'Tenha o telefone do consulado do país de escala salvo.'}
-                </p>
+              <div className="p-3 rounded-xl bg-white border border-sky-300 space-y-1.5 mt-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-sky-800 uppercase tracking-wide block">
+                    Escala / Conexão: {transitCountries}
+                  </span>
+                  <Badge className="text-[9px] bg-sky-100 text-sky-800 border-none px-1.5 py-0">
+                    Trânsito
+                  </Badge>
+                </div>
+                {transitContact ? (
+                  <div className="space-y-1 text-[11px] text-slate-700">
+                    <p>
+                      <strong>Emergência Escala ({transitContact.country}):</strong>{' '}
+                      {transitContact.generalEmergencyNumber}
+                    </p>
+                    <p>
+                      <strong>Plantão Consular {transitContact.city}:</strong>{' '}
+                      <span className="text-sky-700 font-semibold">
+                        {transitContact.consulateEmergency24h}
+                      </span>
+                    </p>
+                    <p className="text-[10px] text-slate-500">{transitContact.consulateAddress}</p>
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-slate-600">
+                    Mantenha salvo o telefone do plantão consular do país de trânsito (
+                    {transitCountries}) para conexões internacionais seguras.
+                  </p>
+                )}
               </div>
             )}
 
             <p className="text-[11px] text-slate-500 pt-1">
-              Consulado: {destinationInfo?.consulateAddress || destinationCity} • Suporte 24h
+              Consulado destino: {destinationInfo?.consulateAddress || destinationCity} • Suporte
+              24h
             </p>
           </CardContent>
         </Card>

@@ -26,6 +26,8 @@ import { CheckinPage } from './pages/CheckinPage'
 import { EmergencyPage } from './pages/EmergencyPage'
 import { SecurityLibraryPage } from './pages/SecurityLibraryPage'
 import { PlanSpecExplorerPage } from './pages/PlanSpecExplorerPage'
+import { DestinationsPublicPage } from './pages/DestinationsPublicPage'
+import { ProfilePage } from './pages/ProfilePage'
 import NotFound from './pages/NotFound'
 
 const App = () => (
@@ -60,8 +62,11 @@ const App = () => (
               {/* Public exploratory flow */}
               <Route path="/onboarding" element={<OnboardingPage />} />
               <Route path="/create-trip" element={<CreateTripPage />} />
+              <Route path="/trips/new" element={<CreateTripPage />} />
               <Route path="/assessment" element={<AssessmentPage />} />
               <Route path="/score-result" element={<ScoreResultPage />} />
+              <Route path="/destinos" element={<DestinationsPublicPage />} />
+              <Route path="/destinations" element={<Navigate to="/destinos" replace />} />
               <Route path="/security-library" element={<SecurityLibraryPage />} />
               <Route path="/emergency" element={<EmergencyPage />} />
               <Route path="/plan-spec" element={<PlanSpecExplorerPage />} />
@@ -99,6 +104,15 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/perfil"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/profile" element={<Navigate to="/perfil" replace />} />
 
               {/* Helper aliases */}
               <Route path="/library" element={<Navigate to="/security-library" replace />} />
