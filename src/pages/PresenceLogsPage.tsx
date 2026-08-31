@@ -257,15 +257,15 @@ export const PresenceLogsPage: React.FC = () => {
   }
 
   const handleSecretCodeSubmit = () => {
-    const configuredCode = authUser?.duressSecretCode || '9999'
-    if (secretCodeInput.trim() === configuredCode.trim() || secretCodeInput.trim() === '9999') {
+    const configuredCode = authUser?.duressSecretCode?.trim()
+    if (configuredCode && secretCodeInput.trim() === configuredCode) {
       triggerDiscreetDuressAlert('secret_code')
-      setShowSecretCodeModal(false)
-      setSecretCodeInput('')
-    } else {
-      setShowSecretCodeModal(false)
-      setSecretCodeInput('')
+    } else if (!configuredCode && secretCodeInput.trim()) {
+      // If none set yet, simulate duress trigger with entered input
+      triggerDiscreetDuressAlert('secret_code')
     }
+    setShowSecretCodeModal(false)
+    setSecretCodeInput('')
   }
 
   return (
@@ -641,45 +641,44 @@ export const PresenceLogsPage: React.FC = () => {
                     segurança por 3 segundos. O alerta é transmitido silenciosamente.
                   </p>
                 </div>
-
-                {/* Method 2: Recommended */}
+                {/* Method 2: Secret Code (Recommended Mobile) */}
                 <div className="p-3.5 rounded-xl bg-white border border-emerald-300 ring-2 ring-emerald-400/30 space-y-2">
                   <div className="flex items-center justify-between">
                     <Badge className="bg-emerald-100 text-emerald-800 font-bold text-[10px]">
-                      Método 2: Tecla (Recomendado)
+                      Método 2: Código Secreto (Recomendado Mobile)
                     </Badge>
                   </div>
-                  <h4 className="font-bold text-slate-900 text-xs">Tecla de Atalho Física</h4>
+                  <h4 className="font-bold text-slate-900 text-xs">Código Secreto de Coação</h4>
                   <p className="text-[11px] text-slate-600 leading-relaxed">
-                    Pressione <strong>Alt + Shift + S</strong> no teclado ou a tecla de volume com a
-                    tela aberta. O comando é 100% invisível na tela e aciona a polícia e guardiões.
+                    Se for obrigado(a) a digitar um código de saída ou confirmação, digite seu
+                    código secreto de coação cadastrado. O app finge desbloquear ou fechar, mas
+                    dispara o SOS silencioso com sua localização GPS.
                   </p>
                 </div>
-
-                {/* Method 3 */}
+                {/* Method 3: Desktop shortcut */}
                 <div className="p-3.5 rounded-xl bg-white border border-slate-200 space-y-2">
                   <div className="flex items-center justify-between">
                     <Badge className="bg-slate-100 text-slate-800 font-bold text-[10px]">
-                      Método 3: Código Secreto
+                      Método 3: Atalho Teclado (Desktop)
                     </Badge>
                   </div>
-                  <h4 className="font-bold text-slate-900 text-xs">Senha Falsa / Coação</h4>
+                  <h4 className="font-bold text-slate-900 text-xs">Atalho no Computador</h4>
                   <p className="text-[11px] text-slate-600 leading-relaxed">
-                    Se for obrigado(a) a digitar um código, digite seu código de coação cadastrado
-                    no perfil. O app fingirá confirmar normalmente, mas enviará o SOS.
+                    Pressione <strong>Alt + Shift + S</strong> no teclado do computador para acionar
+                    o sinal discreto imediato.
                   </p>
-                </div>
+                </div>{' '}
               </div>
 
               <div className="p-3 rounded-xl bg-slate-900 text-slate-100 text-[11px] flex items-center justify-between gap-3">
                 <span>
                   Sua preferência ativa configurada no perfil:{' '}
                   <strong className="text-sky-300">
-                    {authUser?.duressMethod === 'volume_key'
-                      ? 'Tecla de Atalho / Volume (Mais Discreta)'
+                    {authUser?.duressMethod === 'secret_code'
+                      ? 'Código Secreto de Coação (Recomendado Mobile)'
                       : authUser?.duressMethod === 'hold_3s'
-                        ? 'Toque Contínuo de 3s'
-                        : 'Código Secreto de Coação'}
+                        ? 'Padrão de Toques Discretos (3s / 4 Toques)'
+                        : 'Atalho de Teclado (Desktop)'}
                   </strong>
                 </span>
                 <Link to="/perfil">

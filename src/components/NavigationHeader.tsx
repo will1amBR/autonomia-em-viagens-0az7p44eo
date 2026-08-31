@@ -24,6 +24,7 @@ import {
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
 import { Input } from './ui/input'
+import pb from '@/lib/pocketbase/client'
 import { useAuth } from '../context/AuthContext'
 import { useTrip } from '../context/TripContext'
 
@@ -37,11 +38,60 @@ export const QuickExitOverlay: React.FC = () => {
 
   const handleUnlock = (e: React.FormEvent) => {
     e.preventDefault()
-    const correctPin = user?.emergency_passcode || '1234'
-    if (pin === correctPin || pin === '1234' || pin === '9999') {
+    const userPasscode = user?.emergency_passcode?.trim()
+    const duressCode = user?.duressSecretCode?.trim()
+
+    // 1. If traveler inputs their duress secret code, silently send duress alert with GPS and pretend to unlock
+    if (duressCode && pin.trim() === duressCode) {
+      if (typeof navigator !== 'undefined' && 'geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            fetch('/api/duress-silent-alert', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: pb.authStore.token,
+              },
+              body: JSON.stringify({
+                trigger_method: 'secret_code',
+                location_lat: pos.coords.latitude,
+                location_lng: pos.coords.longitude,
+                device_info: navigator.userAgent.slice(0, 100),
+                timestamp: new Date().toISOString(),
+              }),
+            }).catch(() => {})
+          },
+          () => {
+            fetch('/api/duress-silent-alert', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: pb.authStore.token,
+              },
+              body: JSON.stringify({
+                trigger_method: 'secret_code',
+                device_info: navigator.userAgent.slice(0, 100),
+                timestamp: new Date().toISOString(),
+              }),
+            }).catch(() => {})
+          },
+          { timeout: 3000 },
+        )
+      }
       restoreFromQuickExit()
       setPin('')
       setError(false)
+      return
+    }
+
+    // 2. Strict PIN verification: requires traveler's configured passcode (no universal 1234 / 9999 backdoor)
+    if (userPasscode && pin.trim() === userPasscode) {
+      restoreFromQuickExit()
+      setPin('')
+      setError(false)
+    } else if (!userPasscode) {
+      // If user has not configured a passcode yet, inform them to set it in Profile
+      setError(true)
     } else {
       setError(true)
     }
@@ -94,7 +144,7 @@ export const NavigationHeader: React.FC = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
-  const { user: authUser, logout, isAdmin } = useAuth()
+  const { user: authUser, logout, isAdmin, isPolice } = useAuth()
   const { currentTrip, trips } = useTrip()
 
   const handleLogout = () => {
@@ -177,6 +227,17 @@ export const NavigationHeader: React.FC = () => {
       authRequired: true,
     },
   ]
+
+  if (isPolice || isAdmin) {
+    navItems.push({
+      to: '/police/dashboard',
+      label: 'Canal Policial & Consular',
+      desc: 'Sinais de coação, última localização e logs autorizados',
+      icon: ShieldAlert,
+      authRequired: true,
+      badge: isPolice ? 'Polícia' : 'Oficial',
+    })
+  }
 
   if (isAdmin) {
     navItems.push({

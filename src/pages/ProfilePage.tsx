@@ -32,7 +32,7 @@ export const ProfilePage: React.FC = () => {
   const [phone, setPhone] = useState(user?.phone || '')
   const [emergencyPasscode, setEmergencyPasscode] = useState(user?.emergency_passcode || '')
   const [duressMethod, setDuressMethod] = useState<'volume_key' | 'hold_3s' | 'secret_code'>(
-    user?.duressMethod || 'volume_key',
+    user?.duressMethod || 'secret_code',
   )
   const [duressSecretCode, setDuressSecretCode] = useState(user?.duressSecretCode || '')
   const [isSaving, setIsSaving] = useState(false)
@@ -184,56 +184,15 @@ export const ProfilePage: React.FC = () => {
           <CardContent className="p-5 pt-0 space-y-4">
             {/* Safety Guidance Box */}
             <div className="p-3.5 rounded-2xl bg-sky-50 border border-sky-200 text-xs text-sky-950">
-              <span className="font-bold text-sky-900">💡 Recomendação:</span> Uma{' '}
-              <strong>tecla física (botão de volume)</strong> é o método mais seguro e discreto para
-              acionar socorro em momentos de coação, pois pode ser acionado sem precisar olhar para
-              a tela do aparelho.
+              <span className="font-bold text-sky-900">💡 Método Discreto Seguro em Mobile:</span> O{' '}
+              <strong>Código Secreto de Coação</strong> e o{' '}
+              <strong>Padrão de Toques no Botão Flutuante</strong> funcionam confiavelmente em
+              qualquer celular e navegador móvel, acionando o socorro imediatamente com GPS sem
+              alterar nada na tela.
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {/* Option 1: Volume Key */}
-              <button
-                type="button"
-                onClick={() => setDuressMethod('volume_key')}
-                className={`p-3.5 rounded-2xl border text-left flex flex-col justify-between transition-all ${
-                  duressMethod === 'volume_key'
-                    ? 'border-sky-500 bg-sky-50/80 text-sky-950 font-bold ring-2 ring-sky-500/20'
-                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
-                }`}
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-600 flex items-center justify-center">
-                    <Volume2 className="w-4 h-4" />
-                  </div>
-                  <span className="text-xs">Tecla de Volume</span>
-                </div>
-                <p className="text-[10px] text-slate-500 font-normal leading-tight">
-                  Pressione o botão físico de volume do celular (ou Ctrl+Shift+K no computador).
-                </p>
-              </button>
-
-              {/* Option 2: Hold 3s */}
-              <button
-                type="button"
-                onClick={() => setDuressMethod('hold_3s')}
-                className={`p-3.5 rounded-2xl border text-left flex flex-col justify-between transition-all ${
-                  duressMethod === 'hold_3s'
-                    ? 'border-indigo-500 bg-indigo-50/80 text-indigo-950 font-bold ring-2 ring-indigo-500/20'
-                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
-                }`}
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-600 flex items-center justify-center">
-                    <Hand className="w-4 h-4" />
-                  </div>
-                  <span className="text-xs">Tocar por 3s</span>
-                </div>
-                <p className="text-[10px] text-slate-500 font-normal leading-tight">
-                  Mantenha pressionado o botão discreto de proteção durante a captura de mídia.
-                </p>
-              </button>
-
-              {/* Option 3: Secret Code */}
+              {/* Option 1: Secret Code (Recommended) */}
               <button
                 type="button"
                 onClick={() => setDuressMethod('secret_code')}
@@ -247,10 +206,57 @@ export const ProfilePage: React.FC = () => {
                   <div className="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-600 flex items-center justify-center">
                     <KeyRound className="w-4 h-4" />
                   </div>
-                  <span className="text-xs">Código Secreto</span>
+                  <div className="flex flex-col">
+                    <span className="text-xs">Código Secreto</span>
+                    <span className="text-[9px] text-purple-700 font-bold">Recomendado Mobile</span>
+                  </div>
                 </div>
                 <p className="text-[10px] text-slate-500 font-normal leading-tight">
-                  Digite uma senha predefinida no campo discreto da tela de confirmação.
+                  Digite este código na saída rápida ou em qualquer tela para fingir fechar e
+                  acionar alerta com GPS.
+                </p>
+              </button>
+
+              {/* Option 2: Hold 3s / Multi-tap */}
+              <button
+                type="button"
+                onClick={() => setDuressMethod('hold_3s')}
+                className={`p-3.5 rounded-2xl border text-left flex flex-col justify-between transition-all ${
+                  duressMethod === 'hold_3s'
+                    ? 'border-indigo-500 bg-indigo-50/80 text-indigo-950 font-bold ring-2 ring-indigo-500/20'
+                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-600 flex items-center justify-center">
+                    <Hand className="w-4 h-4" />
+                  </div>
+                  <span className="text-xs">Toque 3s / 4 Toques</span>
+                </div>
+                <p className="text-[10px] text-slate-500 font-normal leading-tight">
+                  Pressione por 3s ou dê 4 toques rápidos no botão flutuante discreto em qualquer
+                  página.
+                </p>
+              </button>
+
+              {/* Option 3: Keyboard Shortcut (Desktop) */}
+              <button
+                type="button"
+                onClick={() => setDuressMethod('volume_key')}
+                className={`p-3.5 rounded-2xl border text-left flex flex-col justify-between transition-all ${
+                  duressMethod === 'volume_key'
+                    ? 'border-sky-500 bg-sky-50/80 text-sky-950 font-bold ring-2 ring-sky-500/20'
+                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-600 flex items-center justify-center">
+                    <Volume2 className="w-4 h-4" />
+                  </div>
+                  <span className="text-xs">Atalho Teclado</span>
+                </div>
+                <p className="text-[10px] text-slate-500 font-normal leading-tight">
+                  Pressione Alt+Shift+S no computador caso utilize a plataforma via desktop.
                 </p>
               </button>
             </div>

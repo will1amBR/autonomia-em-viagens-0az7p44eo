@@ -299,100 +299,200 @@ export const AdminDashboardPage: React.FC = () => {
                   Nenhuma viagem registrada até o momento no backend.
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs text-left border-collapse">
-                    <thead>
-                      <tr className="border-b border-slate-200 text-slate-500 font-bold bg-slate-50/50">
-                        <th className="p-3">Viajante</th>
-                        <th className="p-3">Rota (Origem → Destino)</th>
-                        <th className="p-3">Datas</th>
-                        <th className="p-3">Com Quem Ficará / Anfitrião</th>
-                        <th className="p-3">Hospedagem & Endereço</th>
-                        <th className="p-3 text-right">Ação</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {activeTrips
-                        .filter((t) => {
-                          if (!tripSearch) return true
-                          const term = tripSearch.toLowerCase()
-                          return (
-                            t.title?.toLowerCase().includes(term) ||
-                            t.destination_city?.toLowerCase().includes(term) ||
-                            t.destination_country?.toLowerCase().includes(term) ||
-                            t.user_email?.toLowerCase().includes(term) ||
-                            t.userName?.toLowerCase().includes(term) ||
-                            t.host_responsible_person?.toLowerCase().includes(term)
-                          )
-                        })
-                        .map((t) => (
-                          <tr key={t.id} className="hover:bg-slate-50/80 transition-colors">
-                            <td className="p-3 font-semibold text-slate-900">
-                              <div>{t.userName || t.user_name || 'Viajante'}</div>
-                              <div className="text-[10px] text-slate-400 font-normal">
-                                {t.user_email || t.userEmail || 'ID: ' + t.user_id}
-                              </div>
-                            </td>
-                            <td className="p-3">
-                              <span className="font-bold text-sky-800">
-                                {t.origin_city || t.originCity || 'Brasil'} →{' '}
-                                {t.destination_city || t.destinationCity},{' '}
-                                {t.destination_country || t.destinationCountry}
+                <>
+                  {/* MOBILE VIEW: Responsive Stacked Cards (Issue 7) */}
+                  <div className="md:hidden space-y-3">
+                    {activeTrips
+                      .filter((t) => {
+                        if (!tripSearch) return true
+                        const term = tripSearch.toLowerCase()
+                        return (
+                          t.title?.toLowerCase().includes(term) ||
+                          t.destination_city?.toLowerCase().includes(term) ||
+                          t.destination_country?.toLowerCase().includes(term) ||
+                          t.user_email?.toLowerCase().includes(term) ||
+                          t.userName?.toLowerCase().includes(term) ||
+                          t.host_responsible_person?.toLowerCase().includes(term)
+                        )
+                      })
+                      .map((t) => (
+                        <div
+                          key={t.id}
+                          className="p-4 rounded-2xl border border-slate-200 bg-white shadow-xs space-y-3 text-xs"
+                        >
+                          <div className="flex items-start justify-between gap-2 border-b border-slate-100 pb-2.5">
+                            <div>
+                              <span className="font-bold text-slate-900 text-sm block">
+                                {t.userName || t.user_name || 'Viajante'}
                               </span>
-                              {t.transit_countries && (
-                                <div className="text-[10px] text-slate-400">
-                                  Escala: {t.transit_countries}
-                                </div>
-                              )}
-                            </td>
-                            <td className="p-3 text-slate-600 font-mono text-[11px]">
-                              {t.start_date || t.startDate || '—'} até{' '}
+                              <span className="text-[11px] text-slate-500">
+                                {t.user_email || t.userEmail || 'ID: ' + t.user_id}
+                              </span>
+                            </div>
+                            <Badge className="bg-sky-100 text-sky-800 border-sky-200 text-[10px]">
+                              {t.destination_country || t.destinationCountry}
+                            </Badge>
+                          </div>
+
+                          <div className="space-y-1.5 text-[11px]">
+                            <div className="flex items-center gap-1 text-slate-800 font-semibold">
+                              <Compass className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                              <span>
+                                {t.origin_city || t.originCity || 'Brasil'} →{' '}
+                                {t.destination_city || t.destinationCity}
+                              </span>
+                            </div>
+                            {t.transit_countries && (
+                              <p className="text-[10px] text-slate-500 pl-4.5">
+                                Escala / Conexão:{' '}
+                                <span className="text-slate-700 font-medium">
+                                  {t.transit_countries}
+                                </span>
+                              </p>
+                            )}
+                            <p className="text-slate-500 font-mono text-[10px]">
+                              Período: {t.start_date || t.startDate || '—'} até{' '}
                               {t.end_date || t.endDate || '—'}
-                            </td>
-                            <td className="p-3 text-slate-700">
-                              <div className="font-semibold text-slate-800">
+                            </p>
+                          </div>
+
+                          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 space-y-1 text-[11px]">
+                            <div className="flex justify-between">
+                              <span className="text-slate-500">Anfitrião:</span>
+                              <span className="font-semibold text-slate-800">
                                 {t.host_responsible_person ||
                                   t.hostResponsiblePerson ||
                                   t.staying_with ||
                                   'Não informado'}
+                              </span>
+                            </div>
+                            {(t.host_phone || t.hostPhone) && (
+                              <div className="flex justify-between">
+                                <span className="text-slate-500">Tel:</span>
+                                <span className="text-slate-700">
+                                  {t.host_phone || t.hostPhone}
+                                </span>
                               </div>
-                              {(t.host_phone || t.hostPhone) && (
-                                <div className="text-[10px] text-slate-500">
-                                  Tel: {t.host_phone || t.hostPhone}
-                                </div>
-                              )}
-                            </td>
-                            <td className="p-3 text-slate-600 max-w-xs truncate">
-                              <div className="font-medium capitalize text-slate-800">
+                            )}
+                            <div className="flex justify-between">
+                              <span className="text-slate-500">Hospedagem:</span>
+                              <span className="text-slate-700 capitalize">
                                 {t.accommodation_type || t.accommodationType || 'Hotel'}
-                              </div>
-                              <div
-                                className="text-[10px] text-slate-500 truncate"
-                                title={t.accommodation_address || t.accommodationAddress}
-                              >
-                                {t.accommodation_address ||
-                                  t.accommodationAddress ||
-                                  'Endereço não informado'}
-                              </div>
-                            </td>
-                            <td className="p-3 text-right">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedTripDetail(t)
-                                  setIsTripModalOpen(true)
-                                }}
-                                className="h-7 text-[11px] font-semibold text-sky-700 border-sky-200 hover:bg-sky-50"
-                              >
-                                Ver Detalhes
-                              </Button>
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
+                              </span>
+                            </div>
+                          </div>
+
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedTripDetail(t)
+                              setIsTripModalOpen(true)
+                            }}
+                            className="w-full h-8 text-xs font-bold text-sky-700 border-sky-200 hover:bg-sky-50 rounded-xl"
+                          >
+                            Ver Detalhes Completos
+                          </Button>
+                        </div>
+                      ))}
+                  </div>
+
+                  {/* DESKTOP VIEW: Structured Table (Issue 7) */}
+                  <div className="hidden md:block overflow-x-auto">
+                    <table className="w-full text-xs text-left border-collapse">
+                      <thead>
+                        <tr className="border-b border-slate-200 text-slate-500 font-bold bg-slate-50/50">
+                          <th className="p-3">Viajante</th>
+                          <th className="p-3">Rota (Origem → Destino)</th>
+                          <th className="p-3">Datas</th>
+                          <th className="p-3">Com Quem Ficará / Anfitrião</th>
+                          <th className="p-3">Hospedagem & Endereço</th>
+                          <th className="p-3 text-right">Ação</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {activeTrips
+                          .filter((t) => {
+                            if (!tripSearch) return true
+                            const term = tripSearch.toLowerCase()
+                            return (
+                              t.title?.toLowerCase().includes(term) ||
+                              t.destination_city?.toLowerCase().includes(term) ||
+                              t.destination_country?.toLowerCase().includes(term) ||
+                              t.user_email?.toLowerCase().includes(term) ||
+                              t.userName?.toLowerCase().includes(term) ||
+                              t.host_responsible_person?.toLowerCase().includes(term)
+                            )
+                          })
+                          .map((t) => (
+                            <tr key={t.id} className="hover:bg-slate-50/80 transition-colors">
+                              <td className="p-3 font-semibold text-slate-900">
+                                <div>{t.userName || t.user_name || 'Viajante'}</div>
+                                <div className="text-[10px] text-slate-400 font-normal">
+                                  {t.user_email || t.userEmail || 'ID: ' + t.user_id}
+                                </div>
+                              </td>
+                              <td className="p-3">
+                                <span className="font-bold text-sky-800">
+                                  {t.origin_city || t.originCity || 'Brasil'} →{' '}
+                                  {t.destination_city || t.destinationCity},{' '}
+                                  {t.destination_country || t.destinationCountry}
+                                </span>
+                                {t.transit_countries && (
+                                  <div className="text-[10px] text-slate-400">
+                                    Escala: {t.transit_countries}
+                                  </div>
+                                )}
+                              </td>
+                              <td className="p-3 text-slate-600 font-mono text-[11px]">
+                                {t.start_date || t.startDate || '—'} até{' '}
+                                {t.end_date || t.endDate || '—'}
+                              </td>
+                              <td className="p-3 text-slate-700">
+                                <div className="font-semibold text-slate-800">
+                                  {t.host_responsible_person ||
+                                    t.hostResponsiblePerson ||
+                                    t.staying_with ||
+                                    'Não informado'}
+                                </div>
+                                {(t.host_phone || t.hostPhone) && (
+                                  <div className="text-[10px] text-slate-500">
+                                    Tel: {t.host_phone || t.hostPhone}
+                                  </div>
+                                )}
+                              </td>
+                              <td className="p-3 text-slate-600 max-w-xs truncate">
+                                <div className="font-medium capitalize text-slate-800">
+                                  {t.accommodation_type || t.accommodationType || 'Hotel'}
+                                </div>
+                                <div
+                                  className="text-[10px] text-slate-500 truncate"
+                                  title={t.accommodation_address || t.accommodationAddress}
+                                >
+                                  {t.accommodation_address ||
+                                    t.accommodationAddress ||
+                                    'Endereço não informado'}
+                                </div>
+                              </td>
+                              <td className="p-3 text-right">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedTripDetail(t)
+                                    setIsTripModalOpen(true)
+                                  }}
+                                  className="h-7 text-[11px] font-semibold text-sky-700 border-sky-200 hover:bg-sky-50"
+                                >
+                                  Ver Detalhes
+                                </Button>
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               )}
             </CardContent>
           </Card>
@@ -776,6 +876,7 @@ export const AdminDashboardPage: React.FC = () => {
                     <span className="font-semibold text-slate-800">
                       {selectedTripDetail.host_responsible_person ||
                         selectedTripDetail.hostResponsiblePerson ||
+                        selectedTripDetail.accommodation_details?.responsibleName ||
                         'Não informado'}
                     </span>
                   </div>
@@ -784,6 +885,7 @@ export const AdminDashboardPage: React.FC = () => {
                     <span className="font-semibold text-slate-800">
                       {selectedTripDetail.host_phone ||
                         selectedTripDetail.hostPhone ||
+                        selectedTripDetail.accommodation_details?.responsiblePhone ||
                         selectedTripDetail.destination_contact ||
                         selectedTripDetail.destinationContact ||
                         'Não informado'}
@@ -794,7 +896,19 @@ export const AdminDashboardPage: React.FC = () => {
                     <span className="font-semibold text-slate-800">
                       {selectedTripDetail.host_relationship ||
                         selectedTripDetail.hostRelationship ||
+                        selectedTripDetail.accommodation_details?.relationship ||
                         'Não informada'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-500 block">
+                      Documento / ID do Anfitrião:
+                    </span>
+                    <span className="font-semibold text-slate-800">
+                      {selectedTripDetail.host_document ||
+                        selectedTripDetail.hostDocument ||
+                        selectedTripDetail.accommodation_details?.responsibleDocument ||
+                        'Não informado'}
                     </span>
                   </div>
                   <div>
@@ -803,6 +917,17 @@ export const AdminDashboardPage: React.FC = () => {
                       {selectedTripDetail.traveling_with ||
                         selectedTripDetail.travelingWith ||
                         'Sozinho(a)'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-500 block">
+                      Detalhes dos Companheiros / Hospedagem:
+                    </span>
+                    <span className="font-semibold text-slate-800">
+                      {selectedTripDetail.companion_details ||
+                        selectedTripDetail.companionDetails ||
+                        selectedTripDetail.accommodation_details?.companionNotes ||
+                        'Nenhum detalhe adicional'}
                     </span>
                   </div>
                 </div>

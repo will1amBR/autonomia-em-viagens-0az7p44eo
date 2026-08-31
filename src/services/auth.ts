@@ -43,25 +43,59 @@ export const authService = {
     const authData = await pb.collection('users').authWithPassword(email.trim(), password)
     const rec = authData.record
 
-    // Asynchronously log presence and update last_online_at
-    try {
+    // Asynchronously log presence with GPS (if allowed) and update last_online_at
+    const recordLoginPresence = async () => {
       const now = new Date().toISOString()
-      pb.collection('presence_logs')
-        .create({
+      let lat: number | undefined
+      let lng: number | undefined
+      let locationName = 'Dispositivo Conectado'
+
+      if (typeof navigator !== 'undefined' && 'geolocation' in navigator) {
+        try {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              timeout: 4000,
+              maximumAge: 60000,
+            })
+          })
+          lat = position.coords.latitude
+          lng = position.coords.longitude
+          locationName = `GPS: ${lat.toFixed(5)}, ${lng.toFixed(5)}`
+        } catch {
+          locationName = 'Conexão segura (GPS não autorizado ou indisponível)'
+        }
+      }
+
+      const deviceInfo =
+        typeof navigator !== 'undefined' ? navigator.userAgent.slice(0, 120) : 'Web'
+
+      try {
+        await pb.collection('presence_logs').create({
           user_id: rec.id,
           event_type: 'login',
           timestamp: now,
-          device_info: typeof navigator !== 'undefined' ? navigator.userAgent.slice(0, 120) : '',
+          location_lat: lat,
+          location_lng: lng,
+          location_name: locationName,
+          device_info: deviceInfo,
+          notes: 'Login de autenticação e sessão iniciada',
         })
-        .catch(() => {})
-      pb.collection('users')
-        .update(rec.id, {
+      } catch (err) {
+        console.warn('Presence log creation at login:', err)
+      }
+
+      try {
+        await pb.collection('users').update(rec.id, {
           last_online_at: now,
+          last_location_approx: locationName,
         })
-        .catch(() => {})
-    } catch {
-      /* intentionally ignored */
+      } catch (err) {
+        console.warn('User last online update at login:', err)
+      }
     }
+
+    // Run without blocking the login return
+    recordLoginPresence().catch(() => {})
 
     return {
       id: rec.id,

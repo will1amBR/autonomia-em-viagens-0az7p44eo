@@ -151,55 +151,85 @@ export const DashboardPage: React.FC = () => {
   const isHigh = scoreTier === 'HIGH'
   const isModerate = scoreTier === 'MODERATE'
 
-  // Look up transit country emergency contacts if transit is specified
+  // Look up transit country emergency contacts dynamically across the entire catalog
   const getTransitContact = () => {
     if (!transitCountries) return null
-    const lower = transitCountries.toLowerCase()
-    if (
-      lower.includes('reino unido') ||
-      lower.includes('londres') ||
-      lower.includes('uk') ||
-      lower.includes('inglaterra')
-    ) {
+    const lower = transitCountries
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+
+    // Check every country in COUNTRY_EMERGENCY_CONTACTS
+    for (const [key, contact] of Object.entries(COUNTRY_EMERGENCY_CONTACTS)) {
+      const countryNormalized = contact.country
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+      const cityNormalized = contact.city
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+      const keyNormalized = key.toLowerCase()
+
+      if (
+        lower.includes(countryNormalized) ||
+        lower.includes(cityNormalized) ||
+        lower.includes(keyNormalized)
+      ) {
+        return contact
+      }
+    }
+
+    // Common aliases mapping
+    if (lower.includes('uk') || lower.includes('londres') || lower.includes('inglaterra')) {
       return COUNTRY_EMERGENCY_CONTACTS['ReinoUnido']
     }
-    if (lower.includes('espanha') || lower.includes('madri') || lower.includes('barcelona')) {
-      return COUNTRY_EMERGENCY_CONTACTS['Espanha']
+    if (lower.includes('frankfurt') || lower.includes('berlim') || lower.includes('munique')) {
+      return COUNTRY_EMERGENCY_CONTACTS['Alemanha']
     }
-    if (lower.includes('frança') || lower.includes('franca') || lower.includes('paris')) {
+    if (lower.includes('paris') || lower.includes('cdg')) {
       return COUNTRY_EMERGENCY_CONTACTS['Franca']
     }
-    if (lower.includes('portugal') || lower.includes('lisboa') || lower.includes('porto')) {
+    if (lower.includes('madri') || lower.includes('barajas') || lower.includes('barcelona')) {
+      return COUNTRY_EMERGENCY_CONTACTS['Espanha']
+    }
+    if (lower.includes('lisboa') || lower.includes('porto')) {
       return COUNTRY_EMERGENCY_CONTACTS['Portugal']
     }
-    if (
-      lower.includes('italia') ||
-      lower.includes('itália') ||
-      lower.includes('roma') ||
-      lower.includes('milão')
-    ) {
+    if (lower.includes('roma') || lower.includes('milao') || lower.includes('fiumicino')) {
       return COUNTRY_EMERGENCY_CONTACTS['Italia']
     }
     if (
-      lower.includes('estados unidos') ||
       lower.includes('eua') ||
       lower.includes('usa') ||
       lower.includes('miami') ||
-      lower.includes('nova york')
+      lower.includes('nova york') ||
+      lower.includes('orlando')
     ) {
       return COUNTRY_EMERGENCY_CONTACTS['EstadosUnidos']
     }
-    if (lower.includes('argentina') || lower.includes('buenos aires')) {
+    if (lower.includes('buenos aires')) {
       return COUNTRY_EMERGENCY_CONTACTS['Argentina']
     }
-    if (
-      lower.includes('japao') ||
-      lower.includes('japão') ||
-      lower.includes('toquio') ||
-      lower.includes('tóquio')
-    ) {
+    if (lower.includes('santiago')) {
+      return COUNTRY_EMERGENCY_CONTACTS['Chile']
+    }
+    if (lower.includes('dublin')) {
+      return COUNTRY_EMERGENCY_CONTACTS['Irlanda']
+    }
+    if (lower.includes('toronto') || lower.includes('montreal') || lower.includes('ottawa')) {
+      return COUNTRY_EMERGENCY_CONTACTS['Canada']
+    }
+    if (lower.includes('mexico') || lower.includes('cancun')) {
+      return COUNTRY_EMERGENCY_CONTACTS['Mexico']
+    }
+    if (lower.includes('montevideu') || lower.includes('montevideo')) {
+      return COUNTRY_EMERGENCY_CONTACTS['Uruguai']
+    }
+    if (lower.includes('toquio') || lower.includes('tokyo') || lower.includes('nagoia')) {
       return COUNTRY_EMERGENCY_CONTACTS['Japao']
     }
+
     return null
   }
 

@@ -29,6 +29,7 @@ import { PlanSpecExplorerPage } from './pages/PlanSpecExplorerPage'
 import { DestinationsPublicPage } from './pages/DestinationsPublicPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { PresenceLogsPage } from './pages/PresenceLogsPage'
+import { PoliceDashboardPage } from './pages/PoliceDashboardPage'
 import NotFound from './pages/NotFound'
 
 const App = () => (
@@ -59,6 +60,17 @@ const App = () => (
                 }
               />
               <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+
+              {/* Police protected routes */}
+              <Route
+                path="/police/dashboard"
+                element={
+                  <ProtectedRoute requirePolice>
+                    <PoliceDashboardPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/police" element={<Navigate to="/police/dashboard" replace />} />
 
               {/* Public exploratory flow */}
               <Route path="/onboarding" element={<OnboardingPage />} />

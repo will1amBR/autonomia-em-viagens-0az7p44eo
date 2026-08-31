@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-31T15:24:11.257Z",
+  "generatedAt": "2026-08-31T16:14:45.684Z",
   "collections": [
     {
       "name": "users",
@@ -43,7 +43,7 @@
           "type": "select",
           "required": false,
           "system": false,
-          "selectValues": ["user", "admin"]
+          "selectValues": ["user", "admin", "police"]
         },
         {
           "name": "phone",
@@ -199,8 +199,8 @@
       "name": "trips",
       "type": "base",
       "apiRules": {
-        "list": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
-        "view": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
+        "list": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin' || @request.auth.role = 'police')",
+        "view": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin' || @request.auth.role = 'police')",
         "create": "@request.auth.id != ''",
         "update": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
         "delete": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')"

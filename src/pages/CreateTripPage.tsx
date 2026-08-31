@@ -87,6 +87,18 @@ export const CreateTripPage: React.FC = () => {
         whoIsPaying,
         travelingWith,
         hostResponsiblePerson: hostResponsiblePerson.trim(),
+        hostRelationship: hostRelationship.trim(),
+        hostPhone: hostPhone.trim(),
+        hostDocument: hostDocument.trim(),
+        companionDetails: companionDetails.trim(),
+        accommodationDetails: {
+          responsibleName: hostResponsiblePerson.trim(),
+          responsiblePhone: hostPhone.trim(),
+          responsibleDocument: hostDocument.trim(),
+          relationship: hostRelationship.trim(),
+          companionNotes: companionDetails.trim(),
+        },
+        quickNotes: quickNotes.trim(),
         tripReason: quickNotes.trim() || companionDetails.trim() || 'Viagem Internacional',
       })
       toast({

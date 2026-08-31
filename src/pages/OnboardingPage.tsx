@@ -34,7 +34,7 @@ export const OnboardingPage: React.FC = () => {
   const [step, setStep] = useState(1)
   const [passcode, setPasscode] = useState('')
   const [duressMethod, setDuressMethod] = useState<'volume_key' | 'hold_3s' | 'secret_code'>(
-    'volume_key',
+    'secret_code',
   )
   const [duressSecretCode, setDuressSecretCode] = useState('9999')
   const [guardianName, setGuardianName] = useState('')
@@ -231,15 +231,67 @@ export const OnboardingPage: React.FC = () => {
             <CardContent className="space-y-4">
               {/* Recommendation Note */}
               <div className="p-3.5 rounded-2xl bg-sky-950/50 border border-sky-500/30 text-xs text-sky-200">
-                <span className="font-bold text-sky-300">💡 Recomendação de Segurança:</span> Uma{' '}
-                <strong>tecla física (como o botão de volume)</strong> costuma ser o método mais
-                discreto, pois pode ser acionada mesmo com o aparelho no bolso ou sem olhar para a
-                tela.
+                <span className="font-bold text-sky-300">💡 Método Discreto Seguro em Mobile:</span>{' '}
+                O <strong>Código Secreto de Coação</strong> ou o{' '}
+                <strong>Padrão de 4 Toques Rápidos</strong> no botão discreto são 100% funcionais em
+                qualquer celular e navegador móvel, acionando o socorro imediatamente sem alertar
+                terceiros.
               </div>
 
               {/* Options */}
               <div className="space-y-2.5">
-                {/* 1. Volume Key */}
+                {/* 1. Secret Code (Recommended for mobile) */}
+                <button
+                  type="button"
+                  onClick={() => setDuressMethod('secret_code')}
+                  className={`w-full p-3.5 rounded-2xl border text-left transition-all flex items-start gap-3 ${
+                    duressMethod === 'secret_code'
+                      ? 'border-sky-500 bg-sky-950/40 text-white ring-2 ring-sky-500/30'
+                      : 'border-slate-800 bg-slate-950/60 text-slate-300 hover:bg-slate-800/60'
+                  }`}
+                >
+                  <div className="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center shrink-0 mt-0.5">
+                    <KeyRound className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-0.5 w-full">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-white">Código Secreto de Coação</span>
+                      <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-400/30 text-[9px]">
+                        Recomendado Mobile
+                      </Badge>
+                    </div>
+                    <p className="text-[11px] text-slate-400">
+                      Ao digitar este código na saída rápida ou em qualquer tela, o app simula
+                      fechar normalmente mas envia alerta silencioso com GPS.
+                    </p>
+                  </div>
+                </button>
+
+                {/* 2. Hold 3 seconds / Multi-tap */}
+                <button
+                  type="button"
+                  onClick={() => setDuressMethod('hold_3s')}
+                  className={`w-full p-3.5 rounded-2xl border text-left transition-all flex items-start gap-3 ${
+                    duressMethod === 'hold_3s'
+                      ? 'border-sky-500 bg-sky-950/40 text-white ring-2 ring-sky-500/30'
+                      : 'border-slate-800 bg-slate-950/60 text-slate-300 hover:bg-slate-800/60'
+                  }`}
+                >
+                  <div className="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0 mt-0.5">
+                    <Hand className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-bold text-white">
+                      Padrão de Toques Discretos (3s ou 4 toques)
+                    </span>
+                    <p className="text-[11px] text-slate-400">
+                      Toque contínuo de 3 segundos ou 4 toques rápidos no botão flutuante de
+                      segurança em qualquer tela.
+                    </p>
+                  </div>
+                </button>
+
+                {/* 3. Keyboard Shortcut (Desktop only) */}
                 <button
                   type="button"
                   onClick={() => setDuressMethod('volume_key')}
@@ -255,60 +307,18 @@ export const OnboardingPage: React.FC = () => {
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-bold text-white">
-                        Pressionar Botão de Volume (Tecla)
+                        Atalho de Teclado (Desktop)
                       </span>
-                      <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-400/30 text-[9px]">
-                        Recomendado
+                      <Badge
+                        variant="outline"
+                        className="text-slate-400 border-slate-700 text-[9px]"
+                      >
+                        Computador
                       </Badge>
                     </div>
                     <p className="text-[11px] text-slate-400">
-                      Dispara alerta silencioso ao pressionar a tecla de volume do celular (ou
-                      Ctrl+Shift+K no teclado).
-                    </p>
-                  </div>
-                </button>
-
-                {/* 2. Hold 3 seconds */}
-                <button
-                  type="button"
-                  onClick={() => setDuressMethod('hold_3s')}
-                  className={`w-full p-3.5 rounded-2xl border text-left transition-all flex items-start gap-3 ${
-                    duressMethod === 'hold_3s'
-                      ? 'border-sky-500 bg-sky-950/40 text-white ring-2 ring-sky-500/30'
-                      : 'border-slate-800 bg-slate-950/60 text-slate-300 hover:bg-slate-800/60'
-                  }`}
-                >
-                  <div className="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0 mt-0.5">
-                    <Hand className="w-5 h-5" />
-                  </div>
-                  <div className="space-y-0.5">
-                    <span className="text-xs font-bold text-white">
-                      Tocar e Segurar na Tela por 3 Segundos
-                    </span>
-                    <p className="text-[11px] text-slate-400">
-                      Dispara o alerta ao manter o dedo pressionado sobre o mini botão de proteção
-                      na área de fotos/vídeos.
-                    </p>
-                  </div>
-                </button>
-
-                {/* 3. Secret Code */}
-                <button
-                  type="button"
-                  onClick={() => setDuressMethod('secret_code')}
-                  className={`w-full p-3.5 rounded-2xl border text-left transition-all flex items-start gap-3 ${
-                    duressMethod === 'secret_code'
-                      ? 'border-sky-500 bg-sky-950/40 text-white ring-2 ring-sky-500/30'
-                      : 'border-slate-800 bg-slate-950/60 text-slate-300 hover:bg-slate-800/60'
-                  }`}
-                >
-                  <div className="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center shrink-0 mt-0.5">
-                    <KeyRound className="w-5 h-5" />
-                  </div>
-                  <div className="space-y-0.5 w-full">
-                    <span className="text-xs font-bold text-white">Digitar um Código Secreto</span>
-                    <p className="text-[11px] text-slate-400">
-                      Dispara o alerta quando você digita um código específico no campo discreto.
+                      Dispara alerta silencioso ao pressionar Alt+Shift+S no teclado de
+                      computadores.
                     </p>
                   </div>
                 </button>

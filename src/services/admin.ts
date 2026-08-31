@@ -156,14 +156,14 @@ export const adminService = {
         recentTrips: trips.slice(0, 5),
       }
     } catch (e) {
-      console.warn('Could not fetch real admin metrics, fallback', e)
+      console.error('Error fetching real admin metrics from backend:', e)
       return {
-        totalUsers: 12,
-        totalAdmins: 1,
-        totalTrips: 8,
-        totalAssessments: 14,
-        averageScore: 68,
-        scoreDistribution: { high: 8, moderate: 4, low: 2 },
+        totalUsers: 0,
+        totalAdmins: 0,
+        totalTrips: 0,
+        totalAssessments: 0,
+        averageScore: 0,
+        scoreDistribution: { high: 0, moderate: 0, low: 0 },
         recentTrips: [],
       }
     }

@@ -6,13 +6,15 @@ import { Shield } from 'lucide-react'
 interface ProtectedRouteProps {
   children: React.ReactNode
   requireAdmin?: boolean
+  requirePolice?: boolean
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   requireAdmin = false,
+  requirePolice = false,
 }) => {
-  const { isAuthenticated, isAdmin, isLoading } = useAuth()
+  const { isAuthenticated, isAdmin, isPolice, isLoading } = useAuth()
   const location = useLocation()
 
   if (isLoading) {
@@ -32,6 +34,10 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   if (requireAdmin && !isAdmin) {
     return <Navigate to="/admin/login" replace />
+  }
+
+  if (requirePolice && !(isPolice || isAdmin)) {
+    return <Navigate to="/entrar" replace />
   }
 
   return <>{children}</>
