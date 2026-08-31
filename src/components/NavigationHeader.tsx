@@ -1,29 +1,168 @@
 import React, { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
-  Shield,
-  LifeBuoy,
-  BookOpen,
+  Compass,
   CheckSquare,
   Users,
-  Compass,
-  FileCheck,
-  AlertTriangle,
+  ShieldAlert,
   Menu,
   X,
-  Lock,
-  EyeOff,
+  Phone,
+  BookOpen,
   LogOut,
-  ExternalLink,
-  ShieldAlert,
-  User,
-  Search,
-  RotateCcw,
+  ChevronRight,
+  Shield,
+  EyeOff,
+  CloudRain,
+  Sun,
+  PlusCircle,
 } from 'lucide-react'
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
 import { useTrip } from '../context/TripContext'
 import { useAuth } from '../context/AuthContext'
+
+export const NavigationHeader: React.FC = () => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { currentTrip, isQuickExitActive, triggerQuickExit, restoreFromQuickExit } = useTrip()
+  const { logout, user } = useAuth()
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  const navItems = [
+    { label: 'Painel', path: '/dashboard', icon: Compass },
+    { label: 'Avaliação', path: '/assessment', icon: Shield },
+    { label: 'Checklist', path: '/checklist', icon: CheckSquare },
+    { label: 'Guardiões', path: '/guardians', icon: Users },
+    { label: 'Emergência', path: '/emergency', icon: Phone },
+    { label: 'Biblioteca', path: '/library', icon: BookOpen },
+  ]
+
+  const isActive = (path: string) => location.pathname === path
+
+  return (
+    <>
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200">
+        <div className="container mx-auto px-4 max-w-6xl h-16 flex items-center justify-between gap-4">
+          {/* Logo & Brand */}
+          <Link to="/dashboard" className="flex items-center gap-2.5 shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-sky-600/20">
+              <Shield className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="font-black text-base text-slate-900 tracking-tight">SafeTrip</span>
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-sky-100 text-sky-800 uppercase">
+                  Autonomia
+                </span>
+              </div>
+              <span className="text-[10px] text-slate-500 block leading-none">
+                Segurança Internacional
+              </span>
+            </div>
+          </Link>
+
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center gap-1">
+            {navItems.map((item) => {
+              const Icon = item.icon
+              const active = isActive(item.path)
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                    active
+                      ? 'bg-sky-50 text-sky-700'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  }`}
+                >
+                  <Icon className={`w-3.5 h-3.5 ${active ? 'text-sky-600' : 'text-slate-400'}`} />
+                  <span>{item.label}</span>
+                </Link>
+              )
+            })}
+          </nav>
+
+          {/* User menu & Actions */}
+          <div className="flex items-center gap-2">
+            <Link to="/trips/new" className="hidden sm:inline-flex">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs font-semibold border-sky-200 text-sky-700 hover:bg-sky-50"
+              >
+                <PlusCircle className="w-3.5 h-3.5 mr-1" />
+                Nova Viagem
+              </Button>
+            </Link>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                logout()
+                navigate('/')
+              }}
+              className="text-xs text-slate-500 hover:text-slate-900 h-8 px-2"
+              title="Encerrar sessão"
+            >
+              <LogOut className="w-3.5 h-3.5 sm:mr-1 text-slate-400" />
+              <span className="hidden sm:inline">Sair</span>
+            </Button>
+
+            {/* Mobile menu trigger */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden h-8 w-8 p-0"
+              aria-label="Menu"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </Button>
+          </div>
+        </div>
+
+        {/* Mobile Dropdown Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-b border-slate-200 bg-white px-4 py-3 space-y-1 shadow-lg animate-in slide-in-from-top-2">
+            <div className="pb-2 mb-2 border-b border-slate-100 flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-700">
+                Olá, {user?.name || user?.email || 'Viajante'}
+              </span>
+              <Link to="/trips/new" onClick={() => setMobileMenuOpen(false)}>
+                <Button size="sm" className="h-7 text-[11px] bg-sky-600 text-white font-semibold">
+                  + Nova Viagem
+                </Button>
+              </Link>
+            </div>
+            {navItems.map((item) => {
+              const Icon = item.icon
+              const active = isActive(item.path)
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between ${
+                    active ? 'bg-sky-50 text-sky-700' : 'text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Icon className={`w-4 h-4 ${active ? 'text-sky-600' : 'text-slate-400'}`} />
+                    <span>{item.label}</span>
+                  </div>
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
+                </Link>
+              )
+            })}
+          </div>
+        )}
+      </header>
+    </>
+  )
+}
 
 export const QuickExitOverlay: React.FC = () => {
   const { isQuickExitActive, restoreFromQuickExit } = useTrip()
@@ -31,295 +170,46 @@ export const QuickExitOverlay: React.FC = () => {
   if (!isQuickExitActive) return null
 
   return (
-    <div className="fixed inset-0 z-50 bg-white text-slate-800 flex flex-col p-6 overflow-y-auto">
-      <div className="max-w-3xl mx-auto w-full space-y-6">
-        {/* Fake Search Engine Look */}
-        <div className="flex items-center justify-between border-b pb-4">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl font-bold tracking-tight text-blue-600">G</span>
-            <span className="text-2xl font-bold tracking-tight text-red-500">o</span>
-            <span className="text-2xl font-bold tracking-tight text-amber-500">o</span>
-            <span className="text-2xl font-bold tracking-tight text-blue-600">g</span>
-            <span className="text-2xl font-bold tracking-tight text-green-600">l</span>
-            <span className="text-2xl font-bold tracking-tight text-red-500">e</span>
+    <div className="fixed inset-0 z-[10000] bg-slate-900 text-slate-100 flex flex-col items-center justify-center p-6 space-y-6 select-none font-sans">
+      <div className="max-w-md w-full bg-slate-800 rounded-3xl p-6 border border-slate-700 shadow-2xl space-y-5 text-center">
+        <div className="flex justify-center">
+          <div className="w-16 h-16 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center border border-sky-400/30">
+            <CloudRain className="w-8 h-8" />
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
+        </div>
+
+        <div className="space-y-1">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            Previsão do Tempo Global
+          </span>
+          <h2 className="text-3xl font-black text-white">21°C • Ensolarado</h2>
+          <p className="text-xs text-slate-400">São Paulo, Brasil • Umidade 62% • Vento 12 km/h</p>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-700 text-xs">
+          <div className="p-2 rounded-xl bg-slate-900/60">
+            <span className="text-[10px] text-slate-400 block">Amanhã</span>
+            <span className="font-bold text-white">23°C</span>
+          </div>
+          <div className="p-2 rounded-xl bg-slate-900/60">
+            <span className="text-[10px] text-slate-400 block">Quinta</span>
+            <span className="font-bold text-white">19°C</span>
+          </div>
+          <div className="p-2 rounded-xl bg-slate-900/60">
+            <span className="text-[10px] text-slate-400 block">Sexta</span>
+            <span className="font-bold text-white">24°C</span>
+          </div>
+        </div>
+
+        <div className="pt-4 flex flex-col items-center gap-2">
+          <button
             onClick={restoreFromQuickExit}
-            className="text-[11px] text-slate-400 hover:text-slate-700"
+            className="text-[11px] text-slate-500 hover:text-slate-300 underline transition-colors cursor-pointer"
           >
-            <RotateCcw className="w-3.5 h-3.5 mr-1" />
-            <span>Restaurar app</span>
-          </Button>
-        </div>
-
-        <div className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-          <input
-            type="text"
-            defaultValue="receitas de culinária simples para o almoço"
-            className="w-full pl-10 pr-4 py-2 text-sm border border-slate-200 rounded-full shadow-sm outline-none"
-            readOnly
-          />
-        </div>
-
-        <div className="space-y-4 text-xs text-slate-600">
-          <div className="space-y-1">
-            <span className="text-blue-700 text-sm font-medium hover:underline cursor-pointer block">
-              15 Receitas Rápidas de Almoço para o Dia a Dia - TudoGostoso
-            </span>
-            <p className="text-slate-500">
-              Confira receitas práticas e fáceis prontas em menos de 20 minutos com ingredientes que
-              você já tem em casa...
-            </p>
-          </div>
-
-          <div className="space-y-1">
-            <span className="text-blue-700 text-sm font-medium hover:underline cursor-pointer block">
-              Almoço de Domingo: 20 ideias de pratos saborosos e fáceis
-            </span>
-            <p className="text-slate-500">
-              Dicas de massas, assados e saladas completas para reunir a família com praticidade...
-            </p>
-          </div>
+            Retomar sessão protegida
+          </button>
         </div>
       </div>
     </div>
-  )
-}
-
-export const NavigationHeader: React.FC = () => {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const { triggerQuickExit, isQuickExitActive } = useTrip()
-  const { user, isAuthenticated, isAdmin, logout } = useAuth()
-  const [mobileOpen, setMobileOpen] = useState(false)
-
-  if (isQuickExitActive) {
-    return null
-  }
-
-  const navItems = [
-    { label: 'Visão Geral', path: '/dashboard', icon: Compass },
-    { label: 'Autonomia (Quiz)', path: '/assessment', icon: FileCheck },
-    { label: 'Guardians', path: '/guardians', icon: Users },
-    { label: 'Check-in', path: '/checkin', icon: LifeBuoy },
-    { label: 'Checklist', path: '/checklist', icon: CheckSquare },
-    { label: 'Biblioteca', path: '/security-library', icon: BookOpen },
-  ]
-
-  const isEmergencyPage = location.pathname === '/emergency'
-
-  return (
-    <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      {/* Quick Exit Bar Top (Discreet Safety Feature) */}
-      <div className="bg-slate-900 text-slate-300 px-4 py-1.5 text-xs flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-[11px] font-medium text-slate-300">
-            Ambiente Seguro • Dados Privados
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={triggerQuickExit}
-            className="h-6 px-2 text-[11px] text-amber-300 hover:text-amber-200 hover:bg-slate-800 flex items-center gap-1 font-semibold"
-            title="Disfarce rápido da tela imediatamente"
-          >
-            <EyeOff className="w-3.5 h-3.5" />
-            <span>Saída Rápida (Quick Exit)</span>
-          </Button>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Brand */}
-        <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center text-white shadow-sm shadow-sky-500/20 group-hover:scale-105 transition-transform">
-            <Shield className="w-5 h-5" />
-          </div>
-          <div className="flex flex-col">
-            <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-base tracking-tight text-foreground">
-                SafeTrip
-              </span>
-              <Badge
-                variant="secondary"
-                className="text-[10px] px-1.5 py-0 font-semibold bg-sky-100 text-sky-800"
-              >
-                Autonomia
-              </Badge>
-            </div>
-            <span className="text-[10px] text-muted-foreground -mt-0.5 hidden sm:inline">
-              Autonomia Não É Desconfiança
-            </span>
-          </div>
-        </Link>
-
-        {/* Desktop Navigation Links */}
-        <nav className="hidden lg:flex items-center gap-1">
-          {navItems.map((item) => {
-            const Icon = item.icon
-            const isActive = location.pathname === item.path
-            return (
-              <Link key={item.path} to={item.path}>
-                <Button
-                  variant={isActive ? 'secondary' : 'ghost'}
-                  size="sm"
-                  className={`h-9 text-xs font-medium gap-1.5 ${
-                    isActive ? 'font-semibold text-primary' : 'text-muted-foreground'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{item.label}</span>
-                </Button>
-              </Link>
-            )
-          })}
-        </nav>
-
-        {/* Right side actions */}
-        <div className="flex items-center gap-2">
-          {/* Emergency Button */}
-          <Link to="/emergency">
-            <Button
-              variant={isEmergencyPage ? 'default' : 'destructive'}
-              size="sm"
-              className={`h-9 font-bold px-3 text-xs flex items-center gap-1.5 shadow-sm transition-all ${
-                isEmergencyPage
-                  ? 'bg-red-700 text-white animate-pulse'
-                  : 'bg-red-600 hover:bg-red-700 text-white'
-              }`}
-            >
-              <AlertTriangle className="w-4 h-4" />
-              <span className="hidden sm:inline">Modo Emergência</span>
-              <span className="sm:hidden">Emergência</span>
-            </Button>
-          </Link>
-
-          {/* User Auth Info / Login */}
-          {isAuthenticated ? (
-            <div className="flex items-center gap-1.5 pl-1.5 border-l border-slate-200">
-              {isAdmin && (
-                <Link to="/admin/dashboard" title="Painel Admin">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-9 px-2.5 text-xs font-bold text-amber-800 bg-amber-50 border-amber-300 hover:bg-amber-100 gap-1"
-                  >
-                    <ShieldAlert className="w-3.5 h-3.5 text-amber-600" />
-                    <span className="hidden xl:inline">Admin</span>
-                  </Button>
-                </Link>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  logout()
-                  navigate('/entrar')
-                }}
-                className="h-9 px-2 text-xs text-slate-500 hover:text-red-600 gap-1"
-                title="Sair"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span className="hidden md:inline">Sair</span>
-              </Button>
-            </div>
-          ) : (
-            <Link to="/entrar" className="pl-1">
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-9 px-3 text-xs font-bold text-sky-700 border-sky-300 hover:bg-sky-50"
-              >
-                Entrar
-              </Button>
-            </Link>
-          )}
-
-          {/* Mobile menu trigger */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden h-9 w-9"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Abrir menu de navegação"
-          >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </Button>
-        </div>
-      </div>
-
-      {/* Mobile Menu Dropdown */}
-      {mobileOpen && (
-        <div className="lg:hidden border-b border-border/80 bg-background/98 px-4 py-3 space-y-1">
-          {navItems.map((item) => {
-            const Icon = item.icon
-            const isActive = location.pathname === item.path
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={() => setMobileOpen(false)}
-                className="block"
-              >
-                <div
-                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium ${
-                    isActive
-                      ? 'bg-primary/10 text-primary font-semibold'
-                      : 'text-muted-foreground hover:bg-muted'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{item.label}</span>
-                </div>
-              </Link>
-            )
-          })}
-
-          <div className="pt-2 border-t border-slate-100 flex flex-col gap-2">
-            {isAuthenticated ? (
-              <>
-                {isAdmin && (
-                  <Link
-                    to="/admin/dashboard"
-                    onClick={() => setMobileOpen(false)}
-                    className="block"
-                  >
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold text-amber-800 bg-amber-50 border border-amber-300">
-                      <ShieldAlert className="w-4 h-4 text-amber-600" />
-                      <span>Painel de Administração</span>
-                    </div>
-                  </Link>
-                )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    logout()
-                    setMobileOpen(false)
-                    navigate('/entrar')
-                  }}
-                  className="w-full text-xs text-red-600 border-red-200"
-                >
-                  <LogOut className="w-3.5 h-3.5 mr-1.5" />
-                  <span>Encerrar Sessão ({user?.email})</span>
-                </Button>
-              </>
-            ) : (
-              <Link to="/entrar" onClick={() => setMobileOpen(false)} className="block">
-                <Button className="w-full bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold">
-                  Entrar no SafeTrip
-                </Button>
-              </Link>
-            )}
-          </div>
-        </div>
-      )}
-    </header>
   )
 }
