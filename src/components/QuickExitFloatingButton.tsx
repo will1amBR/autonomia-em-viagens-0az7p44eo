@@ -1,17 +1,20 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef } from 'react'
 import { CloudSun } from 'lucide-react'
 import { useTrip } from '../context/TripContext'
+import { useAuth } from '../context/AuthContext'
 import pb from '@/lib/pocketbase/client'
 
 export const QuickExitFloatingButton: React.FC = () => {
   const { triggerQuickExit } = useTrip()
+  const { user } = useAuth()
   const tapCountRef = useRef(0)
   const tapTimerRef = useRef<any>(null)
   const holdTimerRef = useRef<any>(null)
+  const isHoldFiredRef = useRef(false)
 
   const triggerSilentSOS = (methodName: string = 'floating_button_pattern') => {
     const sendSOS = (lat: number | null, lng: number | null) => {
-      pb.send('/api/duress-silent-alert', {
+      pb.send('/backend/v1/duress-silent-alert', {
         method: 'POST',
         body: {
           userId: user?.id,
@@ -19,8 +22,12 @@ export const QuickExitFloatingButton: React.FC = () => {
           latitude: lat,
           longitude: lng,
           batteryLevel: 0.85,
-          networkStatus: typeof navigator !== 'undefined' && navigator.onLine ? 'online' : 'offline',
-          approxLocation: lat && lng ? `GPS (${lat.toFixed(4)}, ${lng.toFixed(4)}) - Botão Flutuante` : 'Roma, Itália - Botão Flutuante (GPS Indisponível)',
+          networkStatus:
+            typeof navigator !== 'undefined' && navigator.onLine ? 'online' : 'offline',
+          approxLocation:
+            lat && lng
+              ? `GPS (${lat.toFixed(4)}, ${lng.toFixed(4)}) - Toques no Botão Flutuante`
+              : 'Roma, Itália - Botão Flutuante',
         },
       }).catch((err) => {
         console.log('[Duress Alert] Error sending SOS from floating button:', err)
@@ -31,16 +38,21 @@ export const QuickExitFloatingButton: React.FC = () => {
       navigator.geolocation.getCurrentPosition(
         (pos) => sendSOS(pos.coords.latitude, pos.coords.longitude),
         () => sendSOS(null, null),
-        { timeout: 3000 }
+        { timeout: 3000 },
       )
     } else {
       sendSOS(null, null)
     }
   }
   const handlePointerDown = () => {
+    isHoldFiredRef.current = false
     // Start 3-second hold timer for discrete duress alert
     holdTimerRef.current = setTimeout(() => {
-      triggerSilentSOS()
+      isHoldFiredRef.current = true
+      triggerSilentSOS('floating_button_hold_3s')
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate([80, 40, 80])
+      }
     }, 3000)
   }
 
@@ -55,20 +67,25 @@ export const QuickExitFloatingButton: React.FC = () => {
     e.preventDefault()
     e.stopPropagation()
 
+    if (isHoldFiredRef.current) {
+      isHoldFiredRef.current = false
+      return
+    }
+
     tapCountRef.current += 1
     if (tapTimerRef.current) clearTimeout(tapTimerRef.current)
 
     // Check if user tapped 4 times rapidly (discrete mobile signal)
     if (tapCountRef.current >= 4) {
-      triggerSilentSOS()
+      triggerSilentSOS('floating_button_4_taps')
       tapCountRef.current = 0
     } else {
       tapTimerRef.current = setTimeout(() => {
         tapCountRef.current = 0
-      }, 1000)
+      }, 1200)
     }
 
-    // Single touch still triggers instant weather disguise overlay
+    // Single touch triggers instant weather disguise overlay
     triggerQuickExit()
   }
 

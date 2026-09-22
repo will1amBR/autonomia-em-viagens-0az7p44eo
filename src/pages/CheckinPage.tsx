@@ -108,8 +108,11 @@ export const CheckinPage: React.FC = () => {
 
   const handleRunSimulation = async (stage: 1 | 2 | 3 | 4) => {
     setIsSimulating(true)
-    await simulateAbsenceStage(stage)
-    setTimeout(() => setIsSimulating(false), 800)
+    try {
+      await simulateAbsenceStage(stage)
+    } finally {
+      setTimeout(() => setIsSimulating(false), 800)
+    }
   }
 
   const getFrequencyLabel = (freq: CheckinFrequency) => {
@@ -614,70 +617,108 @@ export const CheckinPage: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Visual Log: History of Sent Absence Notifications */}
+      {/* Visual Log: History of Sent Absence Notifications & SMTP Status */}
       <Card className="border-slate-200 shadow-sm">
         <CardHeader className="p-5 pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base font-bold flex items-center gap-2">
-              <Mail className="w-4 h-4 text-sky-600" /> Histórico de Notificações por E-mail (Log
-              Visual)
-            </CardTitle>
-            <Badge variant="outline" className="text-[10px]">
-              {notifsList.length} registro(s)
-            </Badge>
-          </div>
-          <CardDescription className="text-xs">
-            Registro de e-mails disparados pelo PocketBase para o viajante e seus Guardians.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-5 pt-0 space-y-2.5">
-          {notifsList.map((notif) => (
-            <div
-              key={notif.id}
-              className="p-3 rounded-xl border border-slate-200 bg-slate-50/70 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
-            >
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Badge
-                    className={
-                      notif.stage === 1
-                        ? 'bg-sky-600 text-white'
-                        : notif.stage === 2
-                          ? 'bg-amber-600 text-white'
-                          : notif.stage === 3
-                            ? 'bg-orange-600 text-white'
-                            : 'bg-red-600 text-white'
-                    }
-                  >
-                    Etapa {notif.stage}
-                  </Badge>
-                  <span className="font-semibold text-slate-800">{notif.subject}</span>
-                </div>
-                <div className="flex items-center gap-3 text-[11px] text-slate-500 flex-wrap">
-                  <span>
-                    Destinatário: <strong>{notif.recipientEmail}</strong> (
-                    {notif.recipientName || 'Contato'})
-                  </span>
-                  <span>Tipo: {notif.recipientType}</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 text-[11px] text-slate-400 self-end sm:self-auto flex-shrink-0">
-                <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-semibold">
-                  E-mail Transmitido
-                </span>
-                <span>{new Date(notif.sentAt).toLocaleString('pt-BR')}</span>
-              </div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <CardTitle className="text-base font-bold flex items-center gap-2">
+                <Mail className="w-4 h-4 text-sky-600" /> Histórico de Notificações por E-mail (Log
+                Visual)
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Registro de disparos do protocolo de ausência para o viajante e seus Guardians.
+              </CardDescription>
             </div>
-          ))}
-
-          {notifsList.length === 0 && (
-            <div className="p-6 text-center text-slate-400 border border-dashed border-slate-200 rounded-xl">
-              <Mail className="w-6 h-6 mx-auto mb-1 opacity-40" />
-              <p className="text-xs">
-                Nenhuma notificação de ausência precisou ser disparada até o momento.
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge
+                variant="outline"
+                className="text-[10px] bg-amber-50 text-amber-800 border-amber-300 flex items-center gap-1 font-semibold"
+              >
+                <Info className="w-3 h-3 text-amber-600" />
+                Pendente de configuração SMTP real (simulado em log)
+              </Badge>
+              <Badge variant="outline" className="text-[10px]">
+                {notifsList.length} registro(s)
+              </Badge>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-5 pt-0 space-y-3">
+          {/* SMTP Explanatory Banner */}
+          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-start gap-2.5">
+            <Info className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <p className="font-semibold text-slate-800">
+                Sobre o Envio de E-mails aos Guardians:
+              </p>
+              <p className="text-[11px] leading-relaxed">
+                As mensagens abaixo são registradas e auditadas no banco de dados. Quando
+                credenciais SMTP reais forem inseridas nas configurações do backend, os e-mails
+                serão entregues imediatamente nas caixas postais dos guardiões selecionados sem
+                necessidade de alteração no código.
               </p>
             </div>
-          )}
+          </div>
+
+          <div className="space-y-2.5">
+            {notifsList.map((notif) => (
+              <div
+                key={notif.id}
+                className="p-3 rounded-xl border border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs hover:border-slate-300 transition-colors"
+              >
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge
+                      className={
+                        notif.stage === 1
+                          ? 'bg-sky-600 text-white'
+                          : notif.stage === 2
+                            ? 'bg-amber-600 text-white'
+                            : notif.stage === 3
+                              ? 'bg-orange-600 text-white'
+                              : 'bg-red-600 text-white'
+                      }
+                    >
+                      Etapa {notif.stage}
+                    </Badge>
+                    <span className="font-semibold text-slate-800">{notif.subject}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-[11px] text-slate-500 flex-wrap">
+                    <span>
+                      Destinatário: <strong>{notif.recipientEmail}</strong> (
+                      {notif.recipientName || 'Contato'})
+                    </span>
+                    <span>Tipo: {notif.recipientType}</span>
+                    {notif.message && (
+                      <span className="text-slate-400 max-w-md truncate block">
+                        Obs: {notif.message}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-[11px] text-slate-400 self-end sm:self-auto flex-shrink-0">
+                  <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-semibold">
+                    Registrado com Sucesso
+                  </span>
+                  <span>{new Date(notif.sentAt).toLocaleString('pt-BR')}</span>
+                </div>
+              </div>
+            ))}
+
+            {notifsList.length === 0 && (
+              <div className="p-6 text-center text-slate-400 border border-dashed border-slate-200 rounded-xl">
+                <Mail className="w-6 h-6 mx-auto mb-1 opacity-40" />
+                <p className="text-xs">
+                  Nenhuma notificação de ausência precisou ser disparada até o momento.
+                </p>
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Use os botões de teste acima ("Etapa 1", "Etapa 2", "Etapa 3", "Etapa 4") para
+                  simular o protocolo.
+                </p>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 

@@ -83,7 +83,7 @@ export const presenceService = {
   // Send automatic email with GPS and device info to selected guardians
   async sendGpsNotificationToGuardians(payload: GpsDevicePayload) {
     try {
-      const res = await pb.send('/api/guardian-notify-gps', {
+      const res = await pb.send('/backend/v1/guardian-notify-gps', {
         method: 'POST',
         body: payload,
       })
@@ -95,11 +95,17 @@ export const presenceService = {
   },
 
   // Trigger silent duress alert (notifies emergency guardians and police without showing alerts on screen)
-  async triggerSilentDuressAlert(payload: DuressAlertPayload) {
+  async triggerSilentDuressAlert(payload: DuressAlertPayload & { userId?: string }) {
     try {
-      const res = await pb.send('/api/duress-silent-alert', {
+      const res = await pb.send('/backend/v1/duress-silent-alert', {
         method: 'POST',
-        body: payload,
+        body: {
+          ...payload,
+          userId: payload.userId || pb.authStore.record?.id,
+          latitude: payload.location_lat,
+          longitude: payload.location_lng,
+          approxLocation: payload.location_address,
+        },
       })
       return res
     } catch (e: any) {
@@ -186,6 +192,11 @@ export const presenceService = {
   // Upload confirmation photo or morning/night video
   async uploadConfirmationMedia(formData: FormData): Promise<any> {
     try {
+      // Ensure file is populated in both file and media_file fields if possible
+      const rawFile = formData.get('file')
+      if (rawFile && !formData.has('media_file')) {
+        formData.append('media_file', rawFile)
+      }
       const rec = await pb.collection('confirmation_media').create(formData)
       return rec
     } catch (e: any) {
@@ -207,22 +218,34 @@ export const presenceService = {
         sort: '-created',
       })
 
-      return res.items.map((i: any) => ({
-        id: i.id,
-        userId: i.user_id,
-        tripId: i.trip_id,
-        mediaType: i.media_type,
-        file: i.file,
-        fileUrl: i.file ? pb.files.getURL(i, i.file) : undefined,
-        caption: i.caption,
-        locationApprox: i.location_approx,
-        locationLat: i.location_lat,
-        locationLng: i.location_lng,
-        takenUnderDuress: i.taken_under_duress,
-        deviceInfo: i.device_info,
-        timestamp: i.timestamp || i.created,
-        created: i.created,
-      }))
+      return res.items.map((i: any) => {
+        const fileProp = i.media_file || i.file || ''
+        let fileUrl = ''
+        if (fileProp) {
+          try {
+            fileUrl = pb.files.getURL(i, fileProp)
+          } catch {
+            /* ignore */
+          }
+        }
+
+        return {
+          id: i.id,
+          userId: i.user_id,
+          tripId: i.trip_id,
+          mediaType: i.media_type,
+          file: fileProp,
+          fileUrl,
+          caption: i.caption,
+          locationApprox: i.location_approx,
+          locationLat: i.location_lat,
+          locationLng: i.location_lng,
+          takenUnderDuress: i.taken_under_duress,
+          deviceInfo: i.device_info,
+          timestamp: i.timestamp || i.created,
+          created: i.created,
+        }
+      })
     } catch (e) {
       console.warn('Error listing confirmation media:', e)
       return []

@@ -428,11 +428,11 @@ export const tripsService = {
 
   async triggerAbsenceCheck(tripId: string, stage?: number) {
     try {
-      const response = await pb.send('/api/v1/absence/check', {
+      const response = await pb.send('/backend/v1/absence-protocol-check', {
         method: 'POST',
         body: {
-          trip_id: tripId,
-          stage: stage || 0,
+          tripId: tripId,
+          forceStage: typeof stage === 'number' && stage > 0 ? stage : null,
         },
       })
       return response

@@ -22,7 +22,7 @@ cronAdd('absence_protocol_check', '*/10 * * * *', () => {
         user = $app.findRecordById('users', userId)
       } catch (err) {}
 
-      const userName = user ? (user.getString('name') || user.getString('email')) : 'Viajante'
+      const userName = user ? user.getString('name') || user.getString('email') : 'Viajante'
       const userEmail = user ? user.getString('email') : ''
       const tripTitle = trip.getString('title') || 'Viagem'
       const destCity = trip.getString('destination_city') || ''
@@ -35,12 +35,23 @@ cronAdd('absence_protocol_check', '*/10 * * * *', () => {
       // Buscar último checkin ou presença
       let lastPresenceLog = null
       try {
-        const pLogs = $app.findRecordsByFilter('presence_logs', `user_id = "${userId}"`, '-timestamp', 1)
+        const pLogs = $app.findRecordsByFilter(
+          'presence_logs',
+          `user_id = "${userId}"`,
+          '-timestamp',
+          1,
+        )
         if (pLogs && pLogs.length > 0) lastPresenceLog = pLogs[0]
       } catch (err) {}
 
-      const lastPresenceTime = lastPresenceLog ? lastPresenceLog.getString('timestamp') : trip.getString('last_checkin_at') || trip.getString('created')
-      const lastPresenceLocation = lastPresenceLog ? lastPresenceLog.getString('location_approx') : (user ? user.getString('last_location_approx') : 'Não informada')
+      const lastPresenceTime = lastPresenceLog
+        ? lastPresenceLog.getString('timestamp')
+        : trip.getString('last_checkin_at') || trip.getString('created')
+      const lastPresenceLocation = lastPresenceLog
+        ? lastPresenceLog.getString('location_approx')
+        : user
+          ? user.getString('last_location_approx')
+          : 'Não informada'
 
       const lastTime = lastPresenceTime ? new Date(lastPresenceTime).getTime() : now
       const hoursElapsed = (now - lastTime) / (1000 * 60 * 60)
@@ -69,28 +80,65 @@ cronAdd('absence_protocol_check', '*/10 * * * *', () => {
 
       // Se o estágio mudou para um nível superior e está acima de zero
       if (newStage > currentStage && newStage > 0) {
-        console.log(`[Absence Protocol Cron] Usuário ${userName} progrediu para Estágio ${newStage} (atraso: ${overdueHours.toFixed(1)}h)`)
+        console.log(
+          `[Absence Protocol Cron] Usuário ${userName} progrediu para Estágio ${newStage} (atraso: ${overdueHours.toFixed(1)}h)`,
+        )
 
         // Buscar guardiões
         let guardians = []
         try {
-          guardians = $app.findRecordsByFilter('guardians', `user_id = "${userId}" && active = true`)
+          guardians = $app.findRecordsByFilter('guardians', `user_id = "${userId}"`)
         } catch (err) {}
 
         // Registrar no absence_notifications
         try {
           const absenceColl = $app.findCollectionByNameOrId('absence_notifications')
-          const notificationRecord = new Record(absenceColl)
-          notificationRecord.set('user_id', userId)
-          notificationRecord.set('trip_id', trip.id)
-          notificationRecord.set('stage', newStage)
-          notificationRecord.set('status', 'executed')
-          notificationRecord.set('sent_at', new Date().toISOString())
-
-          let actionSummary = `Etapa ${newStage} acionada automaticamente pelo cron (atraso de ${overdueHours.toFixed(1)}h).`
-          notificationRecord.set('actions_taken', actionSummary)
-          notificationRecord.set('notes', `Monitoramento autônomo. Local: ${lastPresenceLocation}`)
-          $app.save(notificationRecord)
+          if (newStage <= 2) {
+            const notif = new Record(absenceColl)
+            notif.set('user_id', userId)
+            notif.set('trip_id', trip.id)
+            notif.set('stage', newStage)
+            notif.set('recipient_type', 'traveler')
+            notif.set('recipient_email', userEmail || 'daianny@autonomia.com')
+            notif.set('recipient_name', userName)
+            notif.set(
+              'subject',
+              newStage === 1
+                ? `SafeTrip: Verificação de rotina — Está tudo bem em ${destCity}?`
+                : `SafeTrip: Segunda tentativa de contato — Confirme seu estado`,
+            )
+            notif.set(
+              'message',
+              `Etapa ${newStage} acionada automaticamente pelo cron (atraso de ${overdueHours.toFixed(1)}h).`,
+            )
+            notif.set('status', 'sent')
+            notif.set('sent_at', new Date().toISOString())
+            $app.save(notif)
+          } else {
+            for (let gIdx = 0; gIdx < guardians.length; gIdx++) {
+              const g = guardians[gIdx]
+              const notif = new Record(absenceColl)
+              notif.set('user_id', userId)
+              notif.set('trip_id', trip.id)
+              notif.set('stage', newStage)
+              notif.set('recipient_type', newStage === 3 ? 'guardians_security' : 'guardians_all')
+              notif.set('recipient_email', g.getString('email'))
+              notif.set('recipient_name', g.getString('name'))
+              notif.set(
+                'subject',
+                newStage === 3
+                  ? `SafeTrip: Alerta preventivo sobre ${userName} em ${destCity}`
+                  : `SafeTrip ALERTA: ${userName} sem contato prolongado em ${destCity}`,
+              )
+              notif.set(
+                'message',
+                `Ausência automática (atraso ${overdueHours.toFixed(1)}h). Anfitrião: ${hostName} (${hostPhone}).`,
+              )
+              notif.set('status', 'sent')
+              notif.set('sent_at', new Date().toISOString())
+              $app.save(notif)
+            }
+          }
         } catch (dbErr) {
           console.log('[Absence Cron] Erro ao gravar notificação:', dbErr)
         }
@@ -110,13 +158,15 @@ cronAdd('absence_protocol_check', '*/10 * * * *', () => {
             const msg = new MailerMessage({
               from: {
                 address: $app.settings().meta.senderAddress || 'checkin@autonomiaemviagens.com.br',
-                name: 'Autonomia em Viagens'
+                name: 'Autonomia em Viagens',
               },
               to: [{ address: userEmail, name: userName }],
               subject: `[Lembrete de Autonomia] Tudo bem na sua viagem em ${destCity}?`,
-              html: `<p>Olá ${userName}, lembrete de presença para a sua viagem a ${destCity}.</p>`
+              html: `<p>Olá ${userName}, lembrete de presença para a sua viagem a ${destCity}.</p>`,
             })
-            try { mailClient.send(msg) } catch (mErr) {}
+            try {
+              mailClient.send(msg)
+            } catch (mErr) {}
           } else if (newStage >= 2) {
             for (let gIdx = 0; gIdx < guardians.length; gIdx++) {
               const g = guardians[gIdx]
@@ -126,18 +176,23 @@ cronAdd('absence_protocol_check', '*/10 * * * *', () => {
 
               const msg = new MailerMessage({
                 from: {
-                  address: $app.settings().meta.senderAddress || 'seguranca@autonomiaemviagens.com.br',
-                  name: 'Autonomia em Viagens - Rede de Apoio'
+                  address:
+                    $app.settings().meta.senderAddress || 'seguranca@autonomiaemviagens.com.br',
+                  name: 'Autonomia em Viagens - Rede de Apoio',
                 },
                 to: [{ address: gEmail, name: gName }],
                 subject: `[Protocolo de Ausência - Etapa ${newStage}] Aviso para ${userName}`,
-                html: `<p>Olá ${gName}, aviso de ausência etapa ${newStage} para ${userName} em ${destCity}. Contato anfitrião: ${hostName} (${hostPhone}).</p>`
+                html: `<p>Olá ${gName}, aviso de ausência etapa ${newStage} para ${userName} em ${destCity}. Contato anfitrião: ${hostName} (${hostPhone}).</p>`,
               })
-              try { mailClient.send(msg) } catch (mErr) {}
+              try {
+                mailClient.send(msg)
+              } catch (mErr) {}
             }
           }
         } catch (mailClientErr) {
-          console.log('[Absence Cron] MailClient SMTP ausente (simulação cron executada com sucesso)')
+          console.log(
+            '[Absence Cron] MailClient SMTP ausente (simulação cron executada com sucesso)',
+          )
         }
       }
     }

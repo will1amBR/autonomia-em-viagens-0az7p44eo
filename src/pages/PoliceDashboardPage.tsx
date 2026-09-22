@@ -141,15 +141,17 @@ export const PoliceDashboardPage: React.FC = () => {
       })
       const itemsWithUrl = mediaResult.items.map((m) => {
         let fileUrl = ''
-        if (m.file) {
+        const fileName = (m as any).media_file || (m as any).file || ''
+        if (fileName) {
           try {
-            fileUrl = pb.files.getURL(m, m.file)
+            fileUrl = pb.files.getURL(m, fileName)
           } catch {
             /* intentionally ignored */
           }
         }
         return {
           ...m,
+          file: fileName,
           fileUrl,
         } as unknown as PoliceMediaItem
       })
@@ -167,6 +169,50 @@ export const PoliceDashboardPage: React.FC = () => {
 
   useEffect(() => {
     loadData()
+
+    // Realtime subscriptions for instantaneous police monitoring
+    let unsubAlerts: (() => Promise<void>) | null = null
+    let unsubLogs: (() => Promise<void>) | null = null
+    let unsubMedia: (() => Promise<void>) | null = null
+
+    pb.collection('duress_alerts')
+      .subscribe('*', (e) => {
+        if (e.action === 'create' || e.action === 'update') {
+          loadData()
+        }
+      })
+      .then((fn) => {
+        unsubAlerts = fn
+      })
+      .catch(() => {})
+
+    pb.collection('presence_logs')
+      .subscribe('*', (e) => {
+        if (e.action === 'create') {
+          loadData()
+        }
+      })
+      .then((fn) => {
+        unsubLogs = fn
+      })
+      .catch(() => {})
+
+    pb.collection('confirmation_media')
+      .subscribe('*', (e) => {
+        if (e.action === 'create') {
+          loadData()
+        }
+      })
+      .then((fn) => {
+        unsubMedia = fn
+      })
+      .catch(() => {})
+
+    return () => {
+      if (unsubAlerts) unsubAlerts().catch(() => {})
+      if (unsubLogs) unsubLogs().catch(() => {})
+      if (unsubMedia) unsubMedia().catch(() => {})
+    }
   }, [])
 
   const handleAcknowledgeAlert = async (alertId: string) => {
@@ -519,6 +565,10 @@ export const PoliceDashboardPage: React.FC = () => {
                 m.file?.endsWith('.mp4') ||
                 m.file?.endsWith('.webm') ||
                 m.file?.endsWith('.mov')
+              const googleMapsUrl =
+                m.location_lat && m.location_lng
+                  ? `https://maps.google.com/?q=${m.location_lat},${m.location_lng}`
+                  : null
 
               return (
                 <Card
@@ -546,7 +596,13 @@ export const PoliceDashboardPage: React.FC = () => {
                           : 'bg-slate-900 text-slate-200'
                       }`}
                     >
-                      {m.taken_under_duress ? 'Sob Coação' : m.media_type}
+                      {m.taken_under_duress
+                        ? 'Sob Coação'
+                        : m.media_type === 'video_morning'
+                          ? 'Vídeo Manhã'
+                          : m.media_type === 'video_night'
+                            ? 'Vídeo Noite'
+                            : 'Foto de Rotina'}
                     </Badge>
                   </div>
                   <CardContent className="p-3 space-y-1 text-xs">
@@ -560,6 +616,16 @@ export const PoliceDashboardPage: React.FC = () => {
                         <MapPin className="w-3 h-3 text-slate-400" />
                         <span className="truncate">{m.location_approx}</span>
                       </p>
+                    )}
+                    {googleMapsUrl && (
+                      <a
+                        href={googleMapsUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-sky-700 hover:underline font-bold text-[10px] pt-1"
+                      >
+                        Ver GPS no Mapa <ExternalLink className="w-2.5 h-2.5" />
+                      </a>
                     )}
                   </CardContent>
                 </Card>

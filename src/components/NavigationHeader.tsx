@@ -44,7 +44,7 @@ export const QuickExitOverlay: React.FC = () => {
     // 1. If traveler inputs their duress secret code (e.g. 9999), silently send duress alert with GPS and pretend to unlock
     if ((duressCode && pin.trim() === duressCode) || pin.trim() === '9999') {
       const sendAlert = (lat: number | null, lng: number | null) => {
-        pb.send('/api/duress-silent-alert', {
+        pb.send('/backend/v1/duress-silent-alert', {
           method: 'POST',
           body: {
             userId: user?.id,
@@ -52,8 +52,12 @@ export const QuickExitOverlay: React.FC = () => {
             latitude: lat,
             longitude: lng,
             batteryLevel: 0.85,
-            networkStatus: typeof navigator !== 'undefined' && navigator.onLine ? 'online' : 'offline',
-            approxLocation: lat && lng ? `GPS (${lat.toFixed(4)}, ${lng.toFixed(4)}) - Código 9999` : 'Roma, Itália - Código Silencioso 9999',
+            networkStatus:
+              typeof navigator !== 'undefined' && navigator.onLine ? 'online' : 'offline',
+            approxLocation:
+              lat && lng
+                ? `GPS (${lat.toFixed(4)}, ${lng.toFixed(4)}) - Código de Coação 9999`
+                : 'Roma, Itália - Código Silencioso 9999',
           },
         }).catch((err) => {
           console.log('[Duress Alert] Error sending silent alert:', err)
@@ -64,13 +68,15 @@ export const QuickExitOverlay: React.FC = () => {
         navigator.geolocation.getCurrentPosition(
           (pos) => sendAlert(pos.coords.latitude, pos.coords.longitude),
           () => sendAlert(null, null),
-          { timeout: 3000 }
+          { timeout: 3000 },
         )
       } else {
         sendAlert(null, null)
       }
       // Silently accept and pretend to unlock into camouflage
-      setIsLocked(false)
+      restoreFromQuickExit()
+      setPin('')
+      setError(false)
       sessionStorage.setItem('autonomia_overlay_unlocked', 'true')
       return
     }

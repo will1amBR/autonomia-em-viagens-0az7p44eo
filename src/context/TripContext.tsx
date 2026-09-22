@@ -157,7 +157,7 @@ interface TripContextType {
   performCheckin: (status: CheckinStatus, note?: string) => Promise<void>
   updateCheckinConfig: (config: Partial<TripData['checkinConfig']>) => Promise<void>
   triggerEmergencyAlert: (details: { reason: string; location?: string }) => Promise<void>
-  simulateAbsenceStage: (stage: 1 | 2 | 3 | 4) => Promise<void>
+  simulateAbsenceStage: (stage: 1 | 2 | 3 | 4) => Promise<any>
   resetToDefault: () => void
   isQuickExitActive: boolean
   triggerQuickExit: () => void
@@ -592,8 +592,9 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const simulateAbsenceStage = async (stage: 1 | 2 | 3 | 4) => {
     if (!currentTrip) return
     if (authUser?.id && currentTrip.id) {
-      await tripsService.triggerAbsenceCheck(currentTrip.id, stage)
+      const res = await tripsService.triggerAbsenceCheck(currentTrip.id, stage)
       await refreshTrip()
+      return res
     } else {
       // Local state fallback for demo
       const newNotif = {
@@ -646,9 +647,14 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updatedAt: new Date().toISOString(),
     }
     setCurrentTrip(updated)
+    setTrips((prev) => prev.map((t) => (t.id === updated.id ? updated : t)))
 
     if (authUser?.id && currentTrip.id) {
-      tripsService.saveTrip(authUser.id, updated)
+      try {
+        await tripsService.saveTrip(authUser.id, updated)
+      } catch (err) {
+        console.warn('Error saving checkin config to backend:', err)
+      }
     }
   }
 
