@@ -52,6 +52,10 @@ export const PresenceLogsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'timeline' | 'media' | 'threat_signal'>('timeline')
   const [presenceLogs, setPresenceLogs] = useState<PresenceLog[]>([])
   const [mediaList, setMediaList] = useState<ConfirmationMedia[]>([])
+  const [logsPagination, setLogsPagination] = useState({ page: 1, totalPages: 1, totalItems: 0 })
+  const [mediaPagination, setMediaPagination] = useState({ page: 1, totalPages: 1, totalItems: 0 })
+  const [isLoadingLogsMore, setIsLoadingLogsMore] = useState(false)
+  const [isLoadingMediaMore, setIsLoadingMediaMore] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
   // Upload/Capture states
@@ -98,16 +102,74 @@ export const PresenceLogsPage: React.FC = () => {
   const loadData = async () => {
     setIsLoading(true)
     try {
-      const [logs, medias] = await Promise.all([
-        presenceService.listPresenceLogs(authUser?.id, currentTrip?.id),
-        presenceService.listConfirmationMedia(authUser?.id, currentTrip?.id),
+      const [logsRes, mediasRes] = await Promise.all([
+        presenceService.listPresenceLogs(authUser?.id, currentTrip?.id, 1, 20),
+        presenceService.listConfirmationMedia(authUser?.id, currentTrip?.id, 1, 20),
       ])
-      setPresenceLogs(logs)
-      setMediaList(medias)
+      setPresenceLogs(logsRes.items)
+      setLogsPagination({
+        page: logsRes.page,
+        totalPages: logsRes.totalPages,
+        totalItems: logsRes.totalItems,
+      })
+      setMediaList(mediasRes.items)
+      setMediaPagination({
+        page: mediasRes.page,
+        totalPages: mediasRes.totalPages,
+        totalItems: mediasRes.totalItems,
+      })
     } catch (err) {
       console.warn('Error loading presence and media:', err)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const loadMoreLogs = async () => {
+    if (isLoadingLogsMore || logsPagination.page >= logsPagination.totalPages) return
+    setIsLoadingLogsMore(true)
+    try {
+      const nextPage = logsPagination.page + 1
+      const res = await presenceService.listPresenceLogs(
+        authUser?.id,
+        currentTrip?.id,
+        nextPage,
+        20,
+      )
+      setPresenceLogs((prev) => [...prev, ...res.items])
+      setLogsPagination({
+        page: res.page,
+        totalPages: res.totalPages,
+        totalItems: res.totalItems,
+      })
+    } catch (err) {
+      console.warn('Error loading more logs:', err)
+    } finally {
+      setIsLoadingLogsMore(false)
+    }
+  }
+
+  const loadMoreMedia = async () => {
+    if (isLoadingMediaMore || mediaPagination.page >= mediaPagination.totalPages) return
+    setIsLoadingMediaMore(true)
+    try {
+      const nextPage = mediaPagination.page + 1
+      const res = await presenceService.listConfirmationMedia(
+        authUser?.id,
+        currentTrip?.id,
+        nextPage,
+        20,
+      )
+      setMediaList((prev) => [...prev, ...res.items])
+      setMediaPagination({
+        page: res.page,
+        totalPages: res.totalPages,
+        totalItems: res.totalItems,
+      })
+    } catch (err) {
+      console.warn('Error loading more media:', err)
+    } finally {
+      setIsLoadingMediaMore(false)
     }
   }
 
@@ -280,7 +342,8 @@ export const PresenceLogsPage: React.FC = () => {
               <ShieldCheck className="w-3.5 h-3.5 mr-1 text-sky-600" /> Presença & Prova de Vida
             </Badge>
             <span className="text-xs text-slate-500">
-              {presenceLogs.length} registro(s) • {mediaList.length} mídia(s)
+              {logsPagination.totalItems || presenceLogs.length} registro(s) •{' '}
+              {mediaPagination.totalItems || mediaList.length} mídia(s)
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
@@ -340,7 +403,7 @@ export const PresenceLogsPage: React.FC = () => {
           </TabsTrigger>
           <TabsTrigger value="media" className="text-xs font-bold gap-1.5 rounded-xl">
             <Camera className="w-3.5 h-3.5" />
-            <span>Fotos & Vídeos ({mediaList.length})</span>
+            <span>Fotos & Vídeos ({mediaPagination.totalItems || mediaList.length})</span>
           </TabsTrigger>
           <TabsTrigger value="threat_signal" className="text-xs font-bold gap-1.5 rounded-xl">
             <ShieldAlert className="w-3.5 h-3.5 text-amber-600" />
@@ -457,6 +520,30 @@ export const PresenceLogsPage: React.FC = () => {
               })}
             </div>
           )}
+
+          {logsPagination.page < logsPagination.totalPages && (
+            <div className="pt-4 flex flex-col items-center justify-center gap-2">
+              <Button
+                variant="outline"
+                onClick={loadMoreLogs}
+                disabled={isLoadingLogsMore}
+                className="text-xs font-bold px-6 h-10 border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl"
+              >
+                {isLoadingLogsMore ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> Carregando mais logs...
+                  </>
+                ) : (
+                  <>
+                    Carregar mais registros ({presenceLogs.length} de {logsPagination.totalItems})
+                  </>
+                )}
+              </Button>
+              <span className="text-[11px] text-slate-400">
+                Página {logsPagination.page} de {logsPagination.totalPages}
+              </span>
+            </div>
+          )}
         </TabsContent>
 
         {/* 2. CONFIRMATION MEDIA GALLERY & UPLOADER */}
@@ -522,7 +609,7 @@ export const PresenceLogsPage: React.FC = () => {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-slate-900">
-                Galeria de Confirmações ({mediaList.length} registros)
+                Galeria de Confirmações ({mediaPagination.totalItems || mediaList.length} registros)
               </h3>
             </div>
 
@@ -608,6 +695,32 @@ export const PresenceLogsPage: React.FC = () => {
                     </Card>
                   )
                 })}
+              </div>
+            )}
+
+            {mediaPagination.page < mediaPagination.totalPages && (
+              <div className="pt-4 flex flex-col items-center justify-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={loadMoreMedia}
+                  disabled={isLoadingMediaMore}
+                  className="text-xs font-bold px-6 h-10 border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl"
+                >
+                  {isLoadingMediaMore ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> Carregando mais
+                      mídias...
+                    </>
+                  ) : (
+                    <>
+                      Carregar mais fotos e vídeos ({mediaList.length} de{' '}
+                      {mediaPagination.totalItems})
+                    </>
+                  )}
+                </Button>
+                <span className="text-[11px] text-slate-400">
+                  Página {mediaPagination.page} de {mediaPagination.totalPages}
+                </span>
               </div>
             )}
           </div>

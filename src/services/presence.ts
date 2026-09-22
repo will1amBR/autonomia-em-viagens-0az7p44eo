@@ -153,39 +153,56 @@ export const presenceService = {
     }
   },
 
-  // List presence logs for traveler/guardians/police
-  async listPresenceLogs(userId?: string, tripId?: string): Promise<PresenceLog[]> {
+  // List presence logs for traveler/guardians/police with pagination support
+  async listPresenceLogs(
+    userId?: string,
+    tripId?: string,
+    page: number = 1,
+    perPage: number = 20,
+  ): Promise<{
+    items: PresenceLog[]
+    page: number
+    perPage: number
+    totalItems: number
+    totalPages: number
+  }> {
     try {
       const filterParts: string[] = []
       if (userId) filterParts.push(`user_id = "${userId}"`)
       if (tripId) filterParts.push(`trip_id = "${tripId}"`)
       const filter = filterParts.join(' && ')
 
-      const res = await pb.collection('presence_logs').getList<PresenceLog>(1, 50, {
+      const res = await pb.collection('presence_logs').getList<PresenceLog>(page, perPage, {
         filter: filter || undefined,
         sort: '-created',
       })
 
-      return res.items.map((i: any) => ({
-        id: i.id,
-        userId: i.user_id,
-        tripId: i.trip_id,
-        eventType: i.event_type,
-        locationLat: i.location_lat,
-        locationLng: i.location_lng,
-        locationName: i.location_name,
-        accuracyMeters: i.accuracy_meters,
-        deviceInfo: i.device_info,
-        ipAddress: i.ip_address,
-        batteryLevel: i.battery_level,
-        notes: i.notes,
-        isDuress: i.is_duress,
-        timestamp: i.timestamp || i.created,
-        created: i.created,
-      }))
+      return {
+        items: res.items.map((i: any) => ({
+          id: i.id,
+          userId: i.user_id,
+          tripId: i.trip_id,
+          eventType: i.event_type,
+          locationLat: i.location_lat,
+          locationLng: i.location_lng,
+          locationName: i.location_name,
+          accuracyMeters: i.accuracy_meters,
+          deviceInfo: i.device_info,
+          ipAddress: i.ip_address,
+          batteryLevel: i.battery_level,
+          notes: i.notes,
+          isDuress: i.is_duress,
+          timestamp: i.timestamp || i.created,
+          created: i.created,
+        })),
+        page: res.page,
+        perPage: res.perPage,
+        totalItems: res.totalItems,
+        totalPages: res.totalPages,
+      }
     } catch (e) {
       console.warn('Error listing presence logs:', e)
-      return []
+      return { items: [], page: 1, perPage, totalItems: 0, totalPages: 0 }
     }
   },
 
@@ -205,50 +222,67 @@ export const presenceService = {
     }
   },
 
-  // List confirmation media records
-  async listConfirmationMedia(userId?: string, tripId?: string): Promise<ConfirmationMedia[]> {
+  // List confirmation media records with pagination support
+  async listConfirmationMedia(
+    userId?: string,
+    tripId?: string,
+    page: number = 1,
+    perPage: number = 20,
+  ): Promise<{
+    items: ConfirmationMedia[]
+    page: number
+    perPage: number
+    totalItems: number
+    totalPages: number
+  }> {
     try {
       const filterParts: string[] = []
       if (userId) filterParts.push(`user_id = "${userId}"`)
       if (tripId) filterParts.push(`trip_id = "${tripId}"`)
       const filter = filterParts.join(' && ')
 
-      const res = await pb.collection('confirmation_media').getList(1, 50, {
+      const res = await pb.collection('confirmation_media').getList(page, perPage, {
         filter: filter || undefined,
         sort: '-created',
       })
 
-      return res.items.map((i: any) => {
-        const fileProp = i.media_file || i.file || ''
-        let fileUrl = ''
-        if (fileProp) {
-          try {
-            fileUrl = pb.files.getURL(i, fileProp)
-          } catch {
-            /* ignore */
+      return {
+        items: res.items.map((i: any) => {
+          const fileProp = i.media_file || i.file || ''
+          let fileUrl = ''
+          if (fileProp) {
+            try {
+              fileUrl = pb.files.getURL(i, fileProp)
+            } catch {
+              /* ignore */
+            }
           }
-        }
 
-        return {
-          id: i.id,
-          userId: i.user_id,
-          tripId: i.trip_id,
-          mediaType: i.media_type,
-          file: fileProp,
-          fileUrl,
-          caption: i.caption,
-          locationApprox: i.location_approx,
-          locationLat: i.location_lat,
-          locationLng: i.location_lng,
-          takenUnderDuress: i.taken_under_duress,
-          deviceInfo: i.device_info,
-          timestamp: i.timestamp || i.created,
-          created: i.created,
-        }
-      })
+          return {
+            id: i.id,
+            userId: i.user_id,
+            tripId: i.trip_id,
+            mediaType: i.media_type,
+            file: fileProp,
+            fileUrl,
+            caption: i.caption,
+            locationApprox: i.location_approx,
+            locationLat: i.location_lat,
+            locationLng: i.location_lng,
+            takenUnderDuress: i.taken_under_duress,
+            deviceInfo: i.device_info,
+            timestamp: i.timestamp || i.created,
+            created: i.created,
+          }
+        }),
+        page: res.page,
+        perPage: res.perPage,
+        totalItems: res.totalItems,
+        totalPages: res.totalPages,
+      }
     } catch (e) {
       console.warn('Error listing confirmation media:', e)
-      return []
+      return { items: [], page: 1, perPage, totalItems: 0, totalPages: 0 }
     }
   },
 

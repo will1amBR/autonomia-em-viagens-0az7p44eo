@@ -13,6 +13,12 @@ import {
   Sparkles,
   ExternalLink,
   Info,
+  Radio,
+  Fingerprint,
+  BellRing,
+  UserCheck,
+  Send,
+  Eye,
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
@@ -140,75 +146,210 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
       </section>
-      {/* 4 Pillars of the Product Flow */}
+      {/* SEÇÃO DIFERENCIAIS EM CARDS MOBILE-FIRST COM ÍCONES */}
+      <section className="container mx-auto px-4 max-w-5xl space-y-6">
+        <div className="text-center space-y-2 max-w-2xl mx-auto">
+          <Badge className="bg-sky-100 text-sky-800 border-sky-200 font-bold text-xs uppercase tracking-wider">
+            Tecnologia de Proteção Discreta
+          </Badge>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Diferenciais pensados para sua liberdade real
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600">
+            Recursos práticos que operam sem alarde, respeitando sua privacidade e sua rede de apoio
+            em qualquer parte do mundo.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Card 1: Código secreto / sinal sob ameaça discreto */}
+          <Card className="border-slate-200 bg-white shadow-sm hover:shadow-md transition-all rounded-2xl flex flex-col justify-between">
+            <CardHeader className="p-5 pb-3 space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center">
+                <Radio className="w-6 h-6" />
+              </div>
+              <div>
+                <Badge
+                  variant="outline"
+                  className="text-[10px] border-amber-300 text-amber-800 bg-amber-50 mb-1.5 font-bold"
+                >
+                  Silencioso & Indetectável
+                </Badge>
+                <CardTitle className="text-base font-bold text-slate-900 leading-snug">
+                  Código secreto / Sinal sob ameaça discreto
+                </CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="p-5 pt-0 text-xs text-slate-600 leading-relaxed">
+              Alerta silencioso com coordenadas GPS em tempo real enviado diretamente para seus
+              guardians e canal policial consular, sem que ninguém ao redor perceba nada na tela.
+            </CardContent>
+          </Card>
+
+          {/* Card 2: Botão discreto flutuante */}
+          <Card className="border-slate-200 bg-white shadow-sm hover:shadow-md transition-all rounded-2xl flex flex-col justify-between">
+            <CardHeader className="p-5 pb-3 space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-sky-50 border border-sky-200 text-sky-700 flex items-center justify-center">
+                <Fingerprint className="w-6 h-6" />
+              </div>
+              <div>
+                <Badge
+                  variant="outline"
+                  className="text-[10px] border-sky-300 text-sky-800 bg-sky-50 mb-1.5 font-bold"
+                >
+                  Acesso Instantâneo
+                </Badge>
+                <CardTitle className="text-base font-bold text-slate-900 leading-snug">
+                  Botão discreto flutuante
+                </CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="p-5 pt-0 text-xs text-slate-600 leading-relaxed">
+              Sempre visível no canto da interface, acionado por toques múltiplos ou pressão longa
+              de 3 segundos para transformar a tela instantaneamente em modo neutro ou disparar SOS.
+            </CardContent>
+          </Card>
+
+          {/* Card 3: Protocolo de ausência em 4 etapas */}
+          <Card className="border-slate-200 bg-white shadow-sm hover:shadow-md transition-all rounded-2xl flex flex-col justify-between">
+            <CardHeader className="p-5 pb-3 space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-700 flex items-center justify-center">
+                <BellRing className="w-6 h-6" />
+              </div>
+              <div>
+                <Badge
+                  variant="outline"
+                  className="text-[10px] border-indigo-300 text-indigo-800 bg-indigo-50 mb-1.5 font-bold"
+                >
+                  Escalonamento Seguro
+                </Badge>
+                <CardTitle className="text-base font-bold text-slate-900 leading-snug">
+                  Protocolo de ausência em 4 etapas
+                </CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="p-5 pt-0 text-xs text-slate-600 leading-relaxed">
+              Se você parar de responder aos check-ins programados, sua rede é avisada
+              progressivamente (Lembrete suave → Confirmação direta → Alerta preventivo →
+              Escalonamento total).
+            </CardContent>
+          </Card>
+
+          {/* Card 4: Rede de guardians */}
+          <Card className="border-slate-200 bg-white shadow-sm hover:shadow-md transition-all rounded-2xl flex flex-col justify-between">
+            <CardHeader className="p-5 pb-3 space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center">
+                <UserCheck className="w-6 h-6" />
+              </div>
+              <div>
+                <Badge
+                  variant="outline"
+                  className="text-[10px] border-emerald-300 text-emerald-800 bg-emerald-50 mb-1.5 font-bold"
+                >
+                  Apoio Confiável
+                </Badge>
+                <CardTitle className="text-base font-bold text-slate-900 leading-snug">
+                  Rede de guardians
+                </CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="p-5 pt-0 text-xs text-slate-600 leading-relaxed">
+              Pessoas de estrita confiança com níveis granulares de acesso: básico (rotina),
+              segurança (alertas preventivos de ausência) e emergência (localização GPS e suporte
+              consular).
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* SEÇÃO COMO FUNCIONA NA PRÁTICA: FLUXO REAL EM 4 PASSOS */}
       <section className="container mx-auto px-4 max-w-5xl space-y-8">
         <div className="text-center space-y-2 max-w-2xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
-            Como funciona o SafeTrip
+          <Badge className="bg-indigo-100 text-indigo-900 border-indigo-200 font-bold text-xs uppercase tracking-wider">
+            Passo a Passo
+          </Badge>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+            Como funciona na prática
           </h2>
-          <p className="text-sm text-slate-600">
-            Quatro passos simples e estruturados para garantir que sua experiência internacional
-            aconteça com total tranquilidade e liberdade.
+          <p className="text-xs sm:text-sm text-slate-600">
+            O fluxo real e estruturado para garantir que você mantenha plena autonomia antes,
+            durante e após sua viagem internacional.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+          {/* Passo 1 */}
+          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow rounded-2xl relative overflow-hidden">
+            <div className="h-1 bg-sky-500 w-full absolute top-0 left-0" />
             <CardHeader className="p-5 pb-2">
-              <div className="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 font-bold flex items-center justify-center mb-2 text-sm">
+              <div className="w-10 h-10 rounded-xl bg-sky-100 text-sky-800 font-black flex items-center justify-center mb-2 text-sm shadow-xs">
                 1
               </div>
-              <CardTitle className="text-base">Prepare sua viagem</CardTitle>
+              <CardTitle className="text-base font-bold text-slate-900">
+                Crie sua viagem e rede de apoio
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-5 pt-0 text-xs text-slate-600 leading-relaxed space-y-2">
               <p>
-                Cadastre datas, destino, contatos do anfitrião e hospedagem para ter tudo
-                centralizado e acessível offline.
+                Cadastre seus dados de voo, acomodação e defina seus guardians de confiança com
+                permissões individualizadas antes do embarque.
               </p>
             </CardContent>
           </Card>
 
-          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+          {/* Passo 2 */}
+          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow rounded-2xl relative overflow-hidden">
+            <div className="h-1 bg-indigo-500 w-full absolute top-0 left-0" />
             <CardHeader className="p-5 pb-2">
-              <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center mb-2 text-sm">
+              <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-800 font-black flex items-center justify-center mb-2 text-sm shadow-xs">
                 2
               </div>
-              <CardTitle className="text-base">Avalie sua autonomia</CardTitle>
+              <CardTitle className="text-base font-bold text-slate-900">
+                Faça check-ins regulares e mídias de confirmação
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-5 pt-0 text-xs text-slate-600 leading-relaxed space-y-2">
               <p>
-                Responda a perguntas objetivas sobre retorno, passaporte físico, cartões, e-SIM e
-                limites sem constrangimento.
+                Confirmações em 1 toque com foto periódica ou vídeo curto diário (manhã/noite) para
+                registrar sua integridade sem incomodar sua rotina.
               </p>
             </CardContent>
           </Card>
 
-          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+          {/* Passo 3 */}
+          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow rounded-2xl relative overflow-hidden">
+            <div className="h-1 bg-amber-500 w-full absolute top-0 left-0" />
             <CardHeader className="p-5 pb-2">
-              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center mb-2 text-sm">
+              <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 font-black flex items-center justify-center mb-2 text-sm shadow-xs">
                 3
               </div>
-              <CardTitle className="text-base">Crie sua rede de segurança</CardTitle>
+              <CardTitle className="text-base font-bold text-slate-900">
+                Acione alerta silencioso com GPS em qualquer situação imprevista
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-5 pt-0 text-xs text-slate-600 leading-relaxed space-y-2">
               <p>
-                Defina Guardians de confiança (família ou amigos) com níveis granulares de acesso e
-                check-ins preventivos.
+                Toque discreto ou código de coação transmite sua localização precisa imediatamente,
+                mesmo com a tela fingindo normalidade ou aplicativo neutro.
               </p>
             </CardContent>
           </Card>
 
-          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+          {/* Passo 4 */}
+          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow rounded-2xl relative overflow-hidden">
+            <div className="h-1 bg-emerald-500 w-full absolute top-0 left-0" />
             <CardHeader className="p-5 pb-2">
-              <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 font-bold flex items-center justify-center mb-2 text-sm">
+              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 font-black flex items-center justify-center mb-2 text-sm shadow-xs">
                 4
               </div>
-              <CardTitle className="text-base">Tenha um plano de saída</CardTitle>
+              <CardTitle className="text-base font-bold text-slate-900">
+                Guardians e apoio acompanham em tempo real com máxima discrição
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-5 pt-0 text-xs text-slate-600 leading-relaxed space-y-2">
               <p>
-                Checklist interativo, consulados, hospitais, hotéis alternativos e Modo de
-                Emergência acionável com 1 clique.
+                Sua rede recebe dados precisos, endereços e last-known GPS para agir com rapidez
+                junto a consulados e autoridades sem expor você.
               </p>
             </CardContent>
           </Card>
@@ -365,21 +506,17 @@ export const LandingPage: React.FC = () => {
             </ul>
           </div>
         </div>
-
         <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-400">
           <span>
             © {new Date().getFullYear()} SafeTrip. Todos os direitos reservados. Autonomia não é
             desconfiança.
           </span>
           <div className="flex items-center gap-4">
-            <Link to="/plan-explorer" className="hover:underline">
-              Arquitetura da Solução
-            </Link>
             <Link to="/emergency" className="hover:underline text-red-600 font-medium">
               Canal de Emergência
             </Link>
           </div>
-        </div>
+        </div>{' '}
       </footer>
     </div>
   )

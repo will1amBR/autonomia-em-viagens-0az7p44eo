@@ -117,25 +117,47 @@ export const PoliceDashboardPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [selectedAlert, setSelectedAlert] = useState<PoliceDuressAlert | null>(null)
 
+  // Pagination states for Police Dashboard
+  const [alertsPagination, setAlertsPagination] = useState({
+    page: 1,
+    totalPages: 1,
+    totalItems: 0,
+  })
+  const [logsPagination, setLogsPagination] = useState({ page: 1, totalPages: 1, totalItems: 0 })
+  const [mediaPagination, setMediaPagination] = useState({ page: 1, totalPages: 1, totalItems: 0 })
+  const [isLoadingAlertsMore, setIsLoadingAlertsMore] = useState(false)
+  const [isLoadingLogsMore, setIsLoadingLogsMore] = useState(false)
+  const [isLoadingMediaMore, setIsLoadingMediaMore] = useState(false)
+
   const loadData = async () => {
     setIsLoading(true)
     try {
-      // 1. Fetch duress alerts
-      const alertsResult = await pb.collection('duress_alerts').getList(1, 50, {
+      // 1. Fetch duress alerts (page 1, 20 per page)
+      const alertsResult = await pb.collection('duress_alerts').getList(1, 20, {
         sort: '-created',
         expand: 'user_id,trip_id',
       })
       setDuressAlerts(alertsResult.items as any)
+      setAlertsPagination({
+        page: alertsResult.page,
+        totalPages: alertsResult.totalPages,
+        totalItems: alertsResult.totalItems,
+      })
 
-      // 2. Fetch presence logs
-      const logsResult = await pb.collection('presence_logs').getList(1, 100, {
+      // 2. Fetch presence logs (page 1, 20 per page)
+      const logsResult = await pb.collection('presence_logs').getList(1, 20, {
         sort: '-created',
         expand: 'user_id,trip_id',
       })
       setPresenceLogs(logsResult.items as any)
+      setLogsPagination({
+        page: logsResult.page,
+        totalPages: logsResult.totalPages,
+        totalItems: logsResult.totalItems,
+      })
 
-      // 3. Fetch confirmation media
-      const mediaResult = await pb.collection('confirmation_media').getList(1, 50, {
+      // 3. Fetch confirmation media (page 1, 20 per page)
+      const mediaResult = await pb.collection('confirmation_media').getList(1, 20, {
         sort: '-created',
         expand: 'user_id,trip_id',
       })
@@ -156,6 +178,11 @@ export const PoliceDashboardPage: React.FC = () => {
         } as unknown as PoliceMediaItem
       })
       setMediaList(itemsWithUrl)
+      setMediaPagination({
+        page: mediaResult.page,
+        totalPages: mediaResult.totalPages,
+        totalItems: mediaResult.totalItems,
+      })
     } catch (err: any) {
       console.error('Error loading police monitoring data:', err)
       toast({
@@ -164,6 +191,88 @@ export const PoliceDashboardPage: React.FC = () => {
       })
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const loadMoreAlerts = async () => {
+    if (isLoadingAlertsMore || alertsPagination.page >= alertsPagination.totalPages) return
+    setIsLoadingAlertsMore(true)
+    try {
+      const nextPage = alertsPagination.page + 1
+      const res = await pb.collection('duress_alerts').getList(nextPage, 20, {
+        sort: '-created',
+        expand: 'user_id,trip_id',
+      })
+      setDuressAlerts((prev) => [...prev, ...(res.items as any)])
+      setAlertsPagination({
+        page: res.page,
+        totalPages: res.totalPages,
+        totalItems: res.totalItems,
+      })
+    } catch (err) {
+      console.warn('Error loading more alerts:', err)
+    } finally {
+      setIsLoadingAlertsMore(false)
+    }
+  }
+
+  const loadMoreLogs = async () => {
+    if (isLoadingLogsMore || logsPagination.page >= logsPagination.totalPages) return
+    setIsLoadingLogsMore(true)
+    try {
+      const nextPage = logsPagination.page + 1
+      const res = await pb.collection('presence_logs').getList(nextPage, 20, {
+        sort: '-created',
+        expand: 'user_id,trip_id',
+      })
+      setPresenceLogs((prev) => [...prev, ...(res.items as any)])
+      setLogsPagination({
+        page: res.page,
+        totalPages: res.totalPages,
+        totalItems: res.totalItems,
+      })
+    } catch (err) {
+      console.warn('Error loading more police logs:', err)
+    } finally {
+      setIsLoadingLogsMore(false)
+    }
+  }
+
+  const loadMoreMedia = async () => {
+    if (isLoadingMediaMore || mediaPagination.page >= mediaPagination.totalPages) return
+    setIsLoadingMediaMore(true)
+    try {
+      const nextPage = mediaPagination.page + 1
+      const res = await pb.collection('confirmation_media').getList(nextPage, 20, {
+        sort: '-created',
+        expand: 'user_id,trip_id',
+      })
+      const itemsWithUrl = res.items.map((m) => {
+        let fileUrl = ''
+        const fileName = (m as any).media_file || (m as any).file || ''
+        if (fileName) {
+          try {
+            fileUrl = pb.files.getURL(m, fileName)
+          } catch {
+            /* intentionally ignored */
+          }
+        }
+        return {
+          ...m,
+          file: fileName,
+          fileUrl,
+        } as unknown as PoliceMediaItem
+      })
+      setMediaList((prev) => [...prev, ...itemsWithUrl])
+      setMediaPagination({
+        page: res.page,
+        totalPages: res.totalPages,
+        totalItems: res.totalItems,
+      })
+    } catch (err) {
+      console.warn('Error loading more police media:', err)
+    } finally {
+      setIsLoadingMediaMore(false)
     }
   }
 
@@ -316,7 +425,7 @@ export const PoliceDashboardPage: React.FC = () => {
             {duressAlerts.filter((a) => a.status === 'dispatched').length} Alerta(s) Ativo(s)
           </Badge>
           <Badge className="bg-sky-100 text-sky-800 border-sky-200 text-xs">
-            {presenceLogs.length} Registro(s) de Presença
+            {logsPagination.totalItems || presenceLogs.length} Registro(s) de Presença
           </Badge>
         </div>
       </div>
@@ -326,15 +435,15 @@ export const PoliceDashboardPage: React.FC = () => {
         <TabsList className="grid grid-cols-3 max-w-md bg-slate-100 p-1 rounded-2xl">
           <TabsTrigger value="alerts" className="text-xs font-bold gap-1.5 rounded-xl">
             <ShieldAlert className="w-3.5 h-3.5 text-red-600" />
-            <span>Sinais de Coação ({duressAlerts.length})</span>
+            <span>Sinais de Coação ({alertsPagination.totalItems || duressAlerts.length})</span>
           </TabsTrigger>
           <TabsTrigger value="presence" className="text-xs font-bold gap-1.5 rounded-xl">
             <Radio className="w-3.5 h-3.5 text-sky-600" />
-            <span>Logs Last-Known ({presenceLogs.length})</span>
+            <span>Logs Last-Known ({logsPagination.totalItems || presenceLogs.length})</span>
           </TabsTrigger>
           <TabsTrigger value="media" className="text-xs font-bold gap-1.5 rounded-xl">
             <Camera className="w-3.5 h-3.5 text-indigo-600" />
-            <span>Mídias Periódicas ({mediaList.length})</span>
+            <span>Mídias Periódicas ({mediaPagination.totalItems || mediaList.length})</span>
           </TabsTrigger>
         </TabsList>
 
@@ -468,6 +577,28 @@ export const PoliceDashboardPage: React.FC = () => {
               })}
             </div>
           )}
+
+          {alertsPagination.page < alertsPagination.totalPages && (
+            <div className="pt-4 flex flex-col items-center justify-center gap-2">
+              <Button
+                variant="outline"
+                onClick={loadMoreAlerts}
+                disabled={isLoadingAlertsMore}
+                className="text-xs font-bold px-6 h-10 border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl"
+              >
+                {isLoadingAlertsMore ? (
+                  <>Carregando mais alertas...</>
+                ) : (
+                  <>
+                    Carregar mais alertas ({duressAlerts.length} de {alertsPagination.totalItems})
+                  </>
+                )}
+              </Button>
+              <span className="text-[11px] text-slate-400">
+                Página {alertsPagination.page} de {alertsPagination.totalPages}
+              </span>
+            </div>
+          )}
         </TabsContent>
 
         {/* TAB 2: PRESENCE LOGS (LAST-KNOWN LOCATION) */}
@@ -553,6 +684,28 @@ export const PoliceDashboardPage: React.FC = () => {
               )
             })}
           </div>
+
+          {logsPagination.page < logsPagination.totalPages && (
+            <div className="pt-4 flex flex-col items-center justify-center gap-2">
+              <Button
+                variant="outline"
+                onClick={loadMoreLogs}
+                disabled={isLoadingLogsMore}
+                className="text-xs font-bold px-6 h-10 border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl"
+              >
+                {isLoadingLogsMore ? (
+                  <>Carregando mais logs...</>
+                ) : (
+                  <>
+                    Carregar mais logs ({presenceLogs.length} de {logsPagination.totalItems})
+                  </>
+                )}
+              </Button>
+              <span className="text-[11px] text-slate-400">
+                Página {logsPagination.page} de {logsPagination.totalPages}
+              </span>
+            </div>
+          )}
         </TabsContent>
 
         {/* TAB 3: CONFIRMATION MEDIA (ROUTINE PHOTOS & VIDEOS) */}
@@ -632,6 +785,28 @@ export const PoliceDashboardPage: React.FC = () => {
               )
             })}
           </div>
+
+          {mediaPagination.page < mediaPagination.totalPages && (
+            <div className="pt-4 flex flex-col items-center justify-center gap-2">
+              <Button
+                variant="outline"
+                onClick={loadMoreMedia}
+                disabled={isLoadingMediaMore}
+                className="text-xs font-bold px-6 h-10 border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl"
+              >
+                {isLoadingMediaMore ? (
+                  <>Carregando mais mídias...</>
+                ) : (
+                  <>
+                    Carregar mais mídias ({mediaList.length} de {mediaPagination.totalItems})
+                  </>
+                )}
+              </Button>
+              <span className="text-[11px] text-slate-400">
+                Página {mediaPagination.page} de {mediaPagination.totalPages}
+              </span>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>

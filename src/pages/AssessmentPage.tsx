@@ -23,14 +23,25 @@ import { Button } from '../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group'
 import { Label } from '../components/ui/label'
+import { Input } from '../components/ui/input'
 import { Progress } from '../components/ui/progress'
 import { Badge } from '../components/ui/badge'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '../components/ui/dialog'
+import { useAuth } from '../context/AuthContext'
 import { useTrip } from '../context/TripContext'
 import { TripAssessmentAnswers } from '../types/trip'
 import { useToast } from '../hooks/use-toast'
+import pb from '@/lib/pocketbase/client'
 
 export const AssessmentPage: React.FC = () => {
   const navigate = useNavigate()
+  const { isAuthenticated, user: authUser, login, register } = useAuth()
   const { currentTrip, updateTripAssessment } = useTrip()
   const { toast } = useToast()
 
@@ -77,6 +88,15 @@ export const AssessmentPage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<number>(1)
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
+  // Auth Gate Modal states for unauthenticated users
+  const [isAuthGateOpen, setIsAuthGateOpen] = useState<boolean>(false)
+  const [authMode, setAuthMode] = useState<'register' | 'login'>('register')
+  const [authName, setAuthName] = useState<string>('')
+  const [authEmail, setAuthEmail] = useState<string>('')
+  const [authPassword, setAuthPassword] = useState<string>('')
+  const [authLoading, setAuthLoading] = useState<boolean>(false)
+  const [authError, setAuthError] = useState<string | null>(null)
+
   const totalSteps = 7
 
   const handleUpdate = <K extends keyof TripAssessmentAnswers>(
@@ -89,7 +109,7 @@ export const AssessmentPage: React.FC = () => {
     }))
   }
 
-  const handleFinish = async () => {
+  const executeSaveAndNavigate = async () => {
     setIsSubmitting(true)
     try {
       await updateTripAssessment(answers)
@@ -103,6 +123,69 @@ export const AssessmentPage: React.FC = () => {
       navigate('/score-result')
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const handleFinish = async () => {
+    // If not authenticated, open the welcoming registration modal
+    if (!isAuthenticated && !pb.authStore.isValid) {
+      setAuthError(null)
+      setIsAuthGateOpen(true)
+      return
+    }
+
+    await executeSaveAndNavigate()
+  }
+
+  const handleAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setAuthError(null)
+
+    if (!authEmail.trim() || !authPassword) {
+      setAuthError('Por favor, preencha seu e-mail e senha.')
+      return
+    }
+
+    if (authMode === 'register' && authPassword.length < 8) {
+      setAuthError('A senha deve conter no mínimo 8 caracteres.')
+      return
+    }
+
+    setAuthLoading(true)
+    try {
+      if (authMode === 'register') {
+        const fallbackName = authName.trim() || authEmail.split('@')[0]
+        await register({
+          name: fallbackName,
+          email: authEmail.trim(),
+          password: authPassword,
+          passwordConfirm: authPassword,
+        })
+        toast({
+          title: 'Conta criada com sucesso!',
+          description: 'Salvando suas respostas e calculando seu índice de autonomia...',
+        })
+      } else {
+        await login(authEmail.trim(), authPassword)
+        toast({
+          title: 'Login efetuado com sucesso!',
+          description: 'Conectando suas respostas à sua conta...',
+        })
+      }
+
+      setIsAuthGateOpen(false)
+      // Save quiz vinculating with the newly authenticated user
+      await executeSaveAndNavigate()
+    } catch (err: any) {
+      console.error('Auth error in assessment gate:', err)
+      const msg =
+        err?.message ||
+        (authMode === 'register'
+          ? 'Não foi possível criar sua conta. Verifique os dados ou se o e-mail já está em uso.'
+          : 'E-mail ou senha inválidos. Tente novamente.')
+      setAuthError(msg)
+    } finally {
+      setAuthLoading(false)
     }
   }
 
@@ -809,6 +892,141 @@ export const AssessmentPage: React.FC = () => {
           </Card>
         </div>
       )}
+
+      {/* AUTH GATE MODAL FOR PUBLIC QUIZ COMPLETION */}
+      <Dialog open={isAuthGateOpen} onOpenChange={setIsAuthGateOpen}>
+        <DialogContent className="rounded-3xl max-w-md p-6 sm:p-7 space-y-4">
+          <DialogHeader className="space-y-2 text-left">
+            <div className="w-12 h-12 rounded-2xl bg-sky-100 text-sky-700 flex items-center justify-center border border-sky-200 shadow-xs mb-1">
+              <Shield className="w-6 h-6" />
+            </div>
+            <DialogTitle className="text-xl font-black text-slate-900 leading-snug">
+              {authMode === 'register'
+                ? 'Salve seu resultado e acesse quando quiser'
+                : 'Acesse sua conta para salvar'}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-600 leading-relaxed">
+              Crie sua conta para salvar seu resultado e acessá-lo quando quiser. Suas respostas são
+              100% privadas e protegidas pela filosofia "Autonomia não é desconfiança".
+            </DialogDescription>
+          </DialogHeader>
+
+          {authError && (
+            <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+              <span>{authError}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleAuthSubmit} className="space-y-3.5 text-xs">
+            {authMode === 'register' && (
+              <div className="space-y-1.5">
+                <Label htmlFor="gate-name" className="text-xs font-semibold text-slate-700">
+                  Como quer ser chamado(a)? (Nome ou apelido)
+                </Label>
+                <Input
+                  id="gate-name"
+                  type="text"
+                  placeholder="Ex: Clara ou Lucas"
+                  value={authName}
+                  onChange={(e) => setAuthName(e.target.value)}
+                  className="h-10 text-xs rounded-xl"
+                  required
+                />
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <Label htmlFor="gate-email" className="text-xs font-semibold text-slate-700">
+                Seu e-mail
+              </Label>
+              <Input
+                id="gate-email"
+                type="email"
+                placeholder="seuemail@exemplo.com"
+                value={authEmail}
+                onChange={(e) => setAuthEmail(e.target.value)}
+                className="h-10 text-xs rounded-xl"
+                required
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="gate-password" className="text-xs font-semibold text-slate-700">
+                  Senha
+                </Label>
+                {authMode === 'register' && (
+                  <span className="text-[10px] text-slate-400">mínimo 8 caracteres</span>
+                )}
+              </div>
+              <Input
+                id="gate-password"
+                type="password"
+                placeholder="••••••••"
+                value={authPassword}
+                onChange={(e) => setAuthPassword(e.target.value)}
+                className="h-10 text-xs rounded-xl"
+                required
+              />
+            </div>
+
+            <Button
+              type="submit"
+              disabled={authLoading}
+              className="w-full h-11 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-sky-600/20 mt-2 flex items-center justify-center gap-2"
+            >
+              {authLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>{authMode === 'register' ? 'Criando conta...' : 'Entrando...'}</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  <span>
+                    {authMode === 'register'
+                      ? 'Salvar meu Resultado e Ver Índice'
+                      : 'Entrar e Salvar meu Resultado'}
+                  </span>
+                </>
+              )}
+            </Button>
+          </form>
+
+          <div className="pt-2 text-center text-xs text-slate-500 border-t border-slate-100 flex items-center justify-center gap-1.5">
+            {authMode === 'register' ? (
+              <>
+                <span>Já possui uma conta?</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('login')
+                    setAuthError(null)
+                  }}
+                  className="font-bold text-sky-600 hover:underline cursor-pointer"
+                >
+                  Entrar agora
+                </button>
+              </>
+            ) : (
+              <>
+                <span>Ainda não tem conta?</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('register')
+                    setAuthError(null)
+                  }}
+                  className="font-bold text-sky-600 hover:underline cursor-pointer"
+                >
+                  Criar conta gratuita
+                </button>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Navigation Buttons */}
       <div className="flex items-center justify-between pt-4 border-t border-slate-200">
