@@ -38,10 +38,32 @@ export const tripsService = {
     return Object.values(DESTINATIONS_CATALOG)
   },
 
-  async getUserTrips(userId: string): Promise<TripData[]> {
+  async getUserTrips(userIdOrIdentifier: string): Promise<TripData[]> {
     try {
+      let resolvedUserId = userIdOrIdentifier
+
+      // If passed an email or username instead of a 15-character PocketBase ID, resolve the real user ID first
+      if (
+        userIdOrIdentifier.includes('@') ||
+        (userIdOrIdentifier.length !== 15 && !userIdOrIdentifier.startsWith('user-'))
+      ) {
+        try {
+          const userRec = await pb
+            .collection('users')
+            .getFirstListItem(`email = "${userIdOrIdentifier}" || name ~ "${userIdOrIdentifier}"`)
+          if (userRec?.id) {
+            resolvedUserId = userRec.id
+          }
+        } catch {
+          // Fall back to checking if authStore has user ID
+          if (pb.authStore?.record?.id) {
+            resolvedUserId = pb.authStore.record.id
+          }
+        }
+      }
+
       const tripRecords = await pb.collection('trips').getFullList({
-        filter: `user_id = "${userId}"`,
+        filter: `user_id = "${resolvedUserId}"`,
         sort: '-created',
       })
 
@@ -61,14 +83,33 @@ export const tripsService = {
     }
   },
 
-  async getUserTrip(userId: string, tripId?: string): Promise<TripData | null> {
+  async getUserTrip(userIdOrIdentifier: string, tripId?: string): Promise<TripData | null> {
     try {
+      let resolvedUserId = userIdOrIdentifier
+      if (
+        userIdOrIdentifier.includes('@') ||
+        (userIdOrIdentifier.length !== 15 && !userIdOrIdentifier.startsWith('user-'))
+      ) {
+        try {
+          const userRec = await pb
+            .collection('users')
+            .getFirstListItem(`email = "${userIdOrIdentifier}" || name ~ "${userIdOrIdentifier}"`)
+          if (userRec?.id) {
+            resolvedUserId = userRec.id
+          }
+        } catch {
+          if (pb.authStore?.record?.id) {
+            resolvedUserId = pb.authStore.record.id
+          }
+        }
+      }
+
       let tripRec: any
       if (tripId) {
         tripRec = await pb.collection('trips').getOne(tripId)
       } else {
         const tripRecords = await pb.collection('trips').getList(1, 1, {
-          filter: `user_id = "${userId}"`,
+          filter: `user_id = "${resolvedUserId}"`,
           sort: '-created',
         })
 
