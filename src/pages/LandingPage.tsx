@@ -56,34 +56,35 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* Primary CTAs */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2">
-            <Link to="/assessment" className="w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 pt-2 w-full max-w-2xl mx-auto">
+            <Link to="/assessment" className="w-full sm:w-auto flex-1">
               <Button
                 size="lg"
-                className="w-full sm:w-auto text-sm sm:text-base font-bold bg-sky-600 hover:bg-sky-700 text-white shadow-lg shadow-sky-600/25 px-8 h-12 rounded-xl flex items-center justify-center gap-2"
+                className="w-full text-sm sm:text-base font-bold bg-sky-600 hover:bg-sky-700 text-white shadow-lg shadow-sky-600/25 px-6 h-12 rounded-xl flex items-center justify-center gap-2"
               >
                 <span>Fazer Quiz de Autonomia</span>
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
 
-            <Link to="/entrar" className="w-full sm:w-auto">
+            <Link to="/entrar" className="w-full sm:w-auto flex-1">
               <Button
                 variant="outline"
                 size="lg"
-                className="w-full sm:w-auto text-sm sm:text-base border-sky-300 bg-sky-50 text-sky-900 hover:bg-sky-100 font-bold h-12 rounded-xl"
+                className="w-full text-sm sm:text-base border-sky-300 bg-sky-50 text-sky-900 hover:bg-sky-100 font-bold h-12 rounded-xl shadow-xs"
               >
-                Entrar / Login
+                Área de Acesso / Entrar
               </Button>
             </Link>
 
-            <Link to="/onboarding" className="w-full sm:w-auto">
+            <Link to="/destinos" className="w-full sm:w-auto flex-1">
               <Button
                 variant="ghost"
                 size="lg"
-                className="w-full sm:w-auto text-xs text-slate-700 hover:bg-slate-100 border border-slate-200 h-12 rounded-xl flex items-center gap-1.5"
+                className="w-full text-xs sm:text-sm text-slate-700 hover:bg-slate-100 border border-slate-200 font-semibold h-12 rounded-xl flex items-center justify-center gap-1.5"
               >
-                <span>Preparar Viagem (Passo a Passo)</span>
+                <Compass className="w-4 h-4 text-sky-600" />
+                <span>Guia de Destinos</span>
               </Button>
             </Link>
           </div>
@@ -105,10 +106,10 @@ export const LandingPage: React.FC = () => {
 
       {/* Philosophy Callout: Central Question */}
       <section className="container mx-auto px-4 max-w-4xl">
-        <div className="relative rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-8 sm:p-12 text-white shadow-2xl overflow-hidden border border-indigo-900/50">
+        <div className="relative rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 sm:p-12 text-white shadow-2xl overflow-hidden border border-indigo-900/50">
           <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
           <div className="relative z-10 space-y-4 text-center sm:text-left">
-            <Badge className="bg-amber-400 text-slate-950 font-bold hover:bg-amber-400 text-xs">
+            <Badge className="bg-amber-400 text-slate-900 font-bold hover:bg-amber-400 text-xs">
               A Pergunta Central
             </Badge>
             <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight">
@@ -116,21 +117,29 @@ export const LandingPage: React.FC = () => {
               <span className="text-sky-300">eu consigo sozinho(a)?</span>"
             </h2>
             <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl">
-              O problema de muitas viagens em que outra pessoa financia tudo não é falta de afeto ou
-              desconfiança. É a vulnerabilidade de perder a liberdade prática de saída. Avaliamos a
-              sua autonomia, nunca o caráter de quem te convidou.
+              O fator crítico em viagens internacionais em que outra pessoa financia ou organiza
+              tudo não é o afeto ou desconfiança. É você possuir pouca autonomia para sair da
+              situação se algo mudar. Avaliamos sua autonomia prática, nunca o caráter de quem te
+              convidou.
             </p>
-            <div className="pt-2 flex flex-wrap items-center gap-3">
-              <Link to="/assessment">
-                <Button className="bg-white text-slate-900 hover:bg-slate-100 font-bold text-xs sm:text-sm px-6 h-10 rounded-lg">
+            <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <Link to="/assessment" className="w-full sm:w-auto">
+                <Button className="w-full sm:w-auto bg-white text-slate-900 hover:bg-slate-100 font-bold text-xs sm:text-sm px-6 h-11 rounded-xl">
                   Fazer o Teste de Autonomia (2 min)
+                </Button>
+              </Link>
+              <Link to="/destinos" className="w-full sm:w-auto">
+                <Button
+                  variant="outline"
+                  className="w-full sm:w-auto border-slate-700 bg-slate-900/80 text-slate-200 hover:bg-slate-800 text-xs sm:text-sm px-5 h-11 rounded-xl"
+                >
+                  Consultar Guia de Destinos
                 </Button>
               </Link>
             </div>
           </div>
         </div>
       </section>
-
       {/* 4 Pillars of the Product Flow */}
       <section className="container mx-auto px-4 max-w-5xl space-y-8">
         <div className="text-center space-y-2 max-w-2xl mx-auto">
@@ -218,10 +227,12 @@ export const LandingPage: React.FC = () => {
               <span className="font-semibold text-red-800 block text-xs">
                 O QUE O SAFETRIP NUNCA DIZ:
               </span>
-              <p className="text-red-700 line-through">"Essa pessoa é perigosa ou criminosa."</p>
-              <p className="text-red-700 line-through">"Você está caindo em um golpe."</p>
+              <p className="text-red-700 line-through">"Essa pessoa é suspeita ou criminosa."</p>
               <p className="text-red-700 line-through">
-                "Você é obrigado(a) a desconfiar de quem te convidou."
+                "Você está em risco iminente ou sendo enganada."
+              </p>
+              <p className="text-red-700 line-through">
+                "Você é obrigada a desconfiar de quem te convidou."
               </p>
             </div>
 
@@ -233,10 +244,10 @@ export const LandingPage: React.FC = () => {
                 "Esse fator pode aumentar sua dependência física ou financeira."
               </p>
               <p className="text-emerald-800">
-                "Recomendamos garantir sua passagem e dinheiro próprio antes do embarque."
+                "Recomendamos resolver esse ponto antes do embarque."
               </p>
               <p className="text-emerald-800">
-                "Preserve sempre sua posse física de documentos e meios de voltar."
+                "Você possui pouca autonomia para sair da situação se necessário."
               </p>
             </div>
           </div>
@@ -253,20 +264,123 @@ export const LandingPage: React.FC = () => {
             Leva menos de 3 minutos para responder a avaliação, gerar seu score e configurar seus
             primeiros contatos de segurança.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-            <Link to="/onboarding">
-              <Button className="bg-sky-600 hover:bg-sky-700 text-white font-bold px-6">
-                Começar Onboarding
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 pt-2">
+            <Link to="/assessment" className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto bg-sky-600 hover:bg-sky-700 text-white font-bold px-6 h-11 rounded-xl">
+                Começar Quiz de Autonomia
               </Button>
             </Link>
-            <Link to="/dashboard">
-              <Button variant="outline" className="border-slate-300 text-slate-700">
-                Ver Viagem Demonstração (Roma)
+            <Link to="/entrar" className="w-full sm:w-auto">
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto border-sky-300 text-sky-900 bg-sky-50 font-bold px-6 h-11 rounded-xl"
+              >
+                Acessar Minha Conta
+              </Button>
+            </Link>
+            <Link to="/destinos" className="w-full sm:w-auto">
+              <Button
+                variant="ghost"
+                className="w-full sm:w-auto border border-slate-200 text-slate-700 font-semibold px-5 h-11 rounded-xl"
+              >
+                Explorar Destinos Públicos
               </Button>
             </Link>
           </div>
         </div>
       </section>
+
+      {/* Footer acolhedor e informativo */}
+      <footer className="container mx-auto px-4 max-w-5xl pt-8 border-t border-slate-200 text-slate-500 text-xs">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pb-8">
+          <div className="space-y-2 md:col-span-2">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-sky-600 text-white flex items-center justify-center font-black text-xs">
+                S
+              </div>
+              <span className="font-bold text-slate-900 text-sm tracking-tight">
+                SafeTrip • Autonomia em Viagens
+              </span>
+            </div>
+            <p className="text-slate-600 text-xs leading-relaxed max-w-md">
+              Ferramenta independente de reflexão prática, proteção factual e suporte a viajantes
+              internacionais. Promovemos liberdade de decisão e autonomia de retorno sem
+              julgamentos.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <span className="font-bold text-slate-800 text-xs uppercase tracking-wider block">
+              Módulos
+            </span>
+            <ul className="space-y-1.5 text-xs text-slate-600">
+              <li>
+                <Link to="/assessment" className="hover:text-sky-600">
+                  Quiz de Autonomia
+                </Link>
+              </li>
+              <li>
+                <Link to="/destinos" className="hover:text-sky-600">
+                  Catálogo de Destinos
+                </Link>
+              </li>
+              <li>
+                <Link to="/library" className="hover:text-sky-600">
+                  Biblioteca de Orientações
+                </Link>
+              </li>
+              <li>
+                <Link to="/onboarding" className="hover:text-sky-600">
+                  Passo a Passo
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div className="space-y-2">
+            <span className="font-bold text-slate-800 text-xs uppercase tracking-wider block">
+              Acesso ao Sistema
+            </span>
+            <ul className="space-y-1.5 text-xs text-slate-600">
+              <li>
+                <Link to="/entrar" className="hover:text-sky-600 font-medium">
+                  Área da Viajante / Login
+                </Link>
+              </li>
+              <li>
+                <Link to="/admin/login" className="hover:text-sky-600">
+                  Área Administrativa
+                </Link>
+              </li>
+              <li>
+                <Link to="/police/dashboard" className="hover:text-sky-600">
+                  Canal Policial / Consular
+                </Link>
+              </li>
+              <li>
+                <Link to="/cadastro" className="hover:text-sky-600">
+                  Criar Nova Conta
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-400">
+          <span>
+            © {new Date().getFullYear()} SafeTrip. Todos os direitos reservados. Autonomia não é
+            desconfiança.
+          </span>
+          <div className="flex items-center gap-4">
+            <Link to="/plan-explorer" className="hover:underline">
+              Arquitetura da Solução
+            </Link>
+            <Link to="/emergency" className="hover:underline text-red-600 font-medium">
+              Canal de Emergência
+            </Link>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

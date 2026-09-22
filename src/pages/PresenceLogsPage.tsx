@@ -257,10 +257,12 @@ export const PresenceLogsPage: React.FC = () => {
   }
 
   const handleSecretCodeSubmit = () => {
+    const trimmedInput = secretCodeInput.trim()
     const configuredCode = authUser?.duressSecretCode?.trim()
-    if (configuredCode && secretCodeInput.trim() === configuredCode) {
+    // Standard silent threat code 9999 or user configured duress code
+    if (trimmedInput === '9999' || (configuredCode && trimmedInput === configuredCode)) {
       triggerDiscreetDuressAlert('secret_code')
-    } else if (!configuredCode && secretCodeInput.trim()) {
+    } else if (!configuredCode && trimmedInput) {
       // If none set yet, simulate duress trigger with entered input
       triggerDiscreetDuressAlert('secret_code')
     }
@@ -724,23 +726,25 @@ export const PresenceLogsPage: React.FC = () => {
               </div>
 
               {/* MINI BUTTON DISCREET DURESS SIGNAL (hold 3s or tap) */}
-              <div className="relative">
+              <div className="relative flex items-center justify-center p-1">
                 <button
                   type="button"
                   onMouseDown={handleTouchStartDiscreet}
                   onMouseUp={handleTouchEndDiscreet}
                   onTouchStart={handleTouchStartDiscreet}
                   onTouchEnd={handleTouchEndDiscreet}
-                  title="Status de Conexão Criptografada"
-                  className={`w-3.5 h-3.5 rounded-full transition-all focus:outline-none ${
+                  title="Status de Conexão Criptografada (Segure 3s para sinal discreto)"
+                  className={`w-5 h-5 rounded-full transition-all focus:outline-none flex items-center justify-center ${
                     isPressingDiscreet
-                      ? 'bg-amber-400 scale-125'
+                      ? 'bg-amber-400 scale-125 ring-2 ring-amber-300 animate-pulse'
                       : duressTriggeredSilently
                         ? 'bg-emerald-400'
                         : 'bg-slate-300 hover:bg-slate-400'
                   }`}
-                  aria-label="Indicador de Status"
-                />
+                  aria-label="Indicador de Status Criptografado"
+                >
+                  <span className="w-2 h-2 rounded-full bg-white/70 block" />
+                </button>
               </div>
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-600">
