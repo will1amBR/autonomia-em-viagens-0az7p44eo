@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-08-31T16:37:19.267Z",
+  "generatedAt": "2026-08-31T17:18:09.129Z",
   "collections": [
     {
       "name": "users",
       "type": "auth",
       "apiRules": {
-        "list": "id = @request.auth.id",
-        "view": "id = @request.auth.id",
+        "list": "@request.auth.id != \"\" && (@request.auth.id = id || @request.auth.role = \"admin\" || @request.auth.role = \"police\")",
+        "view": "@request.auth.id != \"\" && (@request.auth.id = id || @request.auth.role = \"admin\" || @request.auth.role = \"police\")",
         "create": "",
         "update": "id = @request.auth.id",
         "delete": "id = @request.auth.id"
@@ -29,21 +29,30 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate"]
+          "autodateTriggers": [
+            "onCreate"
+          ]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate", "onUpdate"]
+          "autodateTriggers": [
+            "onCreate",
+            "onUpdate"
+          ]
         },
         {
           "name": "role",
           "type": "select",
           "required": false,
           "system": false,
-          "selectValues": ["user", "admin", "police"]
+          "selectValues": [
+            "user",
+            "admin",
+            "police"
+          ]
         },
         {
           "name": "phone",
@@ -181,14 +190,19 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate"]
+          "autodateTriggers": [
+            "onCreate"
+          ]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate", "onUpdate"]
+          "autodateTriggers": [
+            "onCreate",
+            "onUpdate"
+          ]
         }
       ],
       "indexes": [
@@ -199,8 +213,8 @@
       "name": "trips",
       "type": "base",
       "apiRules": {
-        "list": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin' || @request.auth.role = 'police')",
-        "view": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin' || @request.auth.role = 'police')",
+        "list": "@request.auth.id != \"\" && (@request.auth.id = user_id || @request.auth.role = \"admin\" || @request.auth.role = \"police\")",
+        "view": "@request.auth.id != \"\" && (@request.auth.id = user_id || @request.auth.role = \"admin\" || @request.auth.role = \"police\")",
         "create": "@request.auth.id != ''",
         "update": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
         "delete": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')"
@@ -314,14 +328,19 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate"]
+          "autodateTriggers": [
+            "onCreate"
+          ]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate", "onUpdate"]
+          "autodateTriggers": [
+            "onCreate",
+            "onUpdate"
+          ]
         },
         {
           "name": "notify_guardians_on_absence",
@@ -396,7 +415,9 @@
           "system": false
         }
       ],
-      "indexes": ["CREATE INDEX idx_trips_user_created ON trips (user_id, created DESC)"]
+      "indexes": [
+        "CREATE INDEX idx_trips_user_created ON trips (user_id, created DESC)"
+      ]
     },
     {
       "name": "assessments",
@@ -470,14 +491,19 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate"]
+          "autodateTriggers": [
+            "onCreate"
+          ]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate", "onUpdate"]
+          "autodateTriggers": [
+            "onCreate",
+            "onUpdate"
+          ]
         }
       ],
       "indexes": [
@@ -488,8 +514,8 @@
       "name": "guardians",
       "type": "base",
       "apiRules": {
-        "list": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
-        "view": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
+        "list": "@request.auth.id != \"\" && (@request.auth.id = user_id || @request.auth.role = \"admin\" || @request.auth.role = \"police\")",
+        "view": "@request.auth.id != \"\" && (@request.auth.id = user_id || @request.auth.role = \"admin\" || @request.auth.role = \"police\")",
         "create": "@request.auth.id != ''",
         "update": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
         "delete": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')"
@@ -574,17 +600,24 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate"]
+          "autodateTriggers": [
+            "onCreate"
+          ]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate", "onUpdate"]
+          "autodateTriggers": [
+            "onCreate",
+            "onUpdate"
+          ]
         }
       ],
-      "indexes": ["CREATE INDEX idx_guardians_user_created ON guardians (user_id, created DESC)"]
+      "indexes": [
+        "CREATE INDEX idx_guardians_user_created ON guardians (user_id, created DESC)"
+      ]
     },
     {
       "name": "checkins",
@@ -646,17 +679,24 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate"]
+          "autodateTriggers": [
+            "onCreate"
+          ]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate", "onUpdate"]
+          "autodateTriggers": [
+            "onCreate",
+            "onUpdate"
+          ]
         }
       ],
-      "indexes": ["CREATE INDEX idx_checkins_user_created ON checkins (user_id, created DESC)"]
+      "indexes": [
+        "CREATE INDEX idx_checkins_user_created ON checkins (user_id, created DESC)"
+      ]
     },
     {
       "name": "safety_plans",
@@ -736,17 +776,24 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate"]
+          "autodateTriggers": [
+            "onCreate"
+          ]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate", "onUpdate"]
+          "autodateTriggers": [
+            "onCreate",
+            "onUpdate"
+          ]
         }
       ],
-      "indexes": ["CREATE INDEX idx_safety_plans_user_trip ON safety_plans (user_id, trip_id)"]
+      "indexes": [
+        "CREATE INDEX idx_safety_plans_user_trip ON safety_plans (user_id, trip_id)"
+      ]
     },
     {
       "name": "security_library",
@@ -812,25 +859,32 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate"]
+          "autodateTriggers": [
+            "onCreate"
+          ]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate", "onUpdate"]
+          "autodateTriggers": [
+            "onCreate",
+            "onUpdate"
+          ]
         }
       ],
-      "indexes": ["CREATE UNIQUE INDEX idx_security_library_slug ON security_library (slug)"]
+      "indexes": [
+        "CREATE UNIQUE INDEX idx_security_library_slug ON security_library (slug)"
+      ]
     },
     {
       "name": "absence_notifications",
       "type": "base",
       "apiRules": {
-        "list": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
-        "view": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
-        "create": "@request.auth.id != ''",
+        "list": "@request.auth.id != \"\" && (@request.auth.id = user_id || @request.auth.role = \"admin\" || @request.auth.role = \"police\")",
+        "view": "@request.auth.id != \"\" && (@request.auth.id = user_id || @request.auth.role = \"admin\" || @request.auth.role = \"police\")",
+        "create": "@request.auth.id != \"\"",
         "update": "@request.auth.id != '' && @request.auth.role = 'admin'",
         "delete": "@request.auth.id != '' && @request.auth.role = 'admin'"
       },
@@ -902,14 +956,19 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate"]
+          "autodateTriggers": [
+            "onCreate"
+          ]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate", "onUpdate"]
+          "autodateTriggers": [
+            "onCreate",
+            "onUpdate"
+          ]
         }
       ],
       "indexes": [
@@ -921,8 +980,8 @@
       "name": "presence_logs",
       "type": "base",
       "apiRules": {
-        "list": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin' || @request.auth.role = 'police' || @collection.guardians.user_id ?= user_id && @collection.guardians.email ?= @request.auth.email && @collection.guardians.access_type ?= 'emergency')",
-        "view": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin' || @request.auth.role = 'police' || @collection.guardians.user_id ?= user_id && @collection.guardians.email ?= @request.auth.email && @collection.guardians.access_type ?= 'emergency')",
+        "list": "@request.auth.id != \"\" && (@request.auth.id = user_id || @request.auth.role = \"admin\" || @request.auth.role = \"police\")",
+        "view": "@request.auth.id != \"\" && (@request.auth.id = user_id || @request.auth.role = \"admin\" || @request.auth.role = \"police\")",
         "create": "@request.auth.id != ''",
         "update": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
         "delete": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')"
@@ -1013,14 +1072,19 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate"]
+          "autodateTriggers": [
+            "onCreate"
+          ]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate", "onUpdate"]
+          "autodateTriggers": [
+            "onCreate",
+            "onUpdate"
+          ]
         }
       ],
       "indexes": [
@@ -1032,11 +1096,11 @@
       "name": "confirmation_media",
       "type": "base",
       "apiRules": {
-        "list": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin' || @request.auth.role = 'police' || @collection.guardians.user_id ?= user_id && @collection.guardians.email ?= @request.auth.email && @collection.guardians.access_type ?= 'emergency')",
-        "view": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin' || @request.auth.role = 'police' || @collection.guardians.user_id ?= user_id && @collection.guardians.email ?= @request.auth.email && @collection.guardians.access_type ?= 'emergency')",
-        "create": "@request.auth.id != ''",
-        "update": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')",
-        "delete": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin')"
+        "list": "@request.auth.id != \"\" && (@request.auth.id = user_id || @request.auth.role = \"admin\" || @request.auth.role = \"police\")",
+        "view": "@request.auth.id != \"\" && (@request.auth.id = user_id || @request.auth.role = \"admin\" || @request.auth.role = \"police\")",
+        "create": "@request.auth.id != \"\"",
+        "update": "@request.auth.id != \"\" && (@request.auth.id = user_id || @request.auth.role = \"admin\" || @request.auth.role = \"police\")",
+        "delete": "@request.auth.id != \"\" && (@request.auth.id = user_id || @request.auth.role = \"admin\")"
       },
       "fields": [
         {
@@ -1112,14 +1176,25 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate"]
+          "autodateTriggers": [
+            "onCreate"
+          ]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate", "onUpdate"]
+          "autodateTriggers": [
+            "onCreate",
+            "onUpdate"
+          ]
+        },
+        {
+          "name": "media_file",
+          "type": "file",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": [
@@ -1131,11 +1206,11 @@
       "name": "duress_alerts",
       "type": "base",
       "apiRules": {
-        "list": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin' || @request.auth.role = 'police' || @collection.guardians.user_id ?= user_id && @collection.guardians.email ?= @request.auth.email && @collection.guardians.access_type ?= 'emergency')",
-        "view": "@request.auth.id != '' && (user_id = @request.auth.id || @request.auth.role = 'admin' || @request.auth.role = 'police' || @collection.guardians.user_id ?= user_id && @collection.guardians.email ?= @request.auth.email && @collection.guardians.access_type ?= 'emergency')",
-        "create": "@request.auth.id != ''",
-        "update": "@request.auth.id != '' && @request.auth.role = 'admin'",
-        "delete": "@request.auth.id != '' && @request.auth.role = 'admin'"
+        "list": "@request.auth.id != \"\" && (@request.auth.id = user_id || @request.auth.role = \"admin\" || @request.auth.role = \"police\")",
+        "view": "@request.auth.id != \"\" && (@request.auth.id = user_id || @request.auth.role = \"admin\" || @request.auth.role = \"police\")",
+        "create": "@request.auth.id != \"\"",
+        "update": "@request.auth.id != \"\" && (@request.auth.id = user_id || @request.auth.role = \"admin\" || @request.auth.role = \"police\")",
+        "delete": "@request.auth.id != \"\" && (@request.auth.role = \"admin\")"
       },
       "fields": [
         {
@@ -1211,17 +1286,24 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate"]
+          "autodateTriggers": [
+            "onCreate"
+          ]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate", "onUpdate"]
+          "autodateTriggers": [
+            "onCreate",
+            "onUpdate"
+          ]
         }
       ],
-      "indexes": ["CREATE INDEX idx_duress_user ON duress_alerts (user_id, created DESC)"]
+      "indexes": [
+        "CREATE INDEX idx_duress_user ON duress_alerts (user_id, created DESC)"
+      ]
     }
   ]
 }

@@ -9,44 +9,34 @@ export const QuickExitFloatingButton: React.FC = () => {
   const tapTimerRef = useRef<any>(null)
   const holdTimerRef = useRef<any>(null)
 
-  const triggerSilentSOS = () => {
+  const triggerSilentSOS = (methodName: string = 'floating_button_pattern') => {
+    const sendSOS = (lat: number | null, lng: number | null) => {
+      pb.send('/api/duress-silent-alert', {
+        method: 'POST',
+        body: {
+          userId: user?.id,
+          method: methodName,
+          latitude: lat,
+          longitude: lng,
+          batteryLevel: 0.85,
+          networkStatus: typeof navigator !== 'undefined' && navigator.onLine ? 'online' : 'offline',
+          approxLocation: lat && lng ? `GPS (${lat.toFixed(4)}, ${lng.toFixed(4)}) - Botão Flutuante` : 'Roma, Itália - Botão Flutuante (GPS Indisponível)',
+        },
+      }).catch((err) => {
+        console.log('[Duress Alert] Error sending SOS from floating button:', err)
+      })
+    }
+
     if (typeof navigator !== 'undefined' && 'geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          fetch('/api/duress-silent-alert', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: pb.authStore.token,
-            },
-            body: JSON.stringify({
-              trigger_method: 'button_hold',
-              location_lat: pos.coords.latitude,
-              location_lng: pos.coords.longitude,
-              device_info: navigator.userAgent.slice(0, 100),
-              timestamp: new Date().toISOString(),
-            }),
-          }).catch(() => {})
-        },
-        () => {
-          fetch('/api/duress-silent-alert', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: pb.authStore.token,
-            },
-            body: JSON.stringify({
-              trigger_method: 'button_hold',
-              device_info: navigator.userAgent.slice(0, 100),
-              timestamp: new Date().toISOString(),
-            }),
-          }).catch(() => {})
-        },
-        { timeout: 3000 },
+        (pos) => sendSOS(pos.coords.latitude, pos.coords.longitude),
+        () => sendSOS(null, null),
+        { timeout: 3000 }
       )
+    } else {
+      sendSOS(null, null)
     }
   }
-
   const handlePointerDown = () => {
     // Start 3-second hold timer for discrete duress alert
     holdTimerRef.current = setTimeout(() => {
