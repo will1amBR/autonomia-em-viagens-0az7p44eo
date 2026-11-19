@@ -4,38 +4,30 @@ import {
   Shield,
   CheckCircle2,
   Compass,
-  Users,
-  AlertCircle,
-  PhoneCall,
   Lock,
   HeartHandshake,
   ArrowRight,
-  Sparkles,
-  ExternalLink,
-  Info,
   Radio,
   Fingerprint,
   BellRing,
   UserCheck,
-  Send,
-  Eye,
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 
 export const LandingPage: React.FC = () => {
   return (
-    <div className="space-y-16 pb-16">
+    <div className="space-y-12 sm:space-y-16 pb-16">
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-8 pb-12 sm:pt-14 sm:pb-20 border-b border-slate-100 bg-gradient-to-b from-sky-50/60 via-white to-white">
-        <div className="container mx-auto px-4 max-w-5xl text-center space-y-6">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-100 border border-sky-200 text-sky-800 text-xs font-semibold shadow-sm">
-            <Shield className="w-3.5 h-3.5 text-sky-600" />
-            <span>Plataforma de Autonomia e Segurança para Viagens Internacionais</span>
+      <section className="relative overflow-hidden pt-8 pb-10 sm:pt-14 sm:pb-16 border-b border-slate-100 bg-gradient-to-b from-sky-50/60 via-white to-white">
+        <div className="container mx-auto px-4 max-w-5xl text-center space-y-5 sm:space-y-6">
+          <div className="inline-flex items-center gap-2 max-w-full px-3.5 py-1.5 rounded-full bg-sky-100 border border-sky-200 text-sky-800 text-[11px] sm:text-xs font-semibold shadow-sm text-center">
+            <Shield className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+            <span className="min-w-0">Plataforma de Autonomia e Segurança para Viagens</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.15]">
+          <h1 className="text-[26px] leading-[1.2] sm:text-5xl sm:leading-tight md:text-6xl font-extrabold tracking-tight text-slate-900 break-words">
             "Autonomia não é{' '}
             <span className="text-sky-600 underline decoration-sky-300 decoration-wavy decoration-2">
               desconfiança
@@ -43,18 +35,18 @@ export const LandingPage: React.FC = () => {
             ."
           </h1>
 
-          <p className="text-lg sm:text-xl md:text-2xl text-slate-600 max-w-3xl mx-auto font-normal leading-relaxed">
+          <p className="text-base sm:text-xl md:text-2xl text-slate-600 max-w-3xl mx-auto font-normal leading-relaxed">
             Antes de viajar, certifique-se de que você{' '}
             <span className="font-semibold text-slate-800">consegue voltar</span>.
           </p>
 
-          <div className="p-4 sm:p-5 max-w-2xl mx-auto bg-slate-900 text-slate-100 rounded-2xl shadow-xl shadow-slate-900/10 text-left border border-slate-800 flex items-start gap-3.5">
-            <HeartHandshake className="w-6 h-6 text-emerald-400 flex-shrink-0 mt-0.5" />
-            <div className="space-y-1">
+          <div className="p-4 sm:p-5 max-w-2xl mx-auto bg-slate-900 text-slate-100 rounded-2xl shadow-xl shadow-slate-900/10 text-left border border-slate-800 flex items-start gap-3">
+            <HeartHandshake className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400 flex-shrink-0 mt-0.5" />
+            <div className="space-y-1 min-w-0">
               <p className="text-xs sm:text-sm font-medium text-slate-200">
                 Você pode confiar em alguém e ainda assim possuir:
               </p>
-              <p className="text-xs sm:text-xs text-slate-300 leading-relaxed">
+              <p className="text-xs text-slate-300 leading-relaxed break-words">
                 Dinheiro próprio • Passagem de retorno • Documentos na sua mão • Seguro •
                 Comunicação ativa • Rede de contatos • Plano de saída independente.
               </p>
@@ -62,49 +54,50 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* Primary CTAs */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 pt-2 w-full max-w-2xl mx-auto">
-            <Link to="/assessment" className="w-full sm:w-auto flex-1">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 pt-2 w-full max-w-md sm:max-w-2xl mx-auto">
+            <Link to="/assessment" className="w-full sm:w-auto sm:flex-1">
               <Button
                 size="lg"
                 className="w-full text-sm sm:text-base font-bold bg-sky-600 hover:bg-sky-700 text-white shadow-lg shadow-sky-600/25 px-6 h-12 rounded-xl flex items-center justify-center gap-2"
               >
-                <span>Fazer Quiz de Autonomia</span>
-                <ArrowRight className="w-4 h-4" />
+                <span className="whitespace-nowrap">Fazer Quiz de Autonomia</span>
+                <ArrowRight className="w-4 h-4 shrink-0" />
               </Button>
             </Link>
 
-            <Link to="/entrar" className="w-full sm:w-auto flex-1">
+            <Link to="/entrar" className="w-full sm:w-auto sm:flex-1">
               <Button
                 variant="outline"
                 size="lg"
-                className="w-full text-sm sm:text-base border-sky-300 bg-sky-50 text-sky-900 hover:bg-sky-100 font-bold h-12 rounded-xl shadow-xs"
+                className="w-full text-sm sm:text-base border-sky-300 bg-sky-50 text-sky-900 hover:bg-sky-100 font-bold h-12 rounded-xl"
               >
-                Área de Acesso / Entrar
+                Área do Cliente
               </Button>
             </Link>
 
-            <Link to="/destinos" className="w-full sm:w-auto flex-1">
+            <Link to="/destinos" className="w-full sm:w-auto sm:flex-1">
               <Button
                 variant="ghost"
                 size="lg"
-                className="w-full text-xs sm:text-sm text-slate-700 hover:bg-slate-100 border border-slate-200 font-semibold h-12 rounded-xl flex items-center justify-center gap-1.5"
+                className="w-full text-sm text-slate-700 hover:bg-slate-100 border border-slate-200 font-semibold h-12 rounded-xl flex items-center justify-center gap-1.5"
               >
-                <Compass className="w-4 h-4 text-sky-600" />
-                <span>Guia de Destinos</span>
+                <Compass className="w-4 h-4 text-sky-600 shrink-0" />
+                <span className="whitespace-nowrap">Guia de Destinos</span>
               </Button>
             </Link>
           </div>
 
-          <div className="pt-4 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-500">
+          <div className="pt-3 flex flex-col items-center gap-2.5 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-6 sm:gap-y-2 text-xs text-slate-500">
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Sem julgamentos
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" /> Sem julgamentos
             </span>
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Foco em recursos práticos
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" /> Foco em recursos
+              práticos
             </span>
-            <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" /> 100% privado e controlado por
-              você
+            <span className="flex items-center gap-1.5 text-center">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" /> 100% privado e
+              controlado por você
             </span>
           </div>
         </div>
@@ -112,23 +105,23 @@ export const LandingPage: React.FC = () => {
 
       {/* Philosophy Callout: Central Question */}
       <section className="container mx-auto px-4 max-w-4xl">
-        <div className="relative rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 sm:p-12 text-white shadow-2xl overflow-hidden border border-indigo-900/50">
+        <div className="relative rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-6 sm:p-12 text-white shadow-2xl overflow-hidden border border-indigo-900/50">
           <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
           <div className="relative z-10 space-y-4 text-center sm:text-left">
             <Badge className="bg-amber-400 text-slate-900 font-bold hover:bg-amber-400 text-xs">
               A Pergunta Central
             </Badge>
-            <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight">
+            <h2 className="text-xl sm:text-4xl font-extrabold tracking-tight leading-tight break-words">
               "Se amanhã eu decidir que quero voltar para casa,{' '}
               <span className="text-sky-300">eu consigo sozinho(a)?</span>"
             </h2>
-            <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl">
+            <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto sm:mx-0">
               O fator crítico em viagens internacionais em que outra pessoa financia ou organiza
               tudo não é o afeto ou desconfiança. É você possuir pouca autonomia para sair da
               situação se algo mudar. Avaliamos sua autonomia prática, nunca o caráter de quem te
               convidou.
             </p>
-            <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 max-w-sm sm:max-w-none mx-auto sm:mx-0">
               <Link to="/assessment" className="w-full sm:w-auto">
                 <Button className="w-full sm:w-auto bg-white text-slate-900 hover:bg-slate-100 font-bold text-xs sm:text-sm px-6 h-11 rounded-xl">
                   Fazer o Teste de Autonomia (2 min)
@@ -146,16 +139,17 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
       </section>
+
       {/* SEÇÃO DIFERENCIAIS EM CARDS MOBILE-FIRST COM ÍCONES */}
       <section className="container mx-auto px-4 max-w-5xl space-y-6">
         <div className="text-center space-y-2 max-w-2xl mx-auto">
           <Badge className="bg-sky-100 text-sky-800 border-sky-200 font-bold text-xs uppercase tracking-wider">
             Tecnologia de Proteção Discreta
           </Badge>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             Diferenciais pensados para sua liberdade real
           </h2>
-          <p className="text-xs sm:text-sm text-slate-600">
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
             Recursos práticos que operam sem alarde, respeitando sua privacidade e sua rede de apoio
             em qualquer parte do mundo.
           </p>
@@ -163,39 +157,39 @@ export const LandingPage: React.FC = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1: Código secreto / sinal sob ameaça discreto */}
-          <Card className="border-slate-200 bg-white shadow-sm hover:shadow-md transition-all rounded-2xl flex flex-col justify-between">
+          <Card className="border-slate-200 bg-white shadow-sm hover:shadow-md transition-all rounded-2xl flex flex-col">
             <CardHeader className="p-5 pb-3 space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center shrink-0">
                 <Radio className="w-6 h-6" />
               </div>
-              <div>
+              <div className="space-y-1.5">
                 <Badge
                   variant="outline"
-                  className="text-[10px] border-amber-300 text-amber-800 bg-amber-50 mb-1.5 font-bold"
+                  className="text-[10px] border-amber-300 text-amber-800 bg-amber-50 font-bold"
                 >
-                  Silencioso & Indetectável
+                  Silencioso &amp; Indetectável
                 </Badge>
                 <CardTitle className="text-base font-bold text-slate-900 leading-snug">
-                  Código secreto / Sinal sob ameaça discreto
+                  Código secreto / Sinal discreto sob ameaça
                 </CardTitle>
               </div>
             </CardHeader>
-            <CardContent className="p-5 pt-0 text-xs text-slate-600 leading-relaxed">
+            <CardContent className="p-5 pt-0 mt-auto text-xs text-slate-600 leading-relaxed">
               Alerta silencioso com coordenadas GPS em tempo real enviado diretamente para seus
               guardians e canal policial consular, sem que ninguém ao redor perceba nada na tela.
             </CardContent>
           </Card>
 
           {/* Card 2: Botão discreto flutuante */}
-          <Card className="border-slate-200 bg-white shadow-sm hover:shadow-md transition-all rounded-2xl flex flex-col justify-between">
+          <Card className="border-slate-200 bg-white shadow-sm hover:shadow-md transition-all rounded-2xl flex flex-col">
             <CardHeader className="p-5 pb-3 space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-sky-50 border border-sky-200 text-sky-700 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-2xl bg-sky-50 border border-sky-200 text-sky-700 flex items-center justify-center shrink-0">
                 <Fingerprint className="w-6 h-6" />
               </div>
-              <div>
+              <div className="space-y-1.5">
                 <Badge
                   variant="outline"
-                  className="text-[10px] border-sky-300 text-sky-800 bg-sky-50 mb-1.5 font-bold"
+                  className="text-[10px] border-sky-300 text-sky-800 bg-sky-50 font-bold"
                 >
                   Acesso Instantâneo
                 </Badge>
@@ -204,22 +198,22 @@ export const LandingPage: React.FC = () => {
                 </CardTitle>
               </div>
             </CardHeader>
-            <CardContent className="p-5 pt-0 text-xs text-slate-600 leading-relaxed">
+            <CardContent className="p-5 pt-0 mt-auto text-xs text-slate-600 leading-relaxed">
               Sempre visível no canto da interface, acionado por toques múltiplos ou pressão longa
               de 3 segundos para transformar a tela instantaneamente em modo neutro ou disparar SOS.
             </CardContent>
           </Card>
 
           {/* Card 3: Protocolo de ausência em 4 etapas */}
-          <Card className="border-slate-200 bg-white shadow-sm hover:shadow-md transition-all rounded-2xl flex flex-col justify-between">
+          <Card className="border-slate-200 bg-white shadow-sm hover:shadow-md transition-all rounded-2xl flex flex-col">
             <CardHeader className="p-5 pb-3 space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-700 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-700 flex items-center justify-center shrink-0">
                 <BellRing className="w-6 h-6" />
               </div>
-              <div>
+              <div className="space-y-1.5">
                 <Badge
                   variant="outline"
-                  className="text-[10px] border-indigo-300 text-indigo-800 bg-indigo-50 mb-1.5 font-bold"
+                  className="text-[10px] border-indigo-300 text-indigo-800 bg-indigo-50 font-bold"
                 >
                   Escalonamento Seguro
                 </Badge>
@@ -228,23 +222,23 @@ export const LandingPage: React.FC = () => {
                 </CardTitle>
               </div>
             </CardHeader>
-            <CardContent className="p-5 pt-0 text-xs text-slate-600 leading-relaxed">
+            <CardContent className="p-5 pt-0 mt-auto text-xs text-slate-600 leading-relaxed">
               Se você parar de responder aos check-ins programados, sua rede é avisada
-              progressivamente (Lembrete suave → Confirmação direta → Alerta preventivo →
-              Escalonamento total).
+              progressivamente: lembrete suave, confirmação direta, alerta preventivo e
+              escalonamento total.
             </CardContent>
           </Card>
 
           {/* Card 4: Rede de guardians */}
-          <Card className="border-slate-200 bg-white shadow-sm hover:shadow-md transition-all rounded-2xl flex flex-col justify-between">
+          <Card className="border-slate-200 bg-white shadow-sm hover:shadow-md transition-all rounded-2xl flex flex-col">
             <CardHeader className="p-5 pb-3 space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0">
                 <UserCheck className="w-6 h-6" />
               </div>
-              <div>
+              <div className="space-y-1.5">
                 <Badge
                   variant="outline"
-                  className="text-[10px] border-emerald-300 text-emerald-800 bg-emerald-50 mb-1.5 font-bold"
+                  className="text-[10px] border-emerald-300 text-emerald-800 bg-emerald-50 font-bold"
                 >
                   Apoio Confiável
                 </Badge>
@@ -253,7 +247,7 @@ export const LandingPage: React.FC = () => {
                 </CardTitle>
               </div>
             </CardHeader>
-            <CardContent className="p-5 pt-0 text-xs text-slate-600 leading-relaxed">
+            <CardContent className="p-5 pt-0 mt-auto text-xs text-slate-600 leading-relaxed">
               Pessoas de estrita confiança com níveis granulares de acesso: básico (rotina),
               segurança (alertas preventivos de ausência) e emergência (localização GPS e suporte
               consular).
@@ -263,15 +257,15 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* SEÇÃO COMO FUNCIONA NA PRÁTICA: FLUXO REAL EM 4 PASSOS */}
-      <section className="container mx-auto px-4 max-w-5xl space-y-8">
+      <section className="container mx-auto px-4 max-w-5xl space-y-7 sm:space-y-8">
         <div className="text-center space-y-2 max-w-2xl mx-auto">
           <Badge className="bg-indigo-100 text-indigo-900 border-indigo-200 font-bold text-xs uppercase tracking-wider">
             Passo a Passo
           </Badge>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+          <h2 className="text-xl sm:text-3xl font-extrabold text-slate-900">
             Como funciona na prática
           </h2>
-          <p className="text-xs sm:text-sm text-slate-600">
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
             O fluxo real e estruturado para garantir que você mantenha plena autonomia antes,
             durante e após sua viagem internacional.
           </p>
@@ -279,17 +273,17 @@ export const LandingPage: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Passo 1 */}
-          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow rounded-2xl relative overflow-hidden">
+          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow rounded-2xl relative overflow-hidden flex flex-col">
             <div className="h-1 bg-sky-500 w-full absolute top-0 left-0" />
-            <CardHeader className="p-5 pb-2">
-              <div className="w-10 h-10 rounded-xl bg-sky-100 text-sky-800 font-black flex items-center justify-center mb-2 text-sm shadow-xs">
+            <CardHeader className="p-5 pb-2 space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-sky-100 text-sky-800 font-black flex items-center justify-center text-sm shadow-xs">
                 1
               </div>
-              <CardTitle className="text-base font-bold text-slate-900">
+              <CardTitle className="text-base font-bold text-slate-900 leading-snug">
                 Crie sua viagem e rede de apoio
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-5 pt-0 text-xs text-slate-600 leading-relaxed space-y-2">
+            <CardContent className="p-5 pt-0 mt-auto text-xs text-slate-600 leading-relaxed">
               <p>
                 Cadastre seus dados de voo, acomodação e defina seus guardians de confiança com
                 permissões individualizadas antes do embarque.
@@ -298,58 +292,58 @@ export const LandingPage: React.FC = () => {
           </Card>
 
           {/* Passo 2 */}
-          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow rounded-2xl relative overflow-hidden">
+          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow rounded-2xl relative overflow-hidden flex flex-col">
             <div className="h-1 bg-indigo-500 w-full absolute top-0 left-0" />
-            <CardHeader className="p-5 pb-2">
-              <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-800 font-black flex items-center justify-center mb-2 text-sm shadow-xs">
+            <CardHeader className="p-5 pb-2 space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-800 font-black flex items-center justify-center text-sm shadow-xs">
                 2
               </div>
-              <CardTitle className="text-base font-bold text-slate-900">
-                Faça check-ins regulares e mídias de confirmação
+              <CardTitle className="text-base font-bold text-slate-900 leading-snug">
+                Faça check-ins regulares com mídias de confirmação
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-5 pt-0 text-xs text-slate-600 leading-relaxed space-y-2">
+            <CardContent className="p-5 pt-0 mt-auto text-xs text-slate-600 leading-relaxed">
               <p>
-                Confirmações em 1 toque com foto periódica ou vídeo curto diário (manhã/noite) para
-                registrar sua integridade sem incomodar sua rotina.
+                Confirmações em 1 toque, com foto periódica ou vídeo curto diário (manhã/noite),
+                para registrar sua integridade sem incomodar sua rotina.
               </p>
             </CardContent>
           </Card>
 
           {/* Passo 3 */}
-          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow rounded-2xl relative overflow-hidden">
+          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow rounded-2xl relative overflow-hidden flex flex-col">
             <div className="h-1 bg-amber-500 w-full absolute top-0 left-0" />
-            <CardHeader className="p-5 pb-2">
-              <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 font-black flex items-center justify-center mb-2 text-sm shadow-xs">
+            <CardHeader className="p-5 pb-2 space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 font-black flex items-center justify-center text-sm shadow-xs">
                 3
               </div>
-              <CardTitle className="text-base font-bold text-slate-900">
-                Acione alerta silencioso com GPS em qualquer situação imprevista
+              <CardTitle className="text-base font-bold text-slate-900 leading-snug">
+                Acione alerta silencioso com GPS quando precisar
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-5 pt-0 text-xs text-slate-600 leading-relaxed space-y-2">
+            <CardContent className="p-5 pt-0 mt-auto text-xs text-slate-600 leading-relaxed">
               <p>
                 Toque discreto ou código de coação transmite sua localização precisa imediatamente,
-                mesmo com a tela fingindo normalidade ou aplicativo neutro.
+                mesmo com a tela em modo neutro.
               </p>
             </CardContent>
           </Card>
 
           {/* Passo 4 */}
-          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow rounded-2xl relative overflow-hidden">
+          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow rounded-2xl relative overflow-hidden flex flex-col">
             <div className="h-1 bg-emerald-500 w-full absolute top-0 left-0" />
-            <CardHeader className="p-5 pb-2">
-              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 font-black flex items-center justify-center mb-2 text-sm shadow-xs">
+            <CardHeader className="p-5 pb-2 space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 font-black flex items-center justify-center text-sm shadow-xs">
                 4
               </div>
-              <CardTitle className="text-base font-bold text-slate-900">
-                Guardians e apoio acompanham em tempo real com máxima discrição
+              <CardTitle className="text-base font-bold text-slate-900 leading-snug">
+                Guardians acompanham em tempo real com discrição
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-5 pt-0 text-xs text-slate-600 leading-relaxed space-y-2">
+            <CardContent className="p-5 pt-0 mt-auto text-xs text-slate-600 leading-relaxed">
               <p>
-                Sua rede recebe dados precisos, endereços e last-known GPS para agir com rapidez
-                junto a consulados e autoridades sem expor você.
+                Sua rede recebe dados precisos, endereços e última localização conhecida para agir
+                com rapidez junto a consulados e autoridades, sem expor você.
               </p>
             </CardContent>
           </Card>
@@ -358,13 +352,13 @@ export const LandingPage: React.FC = () => {
 
       {/* Non-accusatory tone explanation */}
       <section className="container mx-auto px-4 max-w-4xl">
-        <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 sm:p-8 space-y-4">
-          <div className="flex items-center gap-2 text-slate-800 font-bold text-base">
-            <Lock className="w-5 h-5 text-sky-600" />
-            <span>Nossa Linguagem e Filosofia Não-Acusatória</span>
+        <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-5 sm:p-8 space-y-4">
+          <div className="flex items-center gap-2 text-slate-800 font-bold text-sm sm:text-base">
+            <Lock className="w-5 h-5 text-sky-600 shrink-0" />
+            <span>Nossa linguagem e filosofia não-acusatória</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
-            <div className="bg-red-50/60 border border-red-200/70 p-4 rounded-xl space-y-1.5">
+            <div className="bg-red-50/60 border border-red-200/70 p-4 rounded-xl space-y-2">
               <span className="font-semibold text-red-800 block text-xs">
                 O QUE O SAFETRIP NUNCA DIZ:
               </span>
@@ -377,17 +371,17 @@ export const LandingPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="bg-emerald-50/60 border border-emerald-200/70 p-4 rounded-xl space-y-1.5">
+            <div className="bg-emerald-50/60 border border-emerald-200/70 p-4 rounded-xl space-y-2">
               <span className="font-semibold text-emerald-800 block text-xs">
                 COMO O SAFETRIP ORIENTA VOCÊ:
               </span>
-              <p className="text-emerald-800">
+              <p className="text-emerald-800 leading-relaxed">
                 "Esse fator pode aumentar sua dependência física ou financeira."
               </p>
-              <p className="text-emerald-800">
+              <p className="text-emerald-800 leading-relaxed">
                 "Recomendamos resolver esse ponto antes do embarque."
               </p>
-              <p className="text-emerald-800">
+              <p className="text-emerald-800 leading-relaxed">
                 "Você possui pouca autonomia para sair da situação se necessário."
               </p>
             </div>
@@ -396,16 +390,16 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* Callout Section for Quick Exploration */}
-      <section className="container mx-auto px-4 max-w-4xl text-center space-y-4 pt-4">
-        <div className="p-8 rounded-2xl bg-gradient-to-b from-sky-50 to-white border border-sky-100 shadow-sm space-y-4">
-          <h3 className="text-xl sm:text-2xl font-bold text-slate-900">
+      <section className="container mx-auto px-4 max-w-4xl text-center space-y-4 pt-2 sm:pt-4">
+        <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-b from-sky-50 to-white border border-sky-100 shadow-sm space-y-4">
+          <h3 className="text-lg sm:text-2xl font-bold text-slate-900 leading-snug">
             Pronto para organizar sua autonomia de viagem?
           </h3>
-          <p className="text-xs sm:text-sm text-slate-600 max-w-xl mx-auto">
+          <p className="text-xs sm:text-sm text-slate-600 max-w-xl mx-auto leading-relaxed">
             Leva menos de 3 minutos para responder a avaliação, gerar seu score e configurar seus
             primeiros contatos de segurança.
           </p>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 pt-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 pt-2 max-w-sm sm:max-w-none mx-auto">
             <Link to="/assessment" className="w-full sm:w-auto">
               <Button className="w-full sm:w-auto bg-sky-600 hover:bg-sky-700 text-white font-bold px-6 h-11 rounded-xl">
                 Começar Quiz de Autonomia
@@ -424,7 +418,7 @@ export const LandingPage: React.FC = () => {
                 variant="ghost"
                 className="w-full sm:w-auto border border-slate-200 text-slate-700 font-semibold px-5 h-11 rounded-xl"
               >
-                Explorar Destinos Públicos
+                Explorar Destinos
               </Button>
             </Link>
           </div>
@@ -436,7 +430,7 @@ export const LandingPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pb-8">
           <div className="space-y-2 md:col-span-2">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-sky-600 text-white flex items-center justify-center font-black text-xs">
+              <div className="w-7 h-7 rounded-lg bg-sky-600 text-white flex items-center justify-center font-black text-xs shrink-0">
                 S
               </div>
               <span className="font-bold text-slate-900 text-sm tracking-tight">
@@ -507,16 +501,14 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
         <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-400">
-          <span>
+          <span className="text-center sm:text-left">
             © {new Date().getFullYear()} SafeTrip. Todos os direitos reservados. Autonomia não é
             desconfiança.
           </span>
-          <div className="flex items-center gap-4">
-            <Link to="/emergency" className="hover:underline text-red-600 font-medium">
-              Canal de Emergência
-            </Link>
-          </div>
-        </div>{' '}
+          <Link to="/emergency" className="hover:underline text-red-600 font-medium shrink-0">
+            Canal de Emergência
+          </Link>
+        </div>
       </footer>
     </div>
   )

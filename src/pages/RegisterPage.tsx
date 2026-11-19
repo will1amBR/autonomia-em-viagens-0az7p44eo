@@ -94,7 +94,7 @@ export const RegisterPage: React.FC = () => {
               <Input
                 id="name"
                 type="text"
-                placeholder="Ex: Daianny Silva"
+                placeholder="Ex: Maria S."
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
